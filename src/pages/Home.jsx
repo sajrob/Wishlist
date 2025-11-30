@@ -57,16 +57,27 @@ function Home() {
         : allItems.filter((item) => item.category_id === activeCategory);
 
     const handleAddItem = async (newItem) => {
+        console.log('Attempting to add item:', newItem);
+        console.log('Current User ID:', user?.id);
+
+        if (!user?.id) {
+            console.error('No user ID found, cannot add item');
+            alert('You must be logged in to add items');
+            return;
+        }
+
         try {
             const itemToInsert = {
                 user_id: user.id,
                 category_id: activeCategory, // Add to current category if selected
                 name: newItem.name,
-                price: parseFloat(newItem.price),
+                price: parseFloat(newItem.price) || 0,
                 description: newItem.description,
                 image_url: newItem.imageUrl,
                 buy_link: newItem.buyLink,
             };
+
+            console.log('Payload to insert:', itemToInsert);
 
             const { data, error } = await supabase
                 .from('items')
@@ -74,14 +85,19 @@ function Home() {
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
+
+            console.log('Item added successfully:', data);
 
             setAllItems((prev) => [data, ...prev]);
             setIsFormOpen(false);
             setEditingItem(null);
         } catch (error) {
             console.error('Error adding item:', error);
-            alert('Failed to add item');
+            alert('Failed to add item: ' + error.message);
         }
     };
 

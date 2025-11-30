@@ -12,10 +12,12 @@ export const AuthProvider = ({ children }) => {
 
         const initializeAuth = async () => {
             try {
+                console.log('Auth: Initializing...');
                 // Get initial session
                 const { data: { session }, error } = await supabase.auth.getSession();
 
                 if (error) throw error;
+                console.log('Auth: Initial session check complete. User:', session?.user?.email);
 
                 if (mounted) {
                     if (session?.user) {
@@ -25,10 +27,13 @@ export const AuthProvider = ({ children }) => {
                     }
                 }
             } catch (error) {
-                console.error('Error initializing auth:', error);
+                console.error('Auth: Error initializing:', error);
                 if (mounted) setUser(null);
             } finally {
-                if (mounted) setLoading(false);
+                if (mounted) {
+                    console.log('Auth: Setting loading to false (init)');
+                    setLoading(false);
+                }
             }
         };
 
@@ -37,15 +42,25 @@ export const AuthProvider = ({ children }) => {
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!mounted) return;
+            console.log('Auth: State change event:', event);
+
+            if (event === 'PASSWORD_RECOVERY') {
+                console.log('Auth: Password recovery event detected');
+                setLoading(false);
+                return;
+            }
 
             if (session?.user) {
+                console.log('Auth: User authenticated:', session.user.email);
                 // Only fetch profile if we don't have it or it's a different user
                 if (!user || user.id !== session.user.id) {
                     await fetchProfile(session.user);
                 }
             } else {
+                console.log('Auth: User signed out');
                 setUser(null);
             }
+            console.log('Auth: Setting loading to false (change)');
             setLoading(false);
         });
 
@@ -70,6 +85,7 @@ export const AuthProvider = ({ children }) => {
             setUser({ ...authUser, ...(profile || {}) });
         } catch (error) {
             console.error('Profile fetch error:', error);
+            // Even if profile fetch fails, we should still set the user so they can log in
             setUser(authUser);
         }
     };
