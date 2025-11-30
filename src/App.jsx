@@ -7,6 +7,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import ForgotPassword from './pages/ForgotPassword';
+import UpdatePassword from './pages/UpdatePassword';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -32,6 +34,15 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route
+            path="/update-password"
+            element={
+              <PrivateRoute>
+                <UpdatePassword />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={
