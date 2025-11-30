@@ -8,51 +8,49 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('AuthProvider mounted');
         let mounted = true;
 
-        // Failsafe: Force loading to false after 5 seconds
-        const timeout = setTimeout(() => {
-            if (mounted && loading) {
-                console.warn('Auth loading timed out, forcing false');
-                setLoading(false);
-            }
-        }, 5000);
-
-        // 1. Get initial session
-        const getSession = async () => {
+        const initializeAuth = async () => {
             try {
-                console.log('Getting session...');
+                // Get initial session
                 const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) throw error;
-                console.log('Session retrieved:', session ? 'Found user' : 'No session');
 
-                if (session?.user) {
-                    await fetchProfile(session.user);
+                if (error) throw error;
+
+                if (mounted) {
+                    if (session?.user) {
+                        await fetchProfile(session.user);
+                    } else {
+                        setUser(null);
+                    }
                 }
             } catch (error) {
-                console.error('Error getting session:', error);
+                console.error('Error initializing auth:', error);
+                if (mounted) setUser(null);
             } finally {
                 if (mounted) setLoading(false);
             }
         };
 
-        getSession();
+        initializeAuth();
 
-        // 2. Listen for auth changes
+        // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('Auth state change:', event);
+            if (!mounted) return;
+
             if (session?.user) {
-                await fetchProfile(session.user);
+                // Only fetch profile if we don't have it or it's a different user
+                if (!user || user.id !== session.user.id) {
+                    await fetchProfile(session.user);
+                }
             } else {
                 setUser(null);
             }
-            if (mounted) setLoading(false);
+            setLoading(false);
         });
 
         return () => {
             mounted = false;
-            clearTimeout(timeout);
             subscription.unsubscribe();
         };
     }, []);
