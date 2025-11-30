@@ -270,12 +270,6 @@ function Home() {
                 <header className="app-header">
                     <div className="header-top">
                         <h1>My Wishlist</h1>
-                        {user && (
-                            <Link to="/profile" className="user-profile-link">
-                                <img src={user.avatar_url || user.avatar} alt={user.full_name || user.name} className="header-avatar" />
-                                <span>{user.full_name || user.name}</span>
-                            </Link>
-                        )}
                     </div>
                     <div className="header-actions">
                         <button className="add-item-btn" onClick={handleOpenForm}>

@@ -18,7 +18,7 @@ const Login = () => {
         try {
             await login(email, password);
             // Force a hard reload to ensure auth state is picked up cleanly
-            window.location.href = '/';
+            window.location.href = '/dashboard';
         } catch (err) {
             console.error('Login error:', err);
             setError(err.message || 'Failed to login. Please check your credentials.');

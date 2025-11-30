@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -25,11 +27,13 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <Navbar />
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/"
+            path="/dashboard"
             element={
               <PrivateRoute>
                 <Home />
@@ -44,7 +48,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/Home" element={<Navigate to="/" replace />} />
+          <Route path="/Home" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
