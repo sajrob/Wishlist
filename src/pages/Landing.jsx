@@ -37,7 +37,7 @@ const Landing = () => {
 
                 <div className="landing-right">
                     <img
-                        src="src/hero-image.png"
+                        src="/hero-image.png"
                         alt="Wishlist illustration"
                         className="hero-image"
                     />
