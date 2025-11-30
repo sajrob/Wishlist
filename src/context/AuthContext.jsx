@@ -98,6 +98,7 @@ export const AuthProvider = ({ children }) => {
                 data: {
                     full_name: name,
                 },
+                emailRedirectTo: `${window.location.origin}/dashboard`,
             },
         });
         if (error) throw error;
