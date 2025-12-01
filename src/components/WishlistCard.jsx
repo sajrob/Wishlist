@@ -1,7 +1,7 @@
 import React from "react";
 import "./WishlistCard.css";
 
-const WishlistCard = ({ item, onEdit }) => {
+const WishlistCard = ({ item, onEdit, onDelete }) => {
   const { name, price, description, imageUrl, buyLink } = item;
 
   return (
@@ -29,7 +29,10 @@ const WishlistCard = ({ item, onEdit }) => {
             Buy Item
           </a>
           <button className="edit-btn" onClick={() => onEdit(item)}>
-            Edit Item
+            Edit
+          </button>
+          <button className="delete-btn" onClick={() => onDelete(item.id)} style={{ marginLeft: '8px', backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>
+            Delete
           </button>
         </div>
       </div>
