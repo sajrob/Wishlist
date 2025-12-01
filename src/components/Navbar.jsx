@@ -9,6 +9,14 @@ const Navbar = () => {
                 <Link to="/" className="navbar-logo">
                     Wishlist
                 </Link>
+                <div className="navbar-menu">
+                    <Link to="/" className="navbar-link">
+                        Home
+                    </Link>
+                    <Link to="/wishlist" className="navbar-link">
+                        Dashboard
+                    </Link>
+                </div>
             </div>
         </nav>
     );

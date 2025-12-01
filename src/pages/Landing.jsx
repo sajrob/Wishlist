@@ -8,11 +8,11 @@ const Landing = () => {
             <div className="landing-content">
                 <div className="landing-left">
                     <h1 className="landing-title">
-                        Create Your <span className="highlight">Wishlist</span>
+                        The ultimate <span className="highlight">gift-giving</span> social app.
                     </h1>
                     <p className="landing-description">
-                        Create, manage, and share your wishlist with friends and family.
-                        Never forget what you want, and make gift-giving easier for everyone.
+                        Create your own wish list, browse your friends' and family's <span className="colored-strikethrough">wishlists</span> desires
+                        Give and receive the perfect gift, every time.
                     </p>
                     <div className="landing-buttons">
                         <Link to="/wishlist" className="btn btn-primary">

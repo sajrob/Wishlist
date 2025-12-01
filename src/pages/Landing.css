@@ -1,10 +1,18 @@
+.colored-strikethrough {
+    text-decoration-line: line-through;
+    text-decoration-style: solid;
+    text-decoration-thickness: 2px;
+    text-decoration-color: #2563eb;
+    color: black;
+}
+
 .landing-container {
     min-height: calc(100vh - 64px);
     /* Subtract navbar height */
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #ffffff;
+    background-color: #f9f9f9;
     padding: 2rem;
 }
 
