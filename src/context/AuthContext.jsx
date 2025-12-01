@@ -53,8 +53,11 @@ export const AuthProvider = ({ children }) => {
             if (session?.user) {
                 console.log('Auth: User authenticated:', session.user.email);
                 // Only fetch profile if we don't have it or it's a different user
+                // This prevents infinite re-fetch loops
                 if (!user || user.id !== session.user.id) {
                     await fetchProfile(session.user);
+                } else {
+                    console.log('Auth: User already loaded, skipping fetch');
                 }
             } else {
                 console.log('Auth: User signed out');
@@ -72,17 +75,25 @@ export const AuthProvider = ({ children }) => {
 
     const fetchProfile = async (authUser) => {
         try {
+            console.log('Fetching profile for user:', authUser.id);
             const { data: profile, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', authUser.id)
-                .single();
+                .maybeSingle(); // Use maybeSingle to avoid 406 error when no profile exists
 
-            if (error && error.code !== 'PGRST116') {
+            if (error) {
                 console.error('Error fetching profile:', error);
             }
 
-            setUser({ ...authUser, ...(profile || {}) });
+            if (profile) {
+                console.log('Profile found:', profile);
+                setUser({ ...authUser, ...profile });
+            } else {
+                console.log('No profile found, using auth data only');
+                // Even if profile doesn't exist, set the user with auth data
+                setUser(authUser);
+            }
         } catch (error) {
             console.error('Profile fetch error:', error);
             // Even if profile fetch fails, we should still set the user so they can log in

@@ -15,8 +15,13 @@ const Login = () => {
         e.preventDefault();
         setError('');
         setIsLoading(true);
+        console.log('Login: Form submitted');
+
         try {
+            console.log('Login: Calling login function...');
             await login(email, password);
+            console.log('Login: Login successful, redirecting to dashboard...');
+
             // Force a hard reload to ensure auth state is picked up cleanly
             window.location.href = '/dashboard';
         } catch (err) {
