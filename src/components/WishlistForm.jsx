@@ -6,8 +6,8 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }) => {
     name: "",
     price: "",
     description: "",
-    imageUrl: "",
-    buyLink: "",
+    image_url: "",
+    buy_link: "",
   });
 
   useEffect(() => {
@@ -16,16 +16,16 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }) => {
         name: editingItem.name || "",
         price: editingItem.price || "",
         description: editingItem.description || "",
-        imageUrl: editingItem.imageUrl || "",
-        buyLink: editingItem.buyLink || "",
+        image_url: editingItem.image_url || "",
+        buy_link: editingItem.buy_link || "",
       });
     } else {
       setFormData({
         name: "",
         price: "",
         description: "",
-        imageUrl: "",
-        buyLink: "",
+        image_url: "",
+        buy_link: "",
       });
     }
   }, [editingItem]);
@@ -44,16 +44,16 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }) => {
       formData.name &&
       formData.price &&
       formData.description &&
-      formData.imageUrl &&
-      formData.buyLink
+      formData.image_url &&
+      formData.buy_link
     ) {
       onSubmit(formData);
       setFormData({
         name: "",
         price: "",
         description: "",
-        imageUrl: "",
-        buyLink: "",
+        image_url: "",
+        buy_link: "",
       });
     }
   };
@@ -125,14 +125,14 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }) => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="imageUrl" className="form-label">
+        <label htmlFor="image_url" className="form-label">
           Image URL
         </label>
         <input
           type="url"
-          id="imageUrl"
-          name="imageUrl"
-          value={formData.imageUrl}
+          id="image_url"
+          name="image_url"
+          value={formData.image_url}
           onChange={handleChange}
           className="form-input"
           placeholder="https://example.com/image.jpg"
@@ -141,14 +141,14 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }) => {
       </div>
 
       <div className="form-group">
-        <label htmlFor="buyLink" className="form-label">
+        <label htmlFor="buy_link" className="form-label">
           Buy Link
         </label>
         <input
           type="url"
-          id="buyLink"
-          name="buyLink"
-          value={formData.buyLink}
+          id="buy_link"
+          name="buy_link"
+          value={formData.buy_link}
           onChange={handleChange}
           className="form-input"
           placeholder="https://example.com/buy"

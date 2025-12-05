@@ -2,12 +2,12 @@ import React from "react";
 import "./WishlistCard.css";
 
 const WishlistCard = ({ item, onEdit, onDelete }) => {
-  const { name, price, description, imageUrl, buyLink } = item;
+  const { name, price, description, image_url, buy_link } = item;
 
   return (
     <div className="wishlist-card">
       <div className="card-image-container">
-        <img src={imageUrl} alt={name} className="card-image" />
+        <img src={image_url} alt={name} className="card-image" />
       </div>
       <div className="card-content">
         <div className="text-box name-box">
@@ -21,7 +21,7 @@ const WishlistCard = ({ item, onEdit, onDelete }) => {
         </div>
         <div className="card-actions">
           <a
-            href={buyLink}
+            href={buy_link}
             target="_blank"
             rel="noopener noreferrer"
             className="buy-link"
