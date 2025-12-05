@@ -11,7 +11,7 @@ const Landing = () => {
                         The ultimate <span className="highlight">gift-giving</span> social app.
                     </h1>
                     <p className="landing-description">
-                        Create your own wish list, browse your friends' and family's <span className="colored-strikethrough">wishlists</span> desires
+                        Create your own wish list, browse your friends' and family's <span className="colored-strikethrough">wishlists</span> desires.
                         Give and receive the perfect gift, every time.
                     </p>
                     <div className="landing-buttons">
