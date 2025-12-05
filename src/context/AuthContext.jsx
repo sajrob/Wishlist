@@ -47,6 +47,9 @@ export function AuthProvider({ children }) {
     const signInWithGoogle = () => {
         return supabase.auth.signInWithOAuth({
             provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/wishlist`,
+            },
         });
     };
 
