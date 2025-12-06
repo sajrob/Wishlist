@@ -18,6 +18,8 @@ const SignUp = () => {
         }
     }, [user, navigate]);
 
+    const [message, setMessage] = useState('');
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (password.length < 6) {
@@ -25,10 +27,19 @@ const SignUp = () => {
         }
         try {
             setError('');
+            setMessage('');
             setLoading(true);
-            const { error } = await signUp(email, password, { full_name: name });
+            const { error, data } = await signUp(email, password, { full_name: name });
             if (error) throw error;
-            navigate('/wishlist');
+
+            // If email confirmation is required, Supabase returns user but session is null (or user is not confirmed)
+            // But if auto-confirm is on, it logs them in. 
+            // We'll show the message regardless if they aren't immediately redirected by the useEffect.
+            if (data?.user && !data.session) {
+                setMessage('Account created! Please check your email to confirm your registration.');
+            } else {
+                navigate('/wishlist');
+            }
         } catch (err) {
             setError(err.message);
         } finally {
@@ -50,6 +61,14 @@ const SignUp = () => {
         <div className="auth-container">
             <div className="auth-card">
                 <h2 className="auth-title">Create Account</h2>
+                {message && <div className="success-message" style={{
+                    backgroundColor: '#dcfce7',
+                    color: '#166534',
+                    padding: '0.75rem',
+                    borderRadius: '0.375rem',
+                    marginBottom: '1rem',
+                    fontSize: '0.875rem'
+                }}>{message}</div>}
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">

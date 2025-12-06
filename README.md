@@ -1,78 +1,77 @@
 # Wishlist App
 
-A React application featuring a beautiful card component for displaying wishlist items.
+A modern web application for creating and managing personal wishlists. Users can create accounts, add items they want, organize them into categories, and keep track of their gift wishes.
 
 ## Features
 
-- **Card Component** with:
-  - Image with rounded corners on top
-  - Item name
-  - Price
-  - Description
-  - Buy link button
+- User authentication (email/password and Google OAuth)
+- Create, edit, and delete wishlist items
+- Organize items into custom categories
+- User profile management
+- Responsive design for mobile and desktop
+- Real-time data synchronization
+
+## Tech Stack
+
+- **Frontend:** React, React Router, Vite
+- **Backend:** Supabase (PostgreSQL, Authentication)
+- **Styling:** CSS
+- **Deployment:** Vercel
+- **Analytics:** Vercel Analytics
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+- A Supabase account
+
 ### Installation
 
-Install the dependencies:
+1. Clone the repository:
+```bash
+git clone <your-repo-url>
+cd Wishlist
+```
 
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-### Running the App
+3. Create a `.env` file in the root directory with your Supabase credentials:
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-Start the development server:
+4. Run the database migrations using the `supabase_schema.sql` file in your Supabase project
 
+5. Start the development server:
 ```bash
 npm run dev
 ```
 
 The app will be available at `http://localhost:5173`
 
-### Building for Production
+## Available Scripts
 
-Build the app for production:
-
-```bash
-npm run build
-```
-
-Preview the production build:
-
-```bash
-npm run preview
-```
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
 
 ## Project Structure
 
 ```
-Wishlist/
-├── src/
-│   ├── components/
-│   │   ├── WishlistCard.jsx    # Card component
-│   │   └── WishlistCard.css    # Card styles
-│   ├── App.jsx                 # Main app component
-│   ├── App.css                 # App styles
-│   └── main.jsx                # Entry point
-├── index.html                  # HTML template
-├── package.json                # Dependencies
-├── vite.config.js             # Vite configuration
-└── README.md                   # This file
+src/
+├── components/     # Reusable UI components
+├── pages/          # Page components
+├── context/        # React context providers
+├── App.jsx         # Main application component
+└── main.jsx        # Application entry point
 ```
 
-## Customizing the Card
+## License
 
-Edit the `sampleItem` object in `src/App.jsx` to customize the card content:
-
-```javascript
-const sampleItem = {
-  name: "Your Item Name",
-  price: "$XX.XX",
-  description: "Your description here",
-  imageUrl: "your-image-url.jpg",
-  buyLink: "https://your-link.com"
-};
-```
-
+This project is open source and available under the MIT License.

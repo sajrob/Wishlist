@@ -43,7 +43,7 @@ const CreateCategoryModal = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (categoryName.trim() && selectedItems.size > 0) {
+    if (categoryName.trim()) {
       if (editingCategory) {
         onUpdateCategory({
           id: editingCategory.id,
@@ -137,7 +137,7 @@ const CreateCategoryModal = ({
           <button
             type="submit"
             className="create-btn"
-            disabled={!categoryName.trim() || selectedItems.size === 0}
+            disabled={!categoryName.trim()}
           >
             {editingCategory ? "Save Changes" : "Create Category"}
           </button>
