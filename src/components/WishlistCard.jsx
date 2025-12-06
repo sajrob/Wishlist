@@ -28,12 +28,16 @@ const WishlistCard = ({ item, onEdit, onDelete }) => {
           >
             Buy Item
           </a>
-          <button className="edit-btn" onClick={() => onEdit(item)}>
-            Edit
-          </button>
-          <button className="delete-btn" onClick={() => onDelete(item.id)} style={{ marginLeft: '8px', backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>
-            Delete
-          </button>
+          {!readOnly && (
+            <>
+              <button className="edit-btn" onClick={() => onEdit(item)}>
+                Edit
+              </button>
+              <button className="delete-btn" onClick={() => onDelete(item.id)} style={{ marginLeft: '8px', backgroundColor: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}>
+                Delete
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -47,6 +47,9 @@ const Navbar = () => {
                             <NavLink to="/profile" className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"} onClick={closeMenu}>
                                 Profile
                             </NavLink>
+                            <NavLink to="/find-users" className={({ isActive }) => isActive ? "navbar-link active" : "navbar-link"} onClick={closeMenu}>
+                                Find Friends
+                            </NavLink>
                             <button onClick={handleLogout} className="navbar-btn logout">
                                 Logout
                             </button>

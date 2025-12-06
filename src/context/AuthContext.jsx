@@ -33,6 +33,7 @@ export function AuthProvider({ children }) {
             password,
             options: {
                 data: metadata,
+                emailRedirectTo: `${window.location.origin}/wishlist`,
             },
         });
     };

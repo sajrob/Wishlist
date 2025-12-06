@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
+import FindUsers from './pages/FindUsers';
+import SharedWishlist from './pages/SharedWishlist';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './App.css';
 
@@ -41,6 +43,22 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/find-users"
+            element={
+              <PrivateRoute>
+                <FindUsers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/wishlist/:userId"
+            element={
+              <PrivateRoute>
+                <SharedWishlist />
               </PrivateRoute>
             }
           />

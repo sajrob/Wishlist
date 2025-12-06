@@ -9,14 +9,29 @@ const Profile = () => {
     const [message, setMessage] = useState('');
     const [stats, setStats] = useState({ items: 0, categories: 0 });
     const [formData, setFormData] = useState({
+        first_name: '',
+        last_name: '',
         full_name: '',
         email: ''
     });
 
     useEffect(() => {
         if (user) {
+            // Logic to handle existing users who only have full_name
+            const meta = user.user_metadata || {};
+            let firstName = meta.first_name || '';
+            let lastName = meta.last_name || '';
+
+            if (!firstName && meta.full_name) {
+                const names = meta.full_name.trim().split(' ');
+                firstName = names[0];
+                lastName = names.slice(1).join(' ');
+            }
+
             setFormData({
-                full_name: user.user_metadata?.full_name || '',
+                first_name: firstName,
+                last_name: lastName,
+                full_name: meta.full_name || '',
                 email: user.email || ''
             });
             fetchStats();
@@ -48,11 +63,36 @@ const Profile = () => {
         setMessage('');
 
         try {
+            const fullName = `${formData.first_name} ${formData.last_name}`.trim();
             const { error } = await supabase.auth.updateUser({
-                data: { full_name: formData.full_name }
+                data: {
+                    first_name: formData.first_name,
+                    last_name: formData.last_name,
+                    full_name: fullName
+                }
             });
 
             if (error) throw error;
+
+            // Also update the public profiles table to ensure discoverability
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user.id,
+                    email: user.email,
+                    first_name: formData.first_name,
+                    last_name: formData.last_name,
+                    full_name: fullName,
+                    updated_at: new Date()
+                });
+
+            if (profileError) {
+                console.error('Error updating public profile:', profileError);
+                // We don't necessarily want to fail everything if this fails, but it's important.
+                // For now, let's treat it as non-fatal but log it, or append to message.
+            }
+            // Update local state to reflect the simplified full name
+            setFormData(prev => ({ ...prev, full_name: fullName }));
             setMessage('Profile updated successfully!');
         } catch (error) {
             setMessage('Error updating profile: ' + error.message);
@@ -107,14 +147,25 @@ const Profile = () => {
                     </div>
                 )}
                 <form onSubmit={handleUpdateProfile} className="profile-form">
-                    <div className="form-group">
-                        <label>Full Name</label>
-                        <input
-                            type="text"
-                            value={formData.full_name}
-                            onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                            placeholder="Enter your name"
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="form-group">
+                            <label>First Name</label>
+                            <input
+                                type="text"
+                                value={formData.first_name}
+                                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                placeholder="First Name"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Last Name</label>
+                            <input
+                                type="text"
+                                value={formData.last_name}
+                                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                placeholder="Last Name"
+                            />
+                        </div>
                     </div>
                     <div className="form-group">
                         <label>Email</label>

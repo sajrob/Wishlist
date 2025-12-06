@@ -286,7 +286,15 @@ function Home() {
             <div className={isModalOpen ? "app-content blurred" : "app-content"}>
                 <header className="app-header">
                     <div className="header-top">
-                        <h1>{user?.user_metadata?.full_name ? `${user.user_metadata.full_name}'s Wishlist` : "My Wishlist"}</h1>
+                        <h1>
+                            {(() => {
+                                const meta = user?.user_metadata || {};
+                                const rawName = meta.first_name || (meta.full_name ? meta.full_name.trim().split(' ')[0] : '');
+                                if (!rawName) return "My Wishlist";
+                                const suffix = rawName.slice(-1).toLowerCase() === 's' ? "'" : "'s";
+                                return `${rawName}${suffix} Wishlist`;
+                            })()}
+                        </h1>
                     </div>
                     <div className="header-actions">
                         <button className="add-item-btn" onClick={handleOpenForm}>

@@ -6,7 +6,8 @@ import './Auth.css';
 const SignUp = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [name, setName] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { user, signUp, signInWithGoogle } = useAuth();
@@ -29,7 +30,12 @@ const SignUp = () => {
             setError('');
             setMessage('');
             setLoading(true);
-            const { error, data } = await signUp(email, password, { full_name: name });
+            const fullName = `${firstName} ${lastName}`.trim();
+            const { error, data } = await signUp(email, password, {
+                first_name: firstName,
+                last_name: lastName,
+                full_name: fullName
+            });
             if (error) throw error;
 
             // If email confirmation is required, Supabase returns user but session is null (or user is not confirmed)
@@ -71,15 +77,27 @@ const SignUp = () => {
                 }}>{message}</div>}
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleSubmit} className="auth-form">
-                    <div className="form-group">
-                        <label>Full Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            required
-                            placeholder="Enter your name"
-                        />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="form-group">
+                            <label>First Name</label>
+                            <input
+                                type="text"
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                required
+                                placeholder="First Name"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Last Name</label>
+                            <input
+                                type="text"
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                required
+                                placeholder="Last Name"
+                            />
+                        </div>
                     </div>
                     <div className="form-group">
                         <label>Email</label>
