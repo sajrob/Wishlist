@@ -1,7 +1,7 @@
 import React from "react";
 import "./WishlistCard.css";
 
-const WishlistCard = ({ item, onEdit, onDelete }) => {
+const WishlistCard = ({ item, onEdit, onDelete, readOnly }) => {
   const { name, price, description, image_url, buy_link } = item;
 
   return (
