@@ -191,7 +191,8 @@ function Home() {
                 .from('categories')
                 .insert([{
                     user_id: user.id,
-                    name: categoryData.name
+                    name: categoryData.name,
+                    is_public: categoryData.is_public
                 }])
                 .select()
                 .single();
@@ -223,7 +224,10 @@ function Home() {
             // 1. Update category name
             const { error: catError } = await supabase
                 .from('categories')
-                .update({ name: categoryData.name })
+                .update({
+                    name: categoryData.name,
+                    is_public: categoryData.is_public
+                })
                 .eq('id', categoryData.id);
 
             if (catError) throw catError;
@@ -344,7 +348,9 @@ function Home() {
                             })()}
                         </h1>
                         <div className="toggle-switch-container">
-                            <span className="toggle-label">Public Wishlist</span>
+                            <span className="toggle-label" title="Controls visibility of uncategorized items">
+                                Public Uncategorized Items
+                            </span>
                             <label className="toggle-switch">
                                 <input
                                     type="checkbox"
@@ -381,6 +387,16 @@ function Home() {
                                         onClick={() => setActiveCategory(category.id)}
                                     >
                                         {category.name}
+                                        {category.is_public && (
+                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Public Category">
+                                                🌍
+                                            </span>
+                                        )}
+                                        {!category.is_public && (
+                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Private Category">
+                                                🔒
+                                            </span>
+                                        )}
                                     </button>
                                     {activeCategory === category.id && (
                                         <div className="category-actions">

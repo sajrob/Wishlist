@@ -129,6 +129,16 @@ function SharedWishlist() {
                                         onClick={() => setActiveCategory(category.id)}
                                     >
                                         {category.name}
+                                        {category.is_public && (
+                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Public Category">
+                                                🌍
+                                            </span>
+                                        )}
+                                        {!category.is_public && (
+                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Private Category">
+                                                🔒
+                                            </span>
+                                        )}
                                     </button>
                                 </div>
                             ))}

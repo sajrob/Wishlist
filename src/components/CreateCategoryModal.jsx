@@ -10,14 +10,17 @@ const CreateCategoryModal = ({
 }) => {
   const [categoryName, setCategoryName] = useState("");
   const [selectedItems, setSelectedItems] = useState(new Set());
+  const [isPublic, setIsPublic] = useState(false);
 
   useEffect(() => {
     if (editingCategory) {
       setCategoryName(editingCategory.name);
       setSelectedItems(new Set(editingCategory.itemIds));
+      setIsPublic(editingCategory.is_public || false);
     } else {
       setCategoryName("");
       setSelectedItems(new Set());
+      setIsPublic(false);
     }
   }, [editingCategory]);
 
@@ -49,15 +52,18 @@ const CreateCategoryModal = ({
           id: editingCategory.id,
           name: categoryName.trim(),
           itemIds: Array.from(selectedItems),
+          is_public: isPublic,
         });
       } else {
         onCreateCategory({
           name: categoryName.trim(),
           itemIds: Array.from(selectedItems),
+          is_public: isPublic,
         });
       }
       setCategoryName("");
       setSelectedItems(new Set());
+      setIsPublic(false);
       onClose();
     }
   };
@@ -94,6 +100,20 @@ const CreateCategoryModal = ({
             placeholder="e.g., Birthday, Christmas"
             required
           />
+        </div>
+
+        <div className="form-group row" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <label className="switch">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+            />
+            <span className="slider round"></span>
+          </label>
+          <span style={{ fontSize: '0.9rem', color: '#333' }}>
+            Make Category Public?
+          </span>
         </div>
 
         <div className="form-group">
