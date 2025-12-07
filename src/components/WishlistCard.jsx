@@ -20,14 +20,16 @@ const WishlistCard = ({ item, onEdit, onDelete, readOnly }) => {
           <p className="item-description">{description}</p>
         </div>
         <div className="card-actions">
-          <a
-            href={buy_link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="buy-link"
-          >
-            Buy Item
-          </a>
+          {readOnly && (
+            <a
+              href={buy_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="buy-link"
+            >
+              Buy Item
+            </a>
+          )}
           {!readOnly && (
             <>
               <button className="edit-btn" onClick={() => onEdit(item)}>

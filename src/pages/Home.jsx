@@ -16,10 +16,12 @@ function Home() {
     const [editingItem, setEditingItem] = useState(null);
     const [editingCategory, setEditingCategory] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isPublic, setIsPublic] = useState(false);
 
     useEffect(() => {
         if (user) {
             fetchData();
+            fetchWishlistSettings();
         }
     }, [user]);
 
@@ -29,11 +31,13 @@ function Home() {
             const { data: itemsData, error: itemsError } = await supabase
                 .from('items')
                 .select('*')
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
             const { data: catsData, error: catsError } = await supabase
                 .from('categories')
                 .select('*')
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: true });
 
             if (itemsError) throw itemsError;
@@ -45,6 +49,50 @@ function Home() {
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchWishlistSettings = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('wishlists')
+                .select('is_public')
+                .eq('id', user.id)
+                .single();
+
+            if (data) {
+                setIsPublic(data.is_public);
+            } else if (error && error.code === 'PGRST116') {
+                // Determine if we should treat missing as false or create.
+                // Best to create if missing.
+                const { error: insertError } = await supabase
+                    .from('wishlists')
+                    .insert([{ id: user.id, is_public: false }]);
+
+                if (!insertError) setIsPublic(false);
+            }
+        } catch (error) {
+            console.error('Error fetching wishlist settings:', error);
+        }
+    };
+
+    const handleTogglePublic = async (e) => {
+        const newValue = e.target.checked;
+        setIsPublic(newValue); // Optimistic UI update
+
+        try {
+            const { error } = await supabase
+                .from('wishlists')
+                .update({ is_public: newValue })
+                .eq('id', user.id);
+
+            if (error) {
+                throw error;
+            }
+        } catch (error) {
+            console.error('Error updating wishlist settings:', error);
+            setIsPublic(!newValue); // Revert
+            alert('Failed to update visibility settings.');
         }
     };
 
@@ -295,6 +343,17 @@ function Home() {
                                 return `${rawName}${suffix} Wishlist`;
                             })()}
                         </h1>
+                        <div className="toggle-switch-container">
+                            <span className="toggle-label">Public Wishlist</span>
+                            <label className="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    checked={isPublic}
+                                    onChange={handleTogglePublic}
+                                />
+                                <span className="slider"></span>
+                            </label>
+                        </div>
                     </div>
                     <div className="header-actions">
                         <button className="add-item-btn" onClick={handleOpenForm}>

@@ -11,11 +11,13 @@ function SharedWishlist() {
     const [activeCategory, setActiveCategory] = useState(null);
     const [loading, setLoading] = useState(true);
     const [profile, setProfile] = useState(null);
+    const [isPublic, setIsPublic] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         if (userId) {
             fetchProfile();
+            fetchWishlistSettings();
             fetchData();
         }
     }, [userId]);
@@ -32,6 +34,19 @@ function SharedWishlist() {
             setProfile(data);
         } catch (error) {
             console.error("Error fetching profile:", error);
+        }
+    };
+
+    const fetchWishlistSettings = async () => {
+        try {
+            const { data } = await supabase
+                .from('wishlists')
+                .select('is_public')
+                .eq('id', userId)
+                .single();
+            if (data) setIsPublic(data.is_public);
+        } catch (error) {
+            console.error("Error fetching wishlist settings:", error);
         }
     };
 
@@ -127,7 +142,7 @@ function SharedWishlist() {
                                 <div className="empty-state">
                                     <p>
                                         {activeCategory === null
-                                            ? "No publicly visible items in this wishlist."
+                                            ? (isPublic ? "No items in this wishlist." : "This wishlist is private.")
                                             : "No items in this category."}
                                     </p>
                                 </div>
