@@ -144,7 +144,8 @@ body {
 }
 
 .category-edit-btn,
-.category-delete-btn {
+.category-delete-btn,
+.category-privacy-btn {
   background: none;
   border: none;
   font-size: 1rem;
@@ -155,6 +156,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.category-privacy-btn:hover {
+  background-color: #d1fae5;
 }
 
 .category-edit-btn:hover {
@@ -243,6 +248,7 @@ body {
     transform: scale(1);
   }
 }
+
 /* Toggle Switch */
 .toggle-switch-container {
   display: flex;
@@ -301,14 +307,14 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #10b981;
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px #10b981;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
 }

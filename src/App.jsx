@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Profile from './pages/Profile';
 import FindUsers from './pages/FindUsers';
+import FriendsWishlists from './pages/FriendsWishlists';
 import SharedWishlist from './pages/SharedWishlist';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './App.css';
@@ -51,6 +52,14 @@ function App() {
             element={
               <PrivateRoute>
                 <FindUsers />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/friends-wishlists"
+            element={
+              <PrivateRoute>
+                <FriendsWishlists />
               </PrivateRoute>
             }
           />

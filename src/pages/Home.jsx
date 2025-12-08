@@ -297,6 +297,33 @@ function Home() {
         }
     };
 
+    const handleToggleCategoryPrivacy = async (categoryId, currentIsPublic) => {
+        try {
+            const newIsPublic = !currentIsPublic;
+
+            // Optimistically update the UI
+            setCategories(prev =>
+                prev.map(cat =>
+                    cat.id === categoryId
+                        ? { ...cat, is_public: newIsPublic }
+                        : cat
+                )
+            );
+
+            const { error } = await supabase
+                .from('categories')
+                .update({ is_public: newIsPublic })
+                .eq('id', categoryId);
+
+            if (error) throw error;
+        } catch (error) {
+            console.error('Error toggling category privacy:', error);
+            alert('Failed to update category privacy');
+            // Revert on error
+            await fetchData();
+        }
+    };
+
     const handleEditCategory = (category) => {
         const itemsInCategory = allItems
             .filter(item => item.category_id === category.id)
@@ -347,19 +374,6 @@ function Home() {
                                 return `${rawName}${suffix} Wishlist`;
                             })()}
                         </h1>
-                        <div className="toggle-switch-container">
-                            <span className="toggle-label" title="Controls visibility of uncategorized items">
-                                Public Uncategorized Items
-                            </span>
-                            <label className="toggle-switch">
-                                <input
-                                    type="checkbox"
-                                    checked={isPublic}
-                                    onChange={handleTogglePublic}
-                                />
-                                <span className="slider"></span>
-                            </label>
-                        </div>
                     </div>
                     <div className="header-actions">
                         <button className="add-item-btn" onClick={handleOpenForm}>
@@ -400,6 +414,16 @@ function Home() {
                                     </button>
                                     {activeCategory === category.id && (
                                         <div className="category-actions">
+                                            <button
+                                                className="category-privacy-btn"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleCategoryPrivacy(category.id, category.is_public);
+                                                }}
+                                                title={category.is_public ? "Make Private" : "Make Public"}
+                                            >
+                                                {category.is_public ? '🔒' : '🌍'}
+                                            </button>
                                             <button
                                                 className="category-edit-btn"
                                                 onClick={(e) => {

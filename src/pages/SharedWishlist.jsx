@@ -78,6 +78,16 @@ function SharedWishlist() {
         }
     };
 
+    // Set first public category as active when categories load
+    useEffect(() => {
+        if (categories.length > 0 && activeCategory === null) {
+            const firstPublicCategory = categories.find(cat => cat.is_public);
+            if (firstPublicCategory) {
+                setActiveCategory(firstPublicCategory.id);
+            }
+        }
+    }, [categories]);
+
     // Filter items based on active category
     const wishlistItems = activeCategory === null
         ? allItems
@@ -116,12 +126,6 @@ function SharedWishlist() {
 
                     {categories.length > 0 && (
                         <div className="categories-nav">
-                            <button
-                                className={`category-tab ${activeCategory === null ? "active" : ""}`}
-                                onClick={() => setActiveCategory(null)}
-                            >
-                                All Items
-                            </button>
                             {categories.map((category) => (
                                 <div key={category.id} className="category-tab-wrapper">
                                     <button

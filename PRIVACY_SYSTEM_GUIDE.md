@@ -71,8 +71,13 @@ create policy "Items visible via Category or Wishlist"
 
 #### For the Owner (You):
 1. **Main Toggle** (Header): Controls visibility of uncategorized items only
-2. **Category Creation/Edit**: Each category has a "Make Category Public?" toggle
-3. **Visual Feedback**: See 🌍 (public) or 🔒 (private) icons on category tabs
+2. **Quick Privacy Toggle** (NEW): Click any category to activate it, then click the privacy button (🌍/🔒) to instantly switch between public/private
+3. **Category Creation/Edit**: Each category has a "Make Category Public?" toggle in the modal
+4. **Visual Feedback**: See 🌍 (public) or 🔒 (private) icons on category tabs
+
+**Two Ways to Change Category Privacy:**
+- **Quick Toggle**: Click the privacy button (🌍 or 🔒) next to Edit/Delete buttons when a category is active
+- **Edit Modal**: Click Edit (✏️), toggle "Make Category Public?", and save
 
 #### For Visitors (Other Users):
 - They can only see:
@@ -97,12 +102,13 @@ create policy "Items visible via Category or Wishlist"
    - All categorized items are private
 
 ## Files Modified
-- ✅ `Home.jsx` - Added privacy support and visual indicators
+- ✅ `Home.jsx` - Added privacy support, visual indicators, and quick privacy toggle button
 - ✅ `SharedWishlist.jsx` - Respects privacy settings, shows indicators
 - ✅ `CreateCategoryModal.jsx` - Added privacy toggle for categories
 - ✅ `CreateCategoryModal.css` - Styled the toggle switch
-- ✅ `App.css` - Styled main wishlist toggle
+- ✅ `App.css` - Styled main wishlist toggle and category privacy button
 - ✅ SQL migrations created in project root
+- ✅ `CATEGORY_PRIVACY_TOGGLE.md` - New feature documentation
 
 ## Next Steps
 1. **Run the SQL migration** from `add_category_privacy.sql`
