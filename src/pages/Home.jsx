@@ -1,132 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
 import CreateCategoryModal from "../components/CreateCategoryModal";
-import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
+import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
+import { useCategories } from "../hooks/useCategories";
+import { useWishlistSettings } from "../hooks/useWishlistSettings";
+import { createItem, updateItem, deleteItem } from "../utils/supabaseHelpers";
+import { getUserPossessiveTitle } from "../utils/nameUtils";
 import "../App.css";
 
 function Home() {
     const { user } = useAuth();
-    const [allItems, setAllItems] = useState([]);
-    const [categories, setCategories] = useState([]);
+
+    // Use custom hooks for data management
+    const { allItems, categories, loading, setAllItems, setCategories, refetch } = useWishlistData(user?.id);
+    const { isPublic, togglePublic } = useWishlistSettings(user?.id);
+    const { createCategory, updateCategory, deleteCategory, toggleCategoryPrivacy } = useCategories(user?.id);
+
+    // UI state
     const [activeCategory, setActiveCategory] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState(null);
     const [editingCategory, setEditingCategory] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [isPublic, setIsPublic] = useState(false);
-
-    useEffect(() => {
-        if (user) {
-            fetchData();
-            fetchWishlistSettings();
-        }
-    }, [user]);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const { data: itemsData, error: itemsError } = await supabase
-                .from('items')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-            const { data: catsData, error: catsError } = await supabase
-                .from('categories')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: true });
-
-            if (itemsError) throw itemsError;
-            if (catsError) throw catsError;
-
-            setAllItems(itemsData || []);
-            setCategories(catsData || []);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchWishlistSettings = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('wishlists')
-                .select('is_public')
-                .eq('id', user.id)
-                .single();
-
-            if (data) {
-                setIsPublic(data.is_public);
-            } else if (error && error.code === 'PGRST116') {
-                // Determine if we should treat missing as false or create.
-                // Best to create if missing.
-                const { error: insertError } = await supabase
-                    .from('wishlists')
-                    .insert([{ id: user.id, is_public: false }]);
-
-                if (!insertError) setIsPublic(false);
-            }
-        } catch (error) {
-            console.error('Error fetching wishlist settings:', error);
-        }
-    };
-
-    const handleTogglePublic = async (e) => {
-        const newValue = e.target.checked;
-        setIsPublic(newValue); // Optimistic UI update
-
-        try {
-            const { error } = await supabase
-                .from('wishlists')
-                .update({ is_public: newValue })
-                .eq('id', user.id);
-
-            if (error) {
-                throw error;
-            }
-        } catch (error) {
-            console.error('Error updating wishlist settings:', error);
-            setIsPublic(!newValue); // Revert
-            alert('Failed to update visibility settings.');
-        }
-    };
 
     // Filter items based on active category
-    const wishlistItems = activeCategory === null
-        ? allItems
-        : allItems.filter((item) => item.category_id === activeCategory);
+    const wishlistItems = useFilteredItems(allItems, activeCategory);
+
+    const handleTogglePublic = async (e) => {
+        await togglePublic();
+    };
 
     const handleAddItem = async (newItem) => {
         if (!user) return;
 
-        try {
-            const { data, error } = await supabase
-                .from('items')
-                .insert([{
-                    user_id: user.id,
-                    category_id: activeCategory,
-                    name: newItem.name,
-                    price: parseFloat(newItem.price) || 0,
-                    description: newItem.description,
-                    image_url: newItem.image_url,
-                    buy_link: newItem.buy_link
-                }])
-                .select()
-                .single();
+        const itemData = {
+            user_id: user.id,
+            category_id: activeCategory,
+            name: newItem.name,
+            price: parseFloat(newItem.price) || 0,
+            description: newItem.description,
+            image_url: newItem.image_url,
+            buy_link: newItem.buy_link
+        };
 
-            if (error) throw error;
+        const { data, error } = await createItem(itemData);
 
-            setAllItems((prev) => [data, ...prev]);
-            setIsFormOpen(false);
-        } catch (error) {
-            console.error('Error adding item:', error);
+        if (error) {
             alert('Error adding item');
+            return;
         }
+
+        setAllItems((prev) => [data, ...prev]);
+        setIsFormOpen(false);
     };
 
     const handleEditItem = (item) => {
@@ -137,190 +64,106 @@ function Home() {
     const handleUpdateItem = async (formData) => {
         if (!editingItem) return;
 
-        try {
-            const { data, error } = await supabase
-                .from('items')
-                .update({
-                    name: formData.name,
-                    price: parseFloat(formData.price) || 0,
-                    description: formData.description,
-                    image_url: formData.image_url,
-                    buy_link: formData.buy_link
-                })
-                .eq('id', editingItem.id)
-                .select()
-                .single();
+        const updates = {
+            name: formData.name,
+            price: parseFloat(formData.price) || 0,
+            description: formData.description,
+            image_url: formData.image_url,
+            buy_link: formData.buy_link
+        };
 
-            if (error) throw error;
+        const { data, error } = await updateItem(editingItem.id, updates);
 
-            setAllItems((prev) =>
-                prev.map((item) => (item.id === editingItem.id ? data : item))
-            );
-            setIsFormOpen(false);
-            setEditingItem(null);
-        } catch (error) {
-            console.error('Error updating item:', error);
+        if (error) {
             alert('Error updating item');
+            return;
         }
+
+        setAllItems((prev) =>
+            prev.map((item) => (item.id === editingItem.id ? data : item))
+        );
+        setIsFormOpen(false);
+        setEditingItem(null);
     };
 
     const handleDeleteItem = async (itemId) => {
-        if (window.confirm("Delete this item?")) {
-            try {
-                const { error } = await supabase
-                    .from('items')
-                    .delete()
-                    .eq('id', itemId);
+        if (!window.confirm("Delete this item?")) return;
 
-                if (error) throw error;
+        const { error } = await deleteItem(itemId);
 
-                setAllItems(prev => prev.filter(item => item.id !== itemId));
-            } catch (error) {
-                console.error('Error deleting item:', error);
-                alert('Error deleting item');
-            }
+        if (error) {
+            alert('Error deleting item');
+            return;
         }
+
+        setAllItems(prev => prev.filter(item => item.id !== itemId));
     };
 
     const handleCreateCategory = async (categoryData) => {
-        if (!user) return;
+        const { data, error } = await createCategory(categoryData);
 
-        try {
-            // 1. Create category
-            const { data: newCategory, error: catError } = await supabase
-                .from('categories')
-                .insert([{
-                    user_id: user.id,
-                    name: categoryData.name,
-                    is_public: categoryData.is_public
-                }])
-                .select()
-                .single();
-
-            if (catError) throw catError;
-
-            // 2. Update items if any selected
-            if (categoryData.itemIds && categoryData.itemIds.length > 0) {
-                const { error: itemsError } = await supabase
-                    .from('items')
-                    .update({ category_id: newCategory.id })
-                    .in('id', categoryData.itemIds);
-
-                if (itemsError) throw itemsError;
-            }
-
-            // Refresh data to ensure consistency
-            await fetchData();
-            setActiveCategory(newCategory.id);
-            setIsCategoryModalOpen(false);
-        } catch (error) {
-            console.error('Error creating category:', error);
+        if (error) {
             alert('Error creating category');
+            return;
         }
+
+        // Refresh data and set new category as active
+        await refetch();
+        if (data) {
+            setActiveCategory(data.id);
+        }
+        setIsCategoryModalOpen(false);
     };
 
     const handleUpdateCategory = async (categoryData) => {
-        try {
-            // 1. Update category name
-            const { error: catError } = await supabase
-                .from('categories')
-                .update({
-                    name: categoryData.name,
-                    is_public: categoryData.is_public
-                })
-                .eq('id', categoryData.id);
+        const { error } = await updateCategory(categoryData.id, categoryData);
 
-            if (catError) throw catError;
-
-            // 2. Handle items
-            // First, remove all items from this category
-            const { error: clearError } = await supabase
-                .from('items')
-                .update({ category_id: null })
-                .eq('category_id', categoryData.id);
-
-            if (clearError) throw clearError;
-
-            // Then add selected items to this category
-            if (categoryData.itemIds && categoryData.itemIds.length > 0) {
-                const { error: addError } = await supabase
-                    .from('items')
-                    .update({ category_id: categoryData.id })
-                    .in('id', categoryData.itemIds);
-
-                if (addError) throw addError;
-            }
-
-            await fetchData();
-            setIsCategoryModalOpen(false);
-            setEditingCategory(null);
-        } catch (error) {
-            console.error('Error updating category:', error);
+        if (error) {
             alert('Error updating category');
+            return;
         }
+
+        await refetch();
+        setIsCategoryModalOpen(false);
+        setEditingCategory(null);
     };
 
     const handleDeleteCategory = async (categoryId) => {
-        if (window.confirm("Delete this category? Items will be uncategorized.")) {
-            try {
-                // 1. Uncategorize items (Supabase might handle this with ON DELETE SET NULL if configured, 
-                // but our schema didn't specify, so we do it manually or rely on RLS/FK behavior. 
-                // Default FK behavior restricts delete if referenced. We should update items first.)
+        if (!window.confirm("Delete this category? Items will be uncategorized.")) return;
 
-                const { error: itemsError } = await supabase
-                    .from('items')
-                    .update({ category_id: null })
-                    .eq('category_id', categoryId);
+        const { error } = await deleteCategory(categoryId);
 
-                if (itemsError) throw itemsError;
+        if (error) {
+            alert('Error deleting category: ' + (error.message || 'Unknown error'));
+            return;
+        }
 
-                // 2. Delete category
-                const { error: catError } = await supabase
-                    .from('categories')
-                    .delete()
-                    .eq('id', categoryId);
+        // Update local state
+        setCategories((prev) => prev.filter((cat) => cat.id !== categoryId));
+        setAllItems((prev) => prev.map(item =>
+            item.category_id === categoryId ? { ...item, category_id: null } : item
+        ));
 
-                if (catError) throw catError;
-
-                setCategories((prev) => prev.filter((cat) => cat.id !== categoryId));
-                setAllItems((prev) => prev.map(item =>
-                    item.category_id === categoryId ? { ...item, category_id: null } : item
-                ));
-
-                if (activeCategory === categoryId) {
-                    setActiveCategory(null);
-                }
-            } catch (error) {
-                console.error('Error deleting category:', error);
-                alert('Error deleting category: ' + error.message);
-            }
+        if (activeCategory === categoryId) {
+            setActiveCategory(null);
         }
     };
 
     const handleToggleCategoryPrivacy = async (categoryId, currentIsPublic) => {
-        try {
-            const newIsPublic = !currentIsPublic;
+        const { data, error } = await toggleCategoryPrivacy(categoryId, currentIsPublic);
 
-            // Optimistically update the UI
+        if (error) {
+            alert('Failed to update category privacy');
+            return;
+        }
+
+        // Optimistically update local state
+        if (data) {
             setCategories(prev =>
                 prev.map(cat =>
-                    cat.id === categoryId
-                        ? { ...cat, is_public: newIsPublic }
-                        : cat
+                    cat.id === categoryId ? { ...cat, is_public: data.is_public } : cat
                 )
             );
-
-            const { error } = await supabase
-                .from('categories')
-                .update({ is_public: newIsPublic })
-                .eq('id', categoryId);
-
-            if (error) throw error;
-        } catch (error) {
-            console.error('Error toggling category privacy:', error);
-            alert('Failed to update category privacy');
-            // Revert on error
-            await fetchData();
         }
     };
 
@@ -366,13 +209,7 @@ function Home() {
                 <header className="app-header">
                     <div className="header-top">
                         <h1>
-                            {(() => {
-                                const meta = user?.user_metadata || {};
-                                const rawName = meta.first_name || (meta.full_name ? meta.full_name.trim().split(' ')[0] : '');
-                                if (!rawName) return "My Wishlist";
-                                const suffix = rawName.slice(-1).toLowerCase() === 's' ? "'" : "'s";
-                                return `${rawName}${suffix} Wishlist`;
-                            })()}
+                            {getUserPossessiveTitle(user)}
                         </h1>
                     </div>
                     <div className="header-actions">

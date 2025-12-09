@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { fetchFriends, fetchProfiles, fetchPublicCategories, fetchItemsByCategories } from '../utils/supabaseHelpers';
+import { getInitials, getPossessiveName, getFirstName } from '../utils/nameUtils';
 import './FriendsWishlists.css';
 
 const FriendsWishlists = () => {
@@ -19,10 +20,7 @@ const FriendsWishlists = () => {
         setLoading(true);
         try {
             // 1. Get friends (users I'm following)
-            const { data: friendsData, error: friendsError } = await supabase
-                .from('friends')
-                .select('friend_id')
-                .eq('user_id', user.id);
+            const { data: friendsData, error: friendsError } = await fetchFriends(user.id);
 
             if (friendsError) throw friendsError;
 
@@ -35,19 +33,12 @@ const FriendsWishlists = () => {
             const friendIds = friendsData.map(f => f.friend_id);
 
             // 2. Get profiles for those friends
-            const { data: profilesData, error: profilesError } = await supabase
-                .from('profiles')
-                .select('*')
-                .in('id', friendIds);
+            const { data: profilesData, error: profilesError } = await fetchProfiles(friendIds);
 
             if (profilesError) throw profilesError;
 
             // 3. Get public categories for those friends
-            const { data: categoriesData, error: categoriesError } = await supabase
-                .from('categories')
-                .select('user_id, id, is_public')
-                .in('user_id', friendIds)
-                .eq('is_public', true);
+            const { data: categoriesData, error: categoriesError } = await fetchPublicCategories(friendIds);
 
             if (categoriesError) throw categoriesError;
 
@@ -70,10 +61,9 @@ const FriendsWishlists = () => {
             });
 
             // 4. Get items in public categories
-            const { data: itemsData, error: itemsError } = await supabase
-                .from('items')
-                .select('user_id, category_id')
-                .in('category_id', Array.from(publicCategoryIds));
+            const { data: itemsData, error: itemsError } = await fetchItemsByCategories(
+                Array.from(publicCategoryIds)
+            );
 
             if (itemsError) throw itemsError;
 
@@ -89,7 +79,7 @@ const FriendsWishlists = () => {
                 .map(profile => ({
                     id: profile.id,
                     name: profile.full_name,
-                    firstName: profile.first_name || profile.full_name?.split(' ')[0] || 'Friend',
+                    firstName: getFirstName(profile, 'Friend'),
                     publicCategories: categoriesCount[profile.id] || 0,
                     totalItems: itemsCount[profile.id] || 0
                 }));
@@ -100,17 +90,6 @@ const FriendsWishlists = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const getInitials = (name) => {
-        return name
-            ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
-            : 'U';
-    };
-
-    const getPossessiveName = (name) => {
-        const suffix = name.slice(-1).toLowerCase() === 's' ? "'" : "'s";
-        return `${name}${suffix}`;
     };
 
     if (loading) {

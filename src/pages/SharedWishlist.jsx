@@ -1,82 +1,40 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import WishlistCard from "../components/WishlistCard";
-import { supabase } from "../supabaseClient";
+import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
+import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
+import { fetchProfile } from "../utils/supabaseHelpers";
+import { getFirstName, getPossessiveName } from "../utils/nameUtils";
 import "../App.css";
 
 function SharedWishlist() {
     const { userId } = useParams();
-    const [allItems, setAllItems] = useState([]);
-    const [categories, setCategories] = useState([]);
+
+    // Use custom hooks for data management
+    const { allItems, categories, loading } = useWishlistData(userId);
+    const { isPublic } = useWishlistSettingsReadOnly(userId);
+
+    // Local state
     const [activeCategory, setActiveCategory] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [profile, setProfile] = useState(null);
-    const [isPublic, setIsPublic] = useState(false);
     const [error, setError] = useState(null);
 
+    // Fetch user profile
     useEffect(() => {
-        if (userId) {
-            fetchProfile();
-            fetchWishlistSettings();
-            fetchData();
-        }
+        if (!userId) return;
+
+        const loadProfile = async () => {
+            const { data, error: profileError } = await fetchProfile(userId);
+            if (profileError) {
+                console.error("Error fetching profile:", profileError);
+                setError("Could not load wishlist. You might not be friends with this user.");
+            } else {
+                setProfile(data);
+            }
+        };
+
+        loadProfile();
     }, [userId]);
-
-    const fetchProfile = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
-            if (error) throw error;
-            setProfile(data);
-        } catch (error) {
-            console.error("Error fetching profile:", error);
-        }
-    };
-
-    const fetchWishlistSettings = async () => {
-        try {
-            const { data } = await supabase
-                .from('wishlists')
-                .select('is_public')
-                .eq('id', userId)
-                .single();
-            if (data) setIsPublic(data.is_public);
-        } catch (error) {
-            console.error("Error fetching wishlist settings:", error);
-        }
-    };
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const { data: itemsData, error: itemsError } = await supabase
-                .from('items')
-                .select('*')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: false });
-
-            const { data: catsData, error: catsError } = await supabase
-                .from('categories')
-                .select('*')
-                .eq('user_id', userId)
-                .order('created_at', { ascending: true });
-
-            if (itemsError) throw itemsError;
-            if (catsError) throw catsError;
-
-            setAllItems(itemsData || []);
-            setCategories(catsData || []);
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            setError("Could not load wishlist. You might not be friends with this user.");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     // Set first public category as active when categories load
     useEffect(() => {
@@ -86,15 +44,19 @@ function SharedWishlist() {
                 setActiveCategory(firstPublicCategory.id);
             }
         }
-    }, [categories]);
+    }, [categories, activeCategory]);
 
     // Filter items based on active category
-    const wishlistItems = activeCategory === null
-        ? allItems
-        : allItems.filter((item) => item.category_id === activeCategory);
+    const wishlistItems = useFilteredItems(allItems, activeCategory);
 
+    // Generate title using name utilities
+    const firstName = getFirstName(profile);
+    const title = firstName ? `${getPossessiveName(firstName)} Wishlist` : "Wishlist";
+
+    // Handle loading state
     if (loading) return <div className="loading">Loading...</div>;
 
+    // Handle error state
     if (error) return (
         <div className="app-content">
             <div className="error-container" style={{ textAlign: 'center', marginTop: '4rem' }}>
@@ -106,11 +68,6 @@ function SharedWishlist() {
             </div>
         </div>
     );
-
-    const firstName = profile?.first_name || (profile?.full_name ? profile.full_name.split(' ')[0] : 'User');
-    const title = profile
-        ? `${firstName}${firstName.slice(-1).toLowerCase() === 's' ? "'" : "'s"} Wishlist`
-        : "Wishlist";
 
     return (
         <div className="app">
