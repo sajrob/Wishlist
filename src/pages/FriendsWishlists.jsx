@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from '../components/LoadingSpinner';
+import EmptyState from '../components/EmptyState';
 import { fetchFriends, fetchProfiles, fetchPublicCategories, fetchItemsByCategories } from '../utils/supabaseHelpers';
 import { getInitials, getPossessiveName, getFirstName } from '../utils/nameUtils';
 import './FriendsWishlists.css';
@@ -95,7 +97,7 @@ const FriendsWishlists = () => {
     if (loading) {
         return (
             <div className="friends-wishlists-container">
-                <div className="loading-spinner">Loading friends' wishlists...</div>
+                <LoadingSpinner message="Loading friends' wishlists..." inline={true} />
             </div>
         );
     }
@@ -108,16 +110,12 @@ const FriendsWishlists = () => {
             </div>
 
             {friendsWishlists.length === 0 ? (
-                <div className="empty-state">
-                    <div className="empty-icon">🎁</div>
-                    <h2>No Public Wishlists Yet</h2>
-                    <p>
-                        None of your friends have made their wishlists public yet, or you haven't followed anyone.
-                    </p>
-                    <Link to="/find-users" className="primary-btn">
-                        Find Friends
-                    </Link>
-                </div>
+                <EmptyState
+                    icon="🎁"
+                    title="No Public Wishlists Yet"
+                    message="None of your friends have made their wishlists public yet, or you haven't followed anyone."
+                    action={{ text: "Find Friends", to: "/find-users" }}
+                />
             ) : (
                 <div className="wishlists-grid">
                     {friendsWishlists.map(friend => (

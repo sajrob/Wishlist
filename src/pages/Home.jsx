@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
 import CreateCategoryModal from "../components/CreateCategoryModal";
+import CategoryNav from "../components/CategoryNav";
+import EmptyState from "../components/EmptyState";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { useAuth } from "../context/AuthContext";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useCategories } from "../hooks/useCategories";
@@ -201,7 +204,7 @@ function Home() {
 
     const isModalOpen = isFormOpen || isCategoryModalOpen;
 
-    if (loading && !user) return <div className="loading">Loading...</div>;
+    if (loading && !user) return <LoadingSpinner />;
 
     return (
         <div className="app">
@@ -223,82 +226,25 @@ function Home() {
                             Create Wishlist Category
                         </button>
                     </div>
-                    {categories.length > 0 && (
-                        <div className="categories-nav">
-                            <button
-                                className={`category-tab ${activeCategory === null ? "active" : ""}`}
-                                onClick={() => setActiveCategory(null)}
-                            >
-                                All Items
-                            </button>
-                            {categories.map((category) => (
-                                <div key={category.id} className="category-tab-wrapper">
-                                    <button
-                                        className={`category-tab ${activeCategory === category.id ? "active" : ""}`}
-                                        onClick={() => setActiveCategory(category.id)}
-                                    >
-                                        {category.name}
-                                        {category.is_public && (
-                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Public Category">
-                                                🌍
-                                            </span>
-                                        )}
-                                        {!category.is_public && (
-                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Private Category">
-                                                🔒
-                                            </span>
-                                        )}
-                                    </button>
-                                    {activeCategory === category.id && (
-                                        <div className="category-actions">
-                                            <button
-                                                className="category-privacy-btn"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleToggleCategoryPrivacy(category.id, category.is_public);
-                                                }}
-                                                title={category.is_public ? "Make Private" : "Make Public"}
-                                            >
-                                                {category.is_public ? '🔒' : '🌍'}
-                                            </button>
-                                            <button
-                                                className="category-edit-btn"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleEditCategory(category);
-                                                }}
-                                                title="Edit category"
-                                            >
-                                                ✏️
-                                            </button>
-                                            <button
-                                                className="category-delete-btn"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteCategory(category.id);
-                                                }}
-                                                title="Delete category"
-                                            >
-                                                🗑️
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <CategoryNav
+                        categories={categories}
+                        activeCategory={activeCategory}
+                        onCategoryChange={setActiveCategory}
+                        showActions={true}
+                        onEdit={handleEditCategory}
+                        onDelete={handleDeleteCategory}
+                        onTogglePrivacy={handleToggleCategoryPrivacy}
+                    />
                 </header>
                 <main className="app-main">
                     <div className="content-container">
                         <div className="cards-container">
                             {wishlistItems.length === 0 ? (
-                                <div className="empty-state">
-                                    <p>
-                                        {activeCategory === null
-                                            ? "No items in your wishlist. Add some items!"
-                                            : "No items in this category."}
-                                    </p>
-                                </div>
+                                <EmptyState
+                                    message={activeCategory === null
+                                        ? "No items in your wishlist. Add some items!"
+                                        : "No items in this category."}
+                                />
                             ) : (
                                 wishlistItems.map((item) => (
                                     <WishlistCard

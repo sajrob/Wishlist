@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import WishlistCard from "../components/WishlistCard";
+import CategoryNav from "../components/CategoryNav";
+import LoadingSpinner from "../components/LoadingSpinner";
+import EmptyState from "../components/EmptyState";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
 import { fetchProfile } from "../utils/supabaseHelpers";
@@ -54,18 +57,16 @@ function SharedWishlist() {
     const title = firstName ? `${getPossessiveName(firstName)} Wishlist` : "Wishlist";
 
     // Handle loading state
-    if (loading) return <div className="loading">Loading...</div>;
+    if (loading) return <LoadingSpinner />;
 
     // Handle error state
     if (error) return (
         <div className="app-content">
-            <div className="error-container" style={{ textAlign: 'center', marginTop: '4rem' }}>
-                <h2>Oops!</h2>
-                <p>{error}</p>
-                <Link to="/find-users" className="auth-button" style={{ display: 'inline-block', marginTop: '1rem', width: 'auto' }}>
-                    Go Back to Find Users
-                </Link>
-            </div>
+            <EmptyState
+                title="Oops!"
+                message={error}
+                action={{ text: "Go Back to Find Users", to: "/find-users" }}
+            />
         </div>
     );
 
@@ -81,42 +82,23 @@ function SharedWishlist() {
                     </div>
                     {/* No Add buttons here */}
 
-                    {categories.length > 0 && (
-                        <div className="categories-nav">
-                            {categories.map((category) => (
-                                <div key={category.id} className="category-tab-wrapper">
-                                    <button
-                                        className={`category-tab ${activeCategory === category.id ? "active" : ""}`}
-                                        onClick={() => setActiveCategory(category.id)}
-                                    >
-                                        {category.name}
-                                        {category.is_public && (
-                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Public Category">
-                                                🌍
-                                            </span>
-                                        )}
-                                        {!category.is_public && (
-                                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Private Category">
-                                                🔒
-                                            </span>
-                                        )}
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <CategoryNav
+                        categories={categories}
+                        activeCategory={activeCategory}
+                        onCategoryChange={setActiveCategory}
+                        showActions={false}
+                        showAllTab={false}
+                    />
                 </header>
                 <main className="app-main">
                     <div className="content-container">
                         <div className="cards-container">
                             {wishlistItems.length === 0 ? (
-                                <div className="empty-state">
-                                    <p>
-                                        {activeCategory === null
-                                            ? (isPublic ? "No items in this wishlist." : "This wishlist is private.")
-                                            : "No items in this category."}
-                                    </p>
-                                </div>
+                                <EmptyState
+                                    message={activeCategory === null
+                                        ? (isPublic ? "No items in this wishlist." : "This wishlist is private.")
+                                        : "No items in this category."}
+                                />
                             ) : (
                                 wishlistItems.map((item) => (
                                     <WishlistCard
