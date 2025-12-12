@@ -209,29 +209,28 @@ function Home() {
                                     categories={categories}
                                     activeCategory={activeCategory}
                                     onCategoryChange={setActiveCategory}
-                                    showActions={true}
-                                    onEdit={handleEditCategory}
-                                    onDelete={handleDeleteCategory}
-                                    onTogglePrivacy={handleToggleCategoryPrivacy}
+                                    showActions={false}
                                 />
                                 <button className="btn btn-secondary w-full" style={{ marginTop: '1rem' }} onClick={handleOpenCategoryModal}>
                                     <span>+</span> New Category
                                 </button>
                             </div>
 
-                            <div className="settings-card">
-                                <div className="settings-title">Settings</div>
-                                <label className="toggle-row">
-                                    <span className="toggle-text">Public Wishlist</span>
-                                    <div className="toggle-switch">
-                                        <input type="checkbox" checked={isPublic} onChange={handleTogglePublic} />
-                                        <span className="toggle-slider"></span>
-                                    </div>
-                                </label>
-                                <p className="toggle-helper">
-                                    {isPublic ? 'Your main list is visible to friends.' : 'Only you can see uncategorized items.'}
-                                </p>
-                            </div>
+                            {!activeCategory && (
+                                <div className="settings-card">
+                                    <div className="settings-title">Settings</div>
+                                    <label className="toggle-row">
+                                        <span className="toggle-text">Public Wishlist</span>
+                                        <div className="toggle-switch">
+                                            <input type="checkbox" checked={isPublic} onChange={handleTogglePublic} />
+                                            <span className="toggle-slider"></span>
+                                        </div>
+                                    </label>
+                                    <p className="toggle-helper">
+                                        {isPublic ? 'Your main list is visible to friends.' : 'Only you can see uncategorized items.'}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </aside>
 
@@ -240,11 +239,51 @@ function Home() {
                         <header className="page-header">
                             <div className="page-title">
                                 <h1>{getUserPossessiveTitle(user)}</h1>
-                                <p className="page-subtitle">
-                                    {activeCategory
-                                        ? `Filtering by ${activeCategoryName}`
-                                        : 'All Items'}
-                                </p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                                    <p className="page-subtitle">
+                                        {activeCategory
+                                            ? `Filtering by ${activeCategoryName}`
+                                            : 'All Items'}
+                                    </p>
+
+                                    {/* Category Actions moved from Sidebar */}
+                                    {activeCategory && (
+                                        <div className="header-category-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                                            {(() => {
+                                                const cat = categories.find(c => c.id === activeCategory);
+                                                if (!cat) return null;
+                                                return (
+                                                    <>
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => handleToggleCategoryPrivacy(cat.id, cat.is_public)}
+                                                            title={cat.is_public ? 'Make Private' : 'Make Public'}
+                                                            style={{ border: '1px solid var(--color-border)' }}
+                                                        >
+                                                            {cat.is_public ? '🌍' : '🔒'}
+                                                        </button>
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => handleEditCategory(cat)}
+                                                            title="Edit Category"
+                                                            style={{ border: '1px solid var(--color-border)' }}
+                                                        >
+                                                            ✏️
+                                                        </button>
+                                                        <button
+                                                            className="btn-icon"
+                                                            onClick={() => handleDeleteCategory(cat.id)}
+                                                            title="Delete Category"
+                                                            style={{ border: '1px solid var(--color-border)' }}
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </>
+                                                );
+                                            })()}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             <div className="header-actions">
                                 <button className="btn btn-primary" onClick={handleOpenForm}>

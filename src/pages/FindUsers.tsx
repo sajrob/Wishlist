@@ -16,12 +16,12 @@ const FindUsers = () => {
     const [friends, setFriends] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(false);
     const [searching, setSearching] = useState(false);
+    const [hasSearched, setHasSearched] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
             void fetchFriends();
-            void searchUsers('');
         }
     }, [user]);
 
@@ -41,6 +41,12 @@ const FindUsers = () => {
 
     const searchUsers = async (searchQuery: string) => {
         if (!user) return;
+
+        if (!searchQuery.trim()) {
+            setUsers([]);
+            return;
+        }
+
         setSearching(true);
         try {
             let queryBuilder = supabase.from('profiles').select('*').neq('id', user.id).limit(20);
@@ -53,6 +59,7 @@ const FindUsers = () => {
 
             if (error) throw error;
             setUsers((data || []) as ProfileRecord[]);
+            setHasSearched(true);
         } catch (error) {
             console.error('Error searching users:', error);
         } finally {
@@ -61,17 +68,19 @@ const FindUsers = () => {
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        setQuery(val);
+        setQuery(e.target.value);
+        setHasSearched(false);
     };
 
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            void searchUsers(query);
-        }, 500);
+    const handleSearchSubmit = () => {
+        void searchUsers(query);
+    };
 
-        return () => clearTimeout(delayDebounceFn);
-    }, [query]);
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearchSubmit();
+        }
+    };
 
     const handleFollow = async (friendId: string) => {
         if (!user) return;
@@ -105,40 +114,54 @@ const FindUsers = () => {
                     placeholder="Search by name..."
                     value={query}
                     onChange={handleSearchChange}
+                    onKeyDown={handleKeyDown}
                 />
-                <span className="search-icon">🔍</span>
+                <button
+                    className="search-icon"
+                    onClick={handleSearchSubmit}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+                >
+                    🔍
+                </button>
             </div>
 
             {searching ? (
                 <div className="loading-spinner">Searching...</div>
             ) : (
-                <div className="users-grid">
+                <div className="users-list">
                     {users.length === 0 ? (
                         <div className="empty-state">
-                            {query ? 'No users found matching your search.' : 'Start typing to find friends.'}
+                            {hasSearched ? 'No users found matching your search.' : 'Type a name and press Enter to find friends.'}
                         </div>
                     ) : (
-                        users.map(profile => (
-                            <div key={profile.id} className="user-card">
-                                <div className="user-avatar">{getInitials(profile.full_name)}</div>
-                                <div className="user-info">
-                                    <div className="user-name">{profile.full_name}</div>
-                                </div>
+                        users.map(profile => {
+                            const isFollowing = friends.has(profile.id);
+                            const Wrapper = isFollowing ? Link : 'div';
+                            const wrapperProps = isFollowing
+                                ? { to: `/wishlist/${profile.id}`, className: 'user-list-item' }
+                                : { className: 'user-list-item' };
 
-                                {friends.has(profile.id) ? (
-                                    <>
-                                        <button className="action-btn following-btn">✓ Following</button>
-                                        <Link to={`/wishlist/${profile.id}`}>
-                                            <button className="action-btn view-btn">View Wishlist</button>
-                                        </Link>
-                                    </>
-                                ) : (
-                                    <button className="action-btn follow-btn" onClick={() => handleFollow(profile.id)}>
-                                        Follow +
-                                    </button>
-                                )}
-                            </div>
-                        ))
+                            return (
+                                <Wrapper key={profile.id} {...(wrapperProps as any)}>
+                                    <div className="user-item-main">
+                                        <div className="user-avatar">{getInitials(profile.full_name)}</div>
+                                        <div className="user-info">
+                                            <div className="user-name">{profile.full_name}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="user-actions">
+                                        {isFollowing ? (
+                                            <span className="badge-following">✓ Following</span>
+                                        ) : (
+                                            <button className="action-btn follow-btn" onClick={() => handleFollow(profile.id)}>
+                                                Follow
+                                            </button>
+                                        )}
+                                    </div>
+                                </Wrapper>
+                            );
+                        })
                     )}
                 </div>
             )}

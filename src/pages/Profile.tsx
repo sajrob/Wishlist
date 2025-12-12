@@ -47,10 +47,18 @@ const Profile = () => {
     }, [user]);
 
     const fetchStats = async () => {
-        try {
-            const { count: itemsCount } = await supabase.from('items').select('*', { count: 'exact', head: true });
+        if (!user) return;
 
-            const { count: catsCount } = await supabase.from('categories').select('*', { count: 'exact', head: true });
+        try {
+            const { count: itemsCount } = await supabase
+                .from('items')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id);
+
+            const { count: catsCount } = await supabase
+                .from('categories')
+                .select('*', { count: 'exact', head: true })
+                .eq('user_id', user.id);
 
             setStats({
                 items: itemsCount || 0,

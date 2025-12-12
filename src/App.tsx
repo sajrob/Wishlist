@@ -5,6 +5,8 @@ import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import ForgotPassword from './pages/ForgotPassword';
+import UpdatePassword from './pages/UpdatePassword';
 import Profile from './pages/Profile';
 import FindUsers from './pages/FindUsers';
 import FriendsWishlists from './pages/FriendsWishlists';
@@ -31,6 +33,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route
             path="/dashboard"
             element={

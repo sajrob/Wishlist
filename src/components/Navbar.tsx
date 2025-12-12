@@ -25,7 +25,7 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="navbar-container">
-                <Link to="/" className="navbar-logo" onClick={closeMenu}>
+                <Link to={user ? "/dashboard" : "/"} className="navbar-logo" onClick={closeMenu}>
                     Wishlist
                 </Link>
 
@@ -36,13 +36,6 @@ const Navbar = () => {
                 </div>
 
                 <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
-                    <NavLink
-                        to="/"
-                        className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                        onClick={closeMenu}
-                    >
-                        Home
-                    </NavLink>
                     {user ? (
                         <>
                             <NavLink
@@ -50,14 +43,14 @@ const Navbar = () => {
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
                                 onClick={closeMenu}
                             >
-                                Dashboard
+                                My Wishlist
                             </NavLink>
                             <NavLink
-                                to="/profile"
+                                to="/friends-wishlists"
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
                                 onClick={closeMenu}
                             >
-                                Profile
+                                Friends
                             </NavLink>
                             <NavLink
                                 to="/find-users"
@@ -67,11 +60,11 @@ const Navbar = () => {
                                 Find Friends
                             </NavLink>
                             <NavLink
-                                to="/friends-wishlists"
+                                to="/profile"
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
                                 onClick={closeMenu}
                             >
-                                Friends' Wishlists
+                                Profile
                             </NavLink>
                             <button onClick={handleLogout} className="navbar-btn logout">
                                 Logout
@@ -79,6 +72,13 @@ const Navbar = () => {
                         </>
                     ) : (
                         <>
+                            <NavLink
+                                to="/"
+                                className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
+                                onClick={closeMenu}
+                            >
+                                Home
+                            </NavLink>
                             <NavLink
                                 to="/login"
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}

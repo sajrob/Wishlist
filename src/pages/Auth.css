@@ -161,3 +161,20 @@
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
+
+.forgot-password-link {
+  text-align: right;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.forgot-password-link a {
+  color: #6366f1;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-password-link a:hover {
+  color: #4f46e5;
+  text-decoration: underline;
+}

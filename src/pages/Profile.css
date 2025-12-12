@@ -27,6 +27,7 @@
     font-size: 2.5rem;
     color: white;
     font-weight: 600;
+    flex-shrink: 0;
 }
 
 .profile-info h1 {
@@ -110,4 +111,12 @@
 .save-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+}
+
+@media (max-width: 400px) {
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.75rem;
+    }
 }

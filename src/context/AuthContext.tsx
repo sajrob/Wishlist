@@ -20,6 +20,8 @@ type AuthContextValue = {
   ) => Promise<AuthTokenResponsePassword>;
   signInWithGoogle: () => Promise<OAuthResponse>;
   signOut: () => Promise<{ error: AuthError | null }>;
+  resetPassword: (email: string) => Promise<{ error: AuthError | null }>;
+  updatePassword: (password: string) => Promise<{ error: AuthError | null }>;
   user: User | null;
   loading: boolean;
 };
@@ -93,6 +95,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signIn,
     signInWithGoogle,
     signOut,
+    resetPassword: (email: string) =>
+      supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/update-password`,
+      }),
+    updatePassword: (password: string) =>
+      supabase.auth.updateUser({ password }),
     user,
     loading,
   };
