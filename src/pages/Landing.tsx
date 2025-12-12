@@ -15,7 +15,7 @@ const Landing = () => {
                         Give and receive the perfect gift, every time.
                     </p>
                     <div className="landing-buttons">
-                        <Link to="/wishlist" className="btn btn-primary">
+                        <Link to="/dashboard" className="btn btn-primary">
                             Get Started
                         </Link>
                     </div>

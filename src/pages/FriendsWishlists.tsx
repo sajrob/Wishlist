@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
-import EmptyState from '../components/EmptyState';
 import { fetchFriends, fetchProfiles, fetchPublicCategories, fetchItemsByCategories } from '../utils/supabaseHelpers';
 import { getInitials, getPossessiveName, getFirstName } from '../utils/nameUtils';
 import type { FriendWishlistSummary } from '../types';
@@ -88,8 +87,8 @@ const FriendsWishlists = () => {
 
     if (loading) {
         return (
-            <div className="friends-wishlists-container">
-                <LoadingSpinner message="Loading friends' wishlists..." inline={true} />
+            <div className="flex-center" style={{ height: '80vh' }}>
+                <LoadingSpinner />
             </div>
         );
     }
@@ -102,41 +101,46 @@ const FriendsWishlists = () => {
             </div>
 
             {friendsWishlists.length === 0 ? (
-                <EmptyState
-                    icon="🎁"
-                    title="No Public Wishlists Yet"
-                    message="None of your friends have made their wishlists public yet, or you haven't followed anyone."
-                    action={{ text: 'Find Friends', to: '/find-users' }}
-                />
+                <div className="empty-state-card">
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎁</div>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No Public Wishlists Yet</h2>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>
+                        None of your friends have made their wishlists public yet, or you haven't followed anyone.
+                    </p>
+                    <Link to="/find-users" className="action-btn-primary">
+                        Find Friends
+                    </Link>
+                </div>
             ) : (
-                <div className="wishlists-grid">
+                <div className="wishlists-list">
                     {friendsWishlists.map(friend => (
-                        <div key={friend.id} className="wishlist-card">
-                            <div className="wishlist-card-header">
-                                <div className="user-avatar-large">{getInitials(friend.name)}</div>
-                                <div className="wishlist-info">
-                                    <h3>{getPossessiveName(friend.firstName)} Wishlist</h3>
-                                    <p className="user-full-name">{friend.name}</p>
+                        <Link key={friend.id} to={`/wishlist/${friend.id}`} className="friend-list-item">
+                            <div className="friend-item-main">
+                                <div className="friend-avatar">
+                                    {getInitials(friend.name)}
+                                </div>
+                                <div className="friend-info">
+                                    <span className="friend-name">{friend.name}</span>
+                                    <span className="friend-wishlist-title">
+                                        {getPossessiveName(friend.firstName)} Wishlist
+                                    </span>
                                 </div>
                             </div>
 
-                            <div className="wishlist-stats">
-                                <div className="stat">
-                                    <span className="stat-icon">🌍</span>
-                                    <span className="stat-value">{friend.publicCategories}</span>
-                                    <span className="stat-label">Public Categories</span>
+                            <div className="friend-item-meta">
+                                <div className="meta-badges">
+                                    <span className="meta-badge" title="Public Categories">
+                                        <span className="icon">🌍</span> {friend.publicCategories} Categories
+                                    </span>
+                                    <span className="meta-badge" title="Total Items">
+                                        <span className="icon">🎁</span> {friend.totalItems} Items
+                                    </span>
                                 </div>
-                                <div className="stat">
-                                    <span className="stat-icon">🎁</span>
-                                    <span className="stat-value">{friend.totalItems}</span>
-                                    <span className="stat-label">Items</span>
+                                <div className="item-action-icon">
+                                    ›
                                 </div>
                             </div>
-
-                            <Link to={`/wishlist/${friend.id}`} className="view-wishlist-btn">
-                                View Wishlist →
-                            </Link>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}
@@ -145,5 +149,3 @@ const FriendsWishlists = () => {
 };
 
 export default FriendsWishlists;
-
-

@@ -46,7 +46,7 @@ const Navbar = () => {
                     {user ? (
                         <>
                             <NavLink
-                                to="/wishlist"
+                                to="/dashboard"
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
                                 onClick={closeMenu}
                             >

@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       options: {
         data: metadata,
-        emailRedirectTo: `${window.location.origin}/wishlist`,
+        emailRedirectTo: `${window.location.origin}/dashboard`,
       },
     });
   };
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/wishlist`,
+        redirectTo: `${window.location.origin}/dashboard`,
       },
     });
 

@@ -15,7 +15,7 @@ const SignUp = () => {
 
   React.useEffect(() => {
     if (user) {
-      navigate("/wishlist");
+      navigate("/dashboard");
     }
   }, [user, navigate]);
 
@@ -43,7 +43,7 @@ const SignUp = () => {
           "Account created! Please check your email to confirm your registration."
         );
       } else {
-        navigate("/wishlist");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       setError(err.message);

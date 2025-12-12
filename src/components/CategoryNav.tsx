@@ -1,4 +1,6 @@
+import React from 'react';
 import type { Category } from '../types';
+import './CategoryNav.css';
 
 interface CategoryNavProps {
     categories: Category[];
@@ -21,44 +23,45 @@ function CategoryNav({
     onTogglePrivacy,
     showAllTab = true,
 }: CategoryNavProps) {
-    if (categories.length === 0) {
+    if (categories.length === 0 && !showAllTab) {
         return null;
     }
 
     return (
-        <div className="categories-nav">
+        <nav className="category-nav">
+            <div className="category-header">Categories</div>
+
             {showAllTab && (
                 <button
-                    className={`category-tab ${activeCategory === null ? 'active' : ''}`}
+                    className={`category-item ${activeCategory === null ? 'active' : ''}`}
                     onClick={() => onCategoryChange(null)}
                 >
-                    All Items
+                    <span className="category-name">📦 All Items</span>
                 </button>
             )}
+
             {categories.map(category => (
-                <div key={category.id} className="category-tab-wrapper">
-                    <button
-                        className={`category-tab ${activeCategory === category.id ? 'active' : ''}`}
-                        onClick={() => onCategoryChange(category.id)}
-                    >
-                        {category.name}
-                        {category.is_public && (
-                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Public Category">
-                                🌍
-                            </span>
+                <button
+                    key={category.id}
+                    className={`category-item ${activeCategory === category.id ? 'active' : ''}`}
+                    onClick={() => onCategoryChange(category.id)}
+                >
+                    <span className="category-name">
+                        <span className="truncate">{category.name}</span>
+                        {/* Privacy Indicator */}
+                        {category.is_public ? (
+                            <span title="Public Category" style={{ fontSize: '0.8em', opacity: 0.7 }}>🌍</span>
+                        ) : (
+                            <span title="Private Category" style={{ fontSize: '0.8em', opacity: 0.7 }}>🔒</span>
                         )}
-                        {!category.is_public && (
-                            <span style={{ marginLeft: '6px', fontSize: '0.8rem' }} title="Private Category">
-                                🔒
-                            </span>
-                        )}
-                    </button>
-                    {showActions && activeCategory === category.id && (
-                        <div className="category-actions">
+                    </span>
+
+                    {showActions && (
+                        <div className="category-actions" onClick={(e) => e.stopPropagation()}>
                             {onTogglePrivacy && (
                                 <button
-                                    className="category-privacy-btn"
-                                    onClick={e => {
+                                    className="action-btn"
+                                    onClick={(e) => {
                                         e.stopPropagation();
                                         onTogglePrivacy(category.id, category.is_public);
                                     }}
@@ -69,8 +72,8 @@ function CategoryNav({
                             )}
                             {onEdit && (
                                 <button
-                                    className="category-edit-btn"
-                                    onClick={e => {
+                                    className="action-btn"
+                                    onClick={(e) => {
                                         e.stopPropagation();
                                         onEdit(category);
                                     }}
@@ -81,8 +84,8 @@ function CategoryNav({
                             )}
                             {onDelete && (
                                 <button
-                                    className="category-delete-btn"
-                                    onClick={e => {
+                                    className="action-btn"
+                                    onClick={(e) => {
                                         e.stopPropagation();
                                         onDelete(category.id);
                                     }}
@@ -93,12 +96,10 @@ function CategoryNav({
                             )}
                         </div>
                     )}
-                </div>
+                </button>
             ))}
-        </div>
+        </nav>
     );
 }
 
 export default CategoryNav;
-
-

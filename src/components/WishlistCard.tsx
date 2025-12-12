@@ -4,54 +4,55 @@ import './WishlistCard.css';
 const WishlistCard = ({ item, onEdit, onDelete, readOnly }: WishlistCardProps) => {
     const { name, price, description, image_url, buy_link } = item;
 
+    // Formatting currency
+    const formattedPrice = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(price);
+
     return (
         <div className="wishlist-card">
             <div className="card-image-container">
-                <img src={image_url} alt={name} className="card-image" />
+                <img src={image_url || 'https://via.placeholder.com/400x300?text=No+Image'} alt={name} className="card-image" />
             </div>
             <div className="card-content">
-                <div className="text-box name-box">
-                    <h2 className="item-name">{name}</h2>
+                <div className="item-header">
+                    <h2 className="item-name" title={name}>{name}</h2>
+                    <span className="item-price">{formattedPrice}</span>
                 </div>
-                <div className="text-box price-box">
-                    <p className="item-price">${price}</p>
-                </div>
-                <div className="text-box description-box">
-                    <p className="item-description">{description}</p>
-                </div>
+
+                <p className="item-description">{description || 'No description provided.'}</p>
+
                 <div className="card-actions">
-                    {readOnly && (
+                    {buy_link && (
                         <a
                             href={buy_link}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="buy-link"
                         >
-                            Buy Item
+                            Buy Now
                         </a>
                     )}
+
                     {!readOnly && (
                         <>
                             {onEdit && (
-                                <button className="edit-btn" onClick={() => onEdit(item)}>
-                                    Edit
+                                <button
+                                    className="action-icon-btn"
+                                    onClick={() => onEdit(item)}
+                                    title="Edit Item"
+                                >
+                                    ✏️
                                 </button>
                             )}
                             {onDelete && (
                                 <button
-                                    className="delete-btn"
+                                    className="action-icon-btn delete"
                                     onClick={() => onDelete(item.id)}
-                                    style={{
-                                        marginLeft: '8px',
-                                        backgroundColor: '#ef4444',
-                                        color: 'white',
-                                        border: 'none',
-                                        padding: '8px 16px',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                    }}
+                                    title="Delete Item"
                                 >
-                                    Delete
+                                    🗑️
                                 </button>
                             )}
                         </>
@@ -63,5 +64,3 @@ const WishlistCard = ({ item, onEdit, onDelete, readOnly }: WishlistCardProps) =
 };
 
 export default WishlistCard;
-
-

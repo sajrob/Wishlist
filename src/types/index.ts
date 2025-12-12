@@ -3,6 +3,8 @@
  * Converted from JSDoc to TypeScript for stronger type safety.
  */
 
+import type { Dispatch, SetStateAction } from 'react';
+
 // ==================== DATABASE MODELS ====================
 
 export interface WishlistItem {
@@ -125,8 +127,8 @@ export interface UseWishlistDataReturn {
     loading: boolean;
     error: Error | null;
     refetch: () => Promise<void>;
-    setAllItems: (items: WishlistItem[]) => void;
-    setCategories: (categories: Category[]) => void;
+    setAllItems: Dispatch<SetStateAction<WishlistItem[]>>;
+    setCategories: Dispatch<SetStateAction<Category[]>>;
 }
 
 export interface UseWishlistSettingsReturn {

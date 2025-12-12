@@ -8,7 +8,7 @@ import { useWishlistData, useFilteredItems } from '../hooks/useWishlistData';
 import { useWishlistSettingsReadOnly } from '../hooks/useWishlistSettings';
 import { fetchProfile } from '../utils/supabaseHelpers';
 import { getFirstName, getPossessiveName } from '../utils/nameUtils';
-import type { Category, WishlistItem } from '../types';
+import type { Category, WishlistItem, Profile } from '../types';
 import '../App.css';
 
 function SharedWishlist() {
@@ -18,7 +18,7 @@ function SharedWishlist() {
     const { isPublic } = useWishlistSettingsReadOnly(userId || null);
 
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
-    const [profile, setProfile] = useState<any>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -51,7 +51,10 @@ function SharedWishlist() {
     const firstName = getFirstName(profile);
     const title = firstName ? `${getPossessiveName(firstName)} Wishlist` : 'Wishlist';
 
-    if (loading) return <LoadingSpinner />;
+    // Find active category name for subtitle
+    const activeCategoryName = categories.find(c => c.id === activeCategory)?.name;
+
+    if (loading) return <div className="flex-center" style={{ height: '80vh' }}><LoadingSpinner /></div>;
 
     if (error)
         return (
@@ -61,32 +64,45 @@ function SharedWishlist() {
         );
 
     return (
-        <div className="app">
-            <div className="app-content">
-                <header className="app-header">
-                    <div className="header-top">
-                        <Link
-                            to="/find-users"
-                            className="back-link"
-                            style={{ marginRight: '1rem', textDecoration: 'none', fontSize: '1.5rem' }}
-                        >
-                            ←
-                        </Link>
-                        <h1>{title}</h1>
-                    </div>
+        <div className="app-content">
+            <div className="dashboard-container">
+                {/* Sidebar */}
+                <aside className="dashboard-sidebar">
+                    <div className="sidebar-sticky">
+                        <div className="sidebar-section">
+                            <Link to="/friends-wishlists" className="btn btn-secondary w-full" style={{ marginBottom: '1.5rem', justifyContent: 'flex-start' }}>
+                                ← Back to Friends
+                            </Link>
 
-                    <CategoryNav
-                        categories={categories as Category[]}
-                        activeCategory={activeCategory}
-                        onCategoryChange={setActiveCategory}
-                        showActions={false}
-                        showAllTab={false}
-                    />
-                </header>
-                <main className="app-main">
-                    <div className="content-container">
-                        <div className="cards-container">
-                            {wishlistItems.length === 0 ? (
+                            <h2>Categories</h2>
+                            <CategoryNav
+                                categories={categories as Category[]}
+                                activeCategory={activeCategory}
+                                onCategoryChange={setActiveCategory}
+                                showActions={false}
+                                showAllTab={false}
+                            />
+                        </div>
+                    </div>
+                </aside>
+
+                {/* Main Content */}
+                <main className="dashboard-main">
+                    <header className="page-header">
+                        <div className="page-title">
+                            <h1>{title}</h1>
+                            <p className="page-subtitle">
+                                {activeCategory
+                                    ? `Viewing ${activeCategoryName}`
+                                    : 'All Public Items'}
+                            </p>
+                        </div>
+                    </header>
+
+                    {/* Grid */}
+                    <div className="cards-grid">
+                        {wishlistItems.length === 0 ? (
+                            <div style={{ gridColumn: '1 / -1' }}>
                                 <EmptyState
                                     message={
                                         activeCategory === null
@@ -96,12 +112,12 @@ function SharedWishlist() {
                                             : 'No items in this category.'
                                     }
                                 />
-                            ) : (
-                                wishlistItems.map(item => (
-                                    <WishlistCard key={item.id} item={item} readOnly={true} />
-                                ))
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            wishlistItems.map(item => (
+                                <WishlistCard key={item.id} item={item} readOnly={true} />
+                            ))
+                        )}
                     </div>
                 </main>
             </div>
@@ -110,5 +126,3 @@ function SharedWishlist() {
 }
 
 export default SharedWishlist;
-
-

@@ -26,7 +26,7 @@ export const ROUTES = {
     HOME: '/',
     LOGIN: '/login',
     SIGNUP: '/signup',
-    WISHLIST: '/wishlist',
+    DASHBOARD: '/dashboard',
     PROFILE: '/profile',
     FIND_USERS: '/find-users',
     FRIENDS_WISHLISTS: '/friends-wishlists',

@@ -39,14 +39,14 @@ export function getInitials(name: string): string {
         .slice(0, 2);
 }
 
-type ProfileLike = Pick<Profile, 'first_name' | 'full_name'> & {
+type ProfileLike = Partial<Pick<Profile, 'first_name' | 'full_name'>> & {
     user_metadata?: {
         first_name?: string;
         full_name?: string;
     };
 };
 
-export function getFirstName(profile?: ProfileLike | null, defaultName = DEFAULTS.DEFAULT_NAME): string {
+export function getFirstName(profile?: ProfileLike | null, defaultName: string = DEFAULTS.DEFAULT_NAME): string {
     if (!profile) {
         return defaultName;
     }
@@ -93,7 +93,7 @@ export function getUserPossessiveTitle(
     suffix = 'Wishlist',
     defaultTitle = 'My Wishlist',
 ): string {
-    const firstName = getFirstName(profile, null as unknown as string | null);
+    const firstName = getFirstName(profile, '');
 
     if (!firstName) {
         return defaultTitle;

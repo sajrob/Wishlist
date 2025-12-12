@@ -13,6 +13,7 @@ import { createItem, updateItem, deleteItem } from '../utils/supabaseHelpers';
 import { getUserPossessiveTitle } from '../utils/nameUtils';
 import type { Category, WishlistItem, ItemFormData } from '../types';
 import '../App.css';
+import './Home.css';
 
 function Home() {
     const { user } = useAuth();
@@ -191,44 +192,79 @@ function Home() {
 
     const isModalOpen = isFormOpen || isCategoryModalOpen;
 
-    if (loading && !user) return <LoadingSpinner />;
+    if (loading && !user) return <div className="flex-center" style={{ height: '80vh' }}><LoadingSpinner /></div>;
+
+    const activeCategoryName = categories.find(c => c.id === activeCategory)?.name;
 
     return (
-        <div className="app">
-            <div className={isModalOpen ? 'app-content blurred' : 'app-content'}>
-                <header className="app-header">
-                    <div className="header-top">
-                        <h1>{getUserPossessiveTitle(user)}</h1>
-                    </div>
-                    <div className="header-actions">
-                        <button className="add-item-btn" onClick={handleOpenForm}>
-                            Add New Wishlist Item
-                        </button>
-                        <button className="create-category-btn" onClick={handleOpenCategoryModal}>
-                            Create Wishlist Category
-                        </button>
-                    </div>
-                    <CategoryNav
-                        categories={categories}
-                        activeCategory={activeCategory}
-                        onCategoryChange={setActiveCategory}
-                        showActions={true}
-                        onEdit={handleEditCategory}
-                        onDelete={handleDeleteCategory}
-                        onTogglePrivacy={handleToggleCategoryPrivacy}
-                    />
-                </header>
-                <main className="app-main">
-                    <div className="content-container">
-                        <div className="cards-container">
-                            {wishlistItems.length === 0 ? (
-                                <EmptyState
-                                    message={
-                                        activeCategory === null
-                                            ? 'No items in your wishlist. Add some items!'
-                                            : 'No items in this category.'
-                                    }
+        <>
+            <div className={`app-content ${isModalOpen ? 'blurred' : ''}`}>
+                <div className="dashboard-container">
+                    {/* Sidebar */}
+                    <aside className="dashboard-sidebar">
+                        <div className="sidebar-sticky">
+                            <div className="sidebar-section">
+                                <h2>Your Wishlists</h2>
+                                <CategoryNav
+                                    categories={categories}
+                                    activeCategory={activeCategory}
+                                    onCategoryChange={setActiveCategory}
+                                    showActions={true}
+                                    onEdit={handleEditCategory}
+                                    onDelete={handleDeleteCategory}
+                                    onTogglePrivacy={handleToggleCategoryPrivacy}
                                 />
+                                <button className="btn btn-secondary w-full" style={{ marginTop: '1rem' }} onClick={handleOpenCategoryModal}>
+                                    <span>+</span> New Category
+                                </button>
+                            </div>
+
+                            <div className="settings-card">
+                                <div className="settings-title">Settings</div>
+                                <label className="toggle-row">
+                                    <span className="toggle-text">Public Wishlist</span>
+                                    <div className="toggle-switch">
+                                        <input type="checkbox" checked={isPublic} onChange={handleTogglePublic} />
+                                        <span className="toggle-slider"></span>
+                                    </div>
+                                </label>
+                                <p className="toggle-helper">
+                                    {isPublic ? 'Your main list is visible to friends.' : 'Only you can see uncategorized items.'}
+                                </p>
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Main Content */}
+                    <main className="dashboard-main">
+                        <header className="page-header">
+                            <div className="page-title">
+                                <h1>{getUserPossessiveTitle(user)}</h1>
+                                <p className="page-subtitle">
+                                    {activeCategory
+                                        ? `Filtering by ${activeCategoryName}`
+                                        : 'All Items'}
+                                </p>
+                            </div>
+                            <div className="header-actions">
+                                <button className="btn btn-primary" onClick={handleOpenForm}>
+                                    <span style={{ fontSize: '1.2em', lineHeight: 1 }}>+</span> Add Item
+                                </button>
+                            </div>
+                        </header>
+
+                        {/* Grid */}
+                        <div className="cards-grid">
+                            {wishlistItems.length === 0 ? (
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    <EmptyState
+                                        message={
+                                            activeCategory === null
+                                                ? 'Your wishlist is looking empty. Add your first item!'
+                                                : 'No items in this category yet.'
+                                        }
+                                    />
+                                </div>
                             ) : (
                                 wishlistItems.map(item => (
                                     <WishlistCard
@@ -240,9 +276,11 @@ function Home() {
                                 ))
                             )}
                         </div>
-                    </div>
-                </main>
+                    </main>
+                </div>
             </div>
+
+            {/* Modals - Outside the blurred container */}
             {isFormOpen && (
                 <div className="modal-overlay" onClick={handleCloseForm}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -267,10 +305,8 @@ function Home() {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 }
 
 export default Home;
-
-
