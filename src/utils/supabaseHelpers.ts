@@ -224,13 +224,14 @@ export async function fetchWishlistSettings(
     try {
         const { data, error } = await supabase
             .from('wishlists')
-            .select('is_public')
+            .select('id, is_public')
             .eq('id', userId)
             .single();
 
         if (error) {
             if ((error as { code?: string }).code === 'PGRST116') {
-                return await createWishlistSettings(userId, false);
+                const result = await createWishlistSettings(userId, false);
+                return result;
             }
             throw error;
         }
@@ -291,6 +292,23 @@ export async function fetchFriends(
         return { data: data || [], error: null };
     } catch (error) {
         console.error('Error fetching friends:', error);
+        return { data: null, error: error as Error };
+    }
+}
+
+export async function fetchFollowers(
+    userId: string,
+): Promise<SupabaseResponse<Array<{ user_id: string }>>> {
+    try {
+        const { data, error } = await supabase
+            .from('friends')
+            .select('user_id')
+            .eq('friend_id', userId);
+
+        if (error) throw error;
+        return { data: data || [], error: null };
+    } catch (error) {
+        console.error('Error fetching followers:', error);
         return { data: null, error: error as Error };
     }
 }

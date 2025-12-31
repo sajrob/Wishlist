@@ -1,60 +1,91 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { fetchFriends, fetchProfiles } from '../utils/supabaseHelpers';
+import { fetchFriends, fetchFollowers, fetchProfiles } from '../utils/supabaseHelpers';
 import { getInitials, getFirstName } from '../utils/nameUtils';
 import type { FriendWishlistSummary } from '../types';
 import './FriendsWishlists.css';
 
+type ConnectionTab = 'friends' | 'following' | 'followers';
+
 const FriendsWishlists = () => {
     const { user } = useAuth();
-    const [friendsWishlists, setFriendsWishlists] = useState<FriendWishlistSummary[]>([]);
+    const [following, setFollowing] = useState<FriendWishlistSummary[]>([]);
+    const [followers, setFollowers] = useState<FriendWishlistSummary[]>([]);
+    const [activeTab, setActiveTab] = useState<ConnectionTab>('friends');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (user) {
-            void fetchFriendsWishlists();
+            void fetchConnections();
         }
     }, [user]);
 
-    const fetchFriendsWishlists = async () => {
+    const fetchConnections = async () => {
         if (!user) return;
         setLoading(true);
         try {
-            const { data: friendsData, error: friendsError } = await fetchFriends(user.id);
+            // Fetch people YOU follow
+            const { data: followingData, error: fError } = await fetchFriends(user.id);
+            if (fError) throw fError;
 
-            if (friendsError) throw friendsError;
+            // Fetch people who follow YOU
+            const { data: followersData, error: folError } = await fetchFollowers(user.id);
+            if (folError) throw folError;
 
-            if (!friendsData || friendsData.length === 0) {
-                setFriendsWishlists([]);
+            const followingIds = (followingData || []).map(f => f.friend_id);
+            const followersIds = (followersData || []).map(f => f.user_id);
+
+            // Fetch profiles for everyone involved
+            const allIds = Array.from(new Set([...followingIds, ...followersIds]));
+            if (allIds.length === 0) {
+                setFollowing([]);
+                setFollowers([]);
                 setLoading(false);
                 return;
             }
 
-            const friendIds = friendsData.map(f => f.friend_id);
+            const { data: profilesData, error: pError } = await fetchProfiles(allIds);
+            if (pError) throw pError;
 
-            const { data: profilesData, error: profilesError } = await fetchProfiles(friendIds);
+            const profilesMap = new Map((profilesData || []).map(p => [p.id, p]));
 
-            if (profilesError) throw profilesError;
+            const followingList = followingIds.map(id => {
+                const profile = profilesMap.get(id);
+                return {
+                    id,
+                    name: profile?.full_name || 'Unknown User',
+                    firstName: profile ? getFirstName(profile, 'Friend') : 'Friend',
+                };
+            });
 
-            const combined = (profilesData || []).map(profile => ({
-                id: profile.id,
-                name: profile.full_name,
-                firstName: getFirstName(profile, 'Friend'),
-            }));
+            const followersList = followersIds.map(id => {
+                const profile = profilesMap.get(id);
+                return {
+                    id,
+                    name: profile?.full_name || 'Unknown User',
+                    firstName: profile ? getFirstName(profile, 'User') : 'Friend',
+                };
+            });
 
-            setFriendsWishlists(combined);
+            setFollowing(followingList);
+            setFollowers(followersList);
         } catch (error) {
-            console.error('Error fetching friends wishlists:', error);
+            console.error('Error fetching connections:', error);
         } finally {
             setLoading(false);
         }
     };
 
+    const mutualFriends = useMemo(() => {
+        const followingSet = new Set(following.map(f => f.id));
+        return followers.filter(f => followingSet.has(f.id));
+    }, [following, followers]);
+
     const handleUnfollow = async (e: React.MouseEvent, friendId: string) => {
-        e.preventDefault(); // Prevent navigating to the wishlist
+        e.preventDefault();
         if (!user || !confirm('Are you sure you want to unfollow this user?')) return;
 
         try {
@@ -66,11 +97,103 @@ const FriendsWishlists = () => {
 
             if (error) throw error;
 
-            setFriendsWishlists(prev => prev.filter(f => f.id !== friendId));
+            setFollowing(prev => prev.filter(f => f.id !== friendId));
         } catch (error) {
             console.error('Error unfollowing user:', error);
             alert('Failed to unfollow user.');
         }
+    };
+
+    const handleFollowBack = async (e: React.MouseEvent, userId: string) => {
+        e.preventDefault();
+        if (!user) return;
+
+        try {
+            const { error } = await supabase
+                .from('friends')
+                .insert([{ user_id: user.id, friend_id: userId }]);
+
+            if (error) throw error;
+
+            // Refetch or update state
+            void fetchConnections();
+        } catch (error) {
+            console.error('Error following user:', error);
+            alert('Failed to follow back.');
+        }
+    };
+
+    const renderList = (list: FriendWishlistSummary[], type: ConnectionTab) => {
+        if (list.length === 0) {
+            return (
+                <div className="empty-state-card">
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+                        {type === 'friends' ? '🤝' : type === 'following' ? '🎁' : '👥'}
+                    </div>
+                    <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+                        {type === 'friends' ? 'No Mutual Friends Yet' :
+                            type === 'following' ? 'Not Following Anyone' :
+                                'No Followers Yet'}
+                    </h2>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>
+                        {type === 'friends' ? 'Connect with others to see mutual friends here.' :
+                            type === 'following' ? "You haven't followed any users to see their wishlists yet." :
+                                'No one has followed you yet. Share your profile to get followers!'}
+                    </p>
+                    {type !== 'followers' && (
+                        <Link to="/find-users" className="action-btn-primary">
+                            Find People
+                        </Link>
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <div className="wishlists-list">
+                {list.map(person => {
+                    const isFollowing = following.some(f => f.id === person.id);
+                    const isMutual = mutualFriends.some(f => f.id === person.id);
+
+                    return (
+                        <Link key={person.id} to={`/wishlist/${person.id}`} className="friend-list-item">
+                            <div className="friend-item-main">
+                                <div className="friend-avatar">
+                                    {getInitials(person.name)}
+                                </div>
+                                <div className="friend-info">
+                                    <span className="friend-name">
+                                        {person.name}
+                                        {isMutual && <span className="mutual-badge">Mutual</span>}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="friend-item-meta">
+                                <div className="friend-actions">
+                                    {isFollowing ? (
+                                        <button
+                                            className="unfollow-btn-small"
+                                            onClick={(e) => handleUnfollow(e, person.id)}
+                                            title="Unfollow"
+                                        >
+                                            Unfollow
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="follow-btn-small"
+                                            onClick={(e) => handleFollowBack(e, person.id)}
+                                        >
+                                            Follow Back
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </Link>
+                    );
+                })}
+            </div>
+        );
     };
 
     if (loading) {
@@ -84,49 +207,34 @@ const FriendsWishlists = () => {
     return (
         <div className="friends-wishlists-container">
             <div className="friends-wishlists-header">
-                <h1>Friends' Wishlists</h1>
-                <p>Browse public wishlists from people you're following</p>
+                <h1>Social Network</h1>
+                <p>Manage your friends, followers, and following</p>
             </div>
 
-            {friendsWishlists.length === 0 ? (
-                <div className="empty-state-card">
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🎁</div>
-                    <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>No Public Wishlists Yet</h2>
-                    <p style={{ color: 'var(--color-text-secondary)' }}>
-                        None of your friends have made their wishlists public yet, or you haven't followed anyone.
-                    </p>
-                    <Link to="/find-users" className="action-btn-primary">
-                        Find Friends
-                    </Link>
-                </div>
-            ) : (
-                <div className="wishlists-list">
-                    {friendsWishlists.map(friend => (
-                        <Link key={friend.id} to={`/wishlist/${friend.id}`} className="friend-list-item">
-                            <div className="friend-item-main">
-                                <div className="friend-avatar">
-                                    {getInitials(friend.name)}
-                                </div>
-                                <div className="friend-info">
-                                    <span className="friend-name">{friend.name}</span>
-                                </div>
-                            </div>
+            <div className="tabs-container">
+                <button
+                    className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('friends')}
+                >
+                    Friends <span className="tab-count">{mutualFriends.length}</span>
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'following' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('following')}
+                >
+                    Following <span className="tab-count">{following.length}</span>
+                </button>
+                <button
+                    className={`tab-btn ${activeTab === 'followers' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('followers')}
+                >
+                    Followers <span className="tab-count">{followers.length}</span>
+                </button>
+            </div>
 
-                            <div className="friend-item-meta">
-                                <div className="friend-actions">
-                                    <button
-                                        className="unfollow-btn-small"
-                                        onClick={(e) => handleUnfollow(e, friend.id)}
-                                        title="Unfollow"
-                                    >
-                                        Unfollow
-                                    </button>
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
-                </div>
-            )}
+            {activeTab === 'friends' && renderList(mutualFriends, 'friends')}
+            {activeTab === 'following' && renderList(following, 'following')}
+            {activeTab === 'followers' && renderList(followers, 'followers')}
         </div>
     );
 };

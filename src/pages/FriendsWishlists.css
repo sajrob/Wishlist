@@ -156,18 +156,114 @@
     background-color: var(--color-primary-hover);
 }
 
+/* Tabs Styling */
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--spacing-sm);
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.tab-btn:hover {
+    color: var(--color-primary);
+}
+
+.tab-btn.active {
+    color: var(--color-primary);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-full) var(--radius-full) 0 0;
+}
+
+.tab-count {
+    background-color: var(--color-bg-muted, #f3f4f6);
+    color: var(--color-text-muted);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.tab-btn.active .tab-count {
+    background-color: var(--color-primary-light, #ebf5ff);
+    color: var(--color-primary);
+}
+
+/* Connection Badges */
+.mutual-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #ecfdf5;
+    /* emerald-50 */
+    color: #059669;
+    /* emerald-600 */
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    border: 1px solid #d1fae5;
+}
+
+.follow-btn-small {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.follow-btn-small:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
+    .tabs-container {
+        gap: var(--spacing-xs);
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
     .friend-list-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-md);
+        flex-direction: row;
+        /* Keep row for social view */
+        align-items: center;
     }
-
-    .friend-item-meta {
-        width: 100%;
-        justify-content: space-between;
-    }
-
 
 }
