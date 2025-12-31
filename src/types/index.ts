@@ -53,6 +53,16 @@ export interface Friend {
     created_at: string;
 }
 
+export interface Notification {
+    id: string;
+    user_id: string;
+    actor_id: string; // The person who triggered the notification
+    type: 'follow' | string;
+    message: string;
+    is_read: boolean;
+    created_at: string;
+}
+
 export interface AuthUser {
     id: string;
     email: string;
@@ -161,8 +171,8 @@ export interface FriendWishlistSummary {
     id: string;
     name: string;
     firstName: string;
-    publicCategories: number;
-    totalItems: number;
+    publicCategories?: number;
+    totalItems?: number;
 }
 
 export type CategoryStats = Record<string, number>;

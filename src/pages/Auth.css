@@ -10,7 +10,7 @@
 .auth-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  padding: 3rem;
+  padding: 2rem;
   border-radius: 1rem;
   width: 100%;
   max-width: 550px;
@@ -30,7 +30,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .form-group {

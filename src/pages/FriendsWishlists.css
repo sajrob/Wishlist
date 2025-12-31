@@ -96,42 +96,39 @@
 }
 
 /* Right Section: Stats + Action */
+
 .friend-item-meta {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xl);
 }
 
-.meta-badges {
+
+/* Unfollow Button */
+.friend-actions {
     display: flex;
-    gap: var(--spacing-sm);
+    align-items: center;
+    margin-left: auto;
 }
 
-.meta-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    background-color: var(--color-surface-hover);
+.unfollow-btn-small {
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    padding: 0.4rem 0.75rem;
     border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
     font-size: 0.8rem;
     font-weight: 500;
-    color: var(--color-text-secondary);
 }
 
-.meta-badge .icon {
-    font-size: 0.9rem;
-}
-
-.item-action-icon {
-    color: var(--color-text-muted);
-    font-size: 1.25rem;
-    transition: transform 0.2s ease, color 0.2s ease;
-}
-
-.friend-list-item:hover .item-action-icon {
-    color: var(--color-primary);
-    transform: translateX(4px);
+.unfollow-btn-small:hover {
+    background-color: var(--color-danger-bg, #ffe5e5);
+    color: var(--color-danger, #d32f2f);
+    border-color: var(--color-danger, #d32f2f);
 }
 
 /* Empty & Loading States */
@@ -172,12 +169,5 @@
         justify-content: space-between;
     }
 
-    .meta-badges {
-        flex-wrap: wrap;
-    }
 
-    .item-action-icon {
-        display: none;
-        /* Hide chevron on mobile if stacked */
-    }
 }

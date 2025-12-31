@@ -160,8 +160,9 @@ const SignUp = () => {
           </svg>
           Continue with Google
         </button>
-        <div className="auth-link">
-          Already have an account? <Link to="/login">Log In</Link>
+        <div className="auth-link" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
+          <Link to="/login">Log In</Link>
+          <Link to="/forgot-password" style={{ fontSize: '0.85rem' }}>Forgot your password?</Link>
         </div>
       </div>
     </div>

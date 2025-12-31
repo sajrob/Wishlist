@@ -96,6 +96,28 @@ const FindUsers = () => {
         }
     };
 
+    const handleUnfollow = async (friendId: string) => {
+        if (!user) return;
+        try {
+            const { error } = await supabase
+                .from('friends')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('friend_id', friendId);
+
+            if (error) throw error;
+
+            setFriends(prev => {
+                const next = new Set(prev);
+                next.delete(friendId);
+                return next;
+            });
+        } catch (error) {
+            console.error('Error unfollowing user:', error);
+            alert('Could not unfollow user.');
+        }
+    };
+
     const getInitials = (name: string) => {
         return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
     };
@@ -152,7 +174,15 @@ const FindUsers = () => {
 
                                     <div className="user-actions">
                                         {isFollowing ? (
-                                            <span className="badge-following">✓ Following</span>
+                                            <button
+                                                className="action-btn unfollow-btn"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    void handleUnfollow(profile.id);
+                                                }}
+                                            >
+                                                Unfollow
+                                            </button>
                                         ) : (
                                             <button className="action-btn follow-btn" onClick={() => handleFollow(profile.id)}>
                                                 Follow

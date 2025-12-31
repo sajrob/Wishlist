@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../supabaseClient';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { fetchFriends, fetchProfiles, fetchPublicCategories, fetchItemsByCategories } from '../utils/supabaseHelpers';
-import { getInitials, getPossessiveName, getFirstName } from '../utils/nameUtils';
+import { fetchFriends, fetchProfiles } from '../utils/supabaseHelpers';
+import { getInitials, getFirstName } from '../utils/nameUtils';
 import type { FriendWishlistSummary } from '../types';
 import './FriendsWishlists.css';
 
@@ -38,50 +39,37 @@ const FriendsWishlists = () => {
 
             if (profilesError) throw profilesError;
 
-            const { data: categoriesData, error: categoriesError } = await fetchPublicCategories(friendIds);
-
-            if (categoriesError) throw categoriesError;
-
-            if (!categoriesData || categoriesData.length === 0) {
-                setFriendsWishlists([]);
-                setLoading(false);
-                return;
-            }
-
-            const categoriesCount: Record<string, number> = {};
-            const usersWithPublicCategories = new Set<string>();
-            const publicCategoryIds = new Set<string>();
-
-            categoriesData.forEach(cat => {
-                categoriesCount[cat.user_id] = (categoriesCount[cat.user_id] || 0) + 1;
-                usersWithPublicCategories.add(cat.user_id);
-                publicCategoryIds.add(cat.id);
-            });
-
-            const { data: itemsData, error: itemsError } = await fetchItemsByCategories(Array.from(publicCategoryIds));
-
-            if (itemsError) throw itemsError;
-
-            const itemsCount: Record<string, number> = {};
-            itemsData?.forEach(item => {
-                itemsCount[item.user_id] = (itemsCount[item.user_id] || 0) + 1;
-            });
-
-            const combined = (profilesData || [])
-                .filter(profile => usersWithPublicCategories.has(profile.id))
-                .map(profile => ({
-                    id: profile.id,
-                    name: profile.full_name,
-                    firstName: getFirstName(profile, 'Friend'),
-                    publicCategories: categoriesCount[profile.id] || 0,
-                    totalItems: itemsCount[profile.id] || 0,
-                }));
+            const combined = (profilesData || []).map(profile => ({
+                id: profile.id,
+                name: profile.full_name,
+                firstName: getFirstName(profile, 'Friend'),
+            }));
 
             setFriendsWishlists(combined);
         } catch (error) {
             console.error('Error fetching friends wishlists:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleUnfollow = async (e: React.MouseEvent, friendId: string) => {
+        e.preventDefault(); // Prevent navigating to the wishlist
+        if (!user || !confirm('Are you sure you want to unfollow this user?')) return;
+
+        try {
+            const { error } = await supabase
+                .from('friends')
+                .delete()
+                .eq('user_id', user.id)
+                .eq('friend_id', friendId);
+
+            if (error) throw error;
+
+            setFriendsWishlists(prev => prev.filter(f => f.id !== friendId));
+        } catch (error) {
+            console.error('Error unfollowing user:', error);
+            alert('Failed to unfollow user.');
         }
     };
 
@@ -121,23 +109,18 @@ const FriendsWishlists = () => {
                                 </div>
                                 <div className="friend-info">
                                     <span className="friend-name">{friend.name}</span>
-                                    <span className="friend-wishlist-title">
-                                        {getPossessiveName(friend.firstName)} Wishlist
-                                    </span>
                                 </div>
                             </div>
 
                             <div className="friend-item-meta">
-                                <div className="meta-badges">
-                                    <span className="meta-badge" title="Public Categories">
-                                        <span className="icon">🌍</span> {friend.publicCategories} Categories
-                                    </span>
-                                    <span className="meta-badge" title="Total Items">
-                                        <span className="icon">🎁</span> {friend.totalItems} Items
-                                    </span>
-                                </div>
-                                <div className="item-action-icon">
-                                    ›
+                                <div className="friend-actions">
+                                    <button
+                                        className="unfollow-btn-small"
+                                        onClick={(e) => handleUnfollow(e, friend.id)}
+                                        title="Unfollow"
+                                    >
+                                        Unfollow
+                                    </button>
                                 </div>
                             </div>
                         </Link>
