@@ -204,7 +204,7 @@ function Home() {
                     <aside className="dashboard-sidebar">
                         <div className="sidebar-sticky">
                             <div className="sidebar-section">
-                                <h2>Your Wishlists</h2>
+                                <h2>{getUserPossessiveTitle(user)}s</h2>
                                 <CategoryNav
                                     categories={categories}
                                     activeCategory={activeCategory}
@@ -238,13 +238,11 @@ function Home() {
                     <main className="dashboard-main">
                         <header className="page-header">
                             <div className="page-title">
-                                <h1>{getUserPossessiveTitle(user)}</h1>
+                                <h1>{activeCategory
+                                    ? `${activeCategoryName} wishlist`
+                                    : 'All Items'}</h1>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                                    <p className="page-subtitle">
-                                        {activeCategory
-                                            ? `Filtering by ${activeCategoryName}`
-                                            : 'All Items'}
-                                    </p>
+
 
                                     {/* Category Actions moved from Sidebar */}
                                     {activeCategory && (
