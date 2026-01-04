@@ -104,7 +104,7 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                     className="form-textarea"
                     placeholder="Say why you want/need this item"
                     rows={2}
-                    required
+                // required
                 />
             </div>
 
@@ -119,7 +119,7 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                     value={formData.image_url}
                     onChange={handleChange}
                     className="form-input"
-                    placeholder="https://example.com/image.jpg"
+                    placeholder="Paste a link of the image eg: https://example.com/image.jpg"
                     required
                 />
             </div>
