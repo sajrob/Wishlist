@@ -1,9 +1,10 @@
 import { Switch } from "@/components/ui/switch";
 import type { WishlistCardProps } from '../types';
+import { ensureAbsoluteUrl } from '../utils/urlUtils';
 import './WishlistCard.css';
 
 const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: WishlistCardProps) => {
-    const { id, name, price, description, image_url, is_must_have } = item;
+    const { id, name, price, description, image_url, is_must_have, buy_link } = item;
 
     // Formatting currency
     const formattedPrice = new Intl.NumberFormat('en-US', {
@@ -25,41 +26,60 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                 <p className="item-description">{description || 'No description provided.'}</p>
 
                 <div className="card-actions">
-                    <div className="flex items-center space-x-2">
-                        <Switch
-                            id={`must-have-${id}`}
-                            checked={is_must_have}
-                            onCheckedChange={(checked) => onToggleMustHave?.(id, checked)}
-                            disabled={readOnly}
-                        />
-                        <label
-                            htmlFor={`must-have-${id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
-                        >
-                            Must Have
-                        </label>
-                    </div>
+                    {readOnly ? (
+                        <div className="shared-actions">
+                            {is_must_have && (
+                                <div className="must-have-tag">
+                                    Must Have
+                                </div>
+                            )}
+                            {buy_link && (
+                                <a
+                                    href={ensureAbsoluteUrl(buy_link)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="buy-button"
+                                >
+                                    Buy Now
+                                </a>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="owner-actions">
+                            <div className="flex items-center space-x-2">
+                                <Switch
+                                    id={`must-have-${id}`}
+                                    checked={is_must_have}
+                                    onCheckedChange={(checked) => onToggleMustHave?.(id, checked)}
+                                />
+                                <label
+                                    htmlFor={`must-have-${id}`}
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
+                                >
+                                    Must Have
+                                </label>
+                            </div>
 
-                    {!readOnly && (
-                        <div className="flex gap-1">
-                            {onEdit && (
-                                <button
-                                    className="action-icon-btn"
-                                    onClick={() => onEdit(item)}
-                                    title="Edit Item"
-                                >
-                                    ✏️
-                                </button>
-                            )}
-                            {onDelete && (
-                                <button
-                                    className="action-icon-btn delete"
-                                    onClick={() => onDelete(item.id)}
-                                    title="Delete Item"
-                                >
-                                    🗑️
-                                </button>
-                            )}
+                            <div className="flex gap-1">
+                                {onEdit && (
+                                    <button
+                                        className="action-icon-btn"
+                                        onClick={() => onEdit(item)}
+                                        title="Edit Item"
+                                    >
+                                        ✏️
+                                    </button>
+                                )}
+                                {onDelete && (
+                                    <button
+                                        className="action-icon-btn delete"
+                                        onClick={() => onDelete(item.id)}
+                                        title="Delete Item"
+                                    >
+                                        🗑️
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

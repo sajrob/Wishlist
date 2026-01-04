@@ -13,8 +13,9 @@ const CreateCategoryModal = ({
     items,
     onCreateCategory,
     onUpdateCategory,
+    onClose,
     editingCategory = null,
-}: Omit<CreateCategoryModalProps, 'onClose'>) => {
+}: CreateCategoryModalProps) => {
     const [categoryName, setCategoryName] = useState('');
     const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
     const [isPublic, setIsPublic] = useState(false);

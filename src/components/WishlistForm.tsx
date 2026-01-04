@@ -16,7 +16,7 @@ const initialForm: ItemFormData = {
     is_must_have: false,
 };
 
-const WishlistForm = ({ onSubmit, editingItem = null }: Omit<WishlistFormProps, 'onClose'>) => {
+const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormProps) => {
     const [formData, setFormData] = useState<ItemFormData>(initialForm);
 
     useEffect(() => {
@@ -145,8 +145,11 @@ const WishlistForm = ({ onSubmit, editingItem = null }: Omit<WishlistFormProps, 
                         />
                     </div>
                 </CardContent>
-                <CardFooter className="pt-2">
-                    <Button type="submit" className="w-full h-11 text-base font-semibold">
+                <CardFooter className="flex gap-3 pt-2">
+                    <Button type="button" variant="outline" className="flex-1" onClick={onClose}>
+                        Cancel
+                    </Button>
+                    <Button type="submit" className="flex-1 text-base font-semibold">
                         {editingItem ? 'Update Item' : 'Add to Wishlist'}
                     </Button>
                 </CardFooter>

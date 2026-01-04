@@ -318,7 +318,7 @@ function Home() {
                                                             title={cat.is_public ? 'Make Private' : 'Make Public'}
                                                             style={{ border: '1px solid var(--color-border)' }}
                                                         >
-                                                            {cat.is_public ? '🌍' : '🔒'}
+                                                            {cat.is_public ? '🌍 Public' : '🔒 Private'}
                                                         </button>
                                                         <button
                                                             className="btn-icon"
@@ -413,6 +413,7 @@ function Home() {
                 <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
                     <WishlistForm
                         onSubmit={editingItem ? handleUpdateItem : handleAddItem}
+                        onClose={handleCloseForm}
                         editingItem={editingItem || undefined}
                     />
                 </DialogContent>
@@ -425,6 +426,7 @@ function Home() {
                         items={allItems}
                         onCreateCategory={handleCreateCategory}
                         onUpdateCategory={handleUpdateCategory}
+                        onClose={handleCloseCategoryModal}
                         editingCategory={editingCategory || undefined}
                     />
                 </DialogContent>
