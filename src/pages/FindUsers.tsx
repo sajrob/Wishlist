@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from "sonner";
+import { confirmDelete } from '../utils/toastHelpers';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -90,32 +92,42 @@ const FindUsers = () => {
             if (error) throw error;
 
             setFriends(prev => new Set(prev).add(friendId));
+            toast.success('Following user!');
         } catch (error) {
             console.error('Error following user:', error);
-            alert('Could not follow user. Make sure you have run the database setup script.');
+            toast.error('Could not follow user.');
         }
     };
 
     const handleUnfollow = async (friendId: string) => {
         if (!user) return;
-        try {
-            const { error } = await supabase
-                .from('friends')
-                .delete()
-                .eq('user_id', user.id)
-                .eq('friend_id', friendId);
 
-            if (error) throw error;
+        confirmDelete({
+            title: "Unfollow user?",
+            description: "You won't be able to see their private wishlists anymore.",
+            deleteLabel: "Unfollow",
+            onDelete: async () => {
+                try {
+                    const { error } = await supabase
+                        .from('friends')
+                        .delete()
+                        .eq('user_id', user.id)
+                        .eq('friend_id', friendId);
 
-            setFriends(prev => {
-                const next = new Set(prev);
-                next.delete(friendId);
-                return next;
-            });
-        } catch (error) {
-            console.error('Error unfollowing user:', error);
-            alert('Could not unfollow user.');
-        }
+                    if (error) throw error;
+
+                    setFriends(prev => {
+                        const next = new Set(prev);
+                        next.delete(friendId);
+                        return next;
+                    });
+                    toast.success('Unfollowed successfully');
+                } catch (error) {
+                    console.error('Error unfollowing user:', error);
+                    toast.error('Could not unfollow user.');
+                }
+            }
+        });
     };
 
     const getInitials = (name: string) => {

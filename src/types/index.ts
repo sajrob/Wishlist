@@ -16,6 +16,7 @@ export interface WishlistItem {
     description: string;
     image_url: string;
     buy_link: string;
+    is_must_have: boolean;
     created_at: string;
 }
 
@@ -97,6 +98,7 @@ export interface ItemFormData {
     description: string;
     image_url: string;
     buy_link: string;
+    is_must_have?: boolean;
 }
 
 export interface CategoryFormData {
@@ -112,6 +114,7 @@ export interface WishlistCardProps {
     item: WishlistItem;
     onEdit?: (item: WishlistItem) => void;
     onDelete?: (itemId: string) => void;
+    onToggleMustHave?: (itemId: string, isMustHave: boolean) => void;
     readOnly?: boolean;
 }
 

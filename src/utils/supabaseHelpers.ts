@@ -14,7 +14,7 @@ import type {
 
 type ItemInsert = Pick<
     WishlistItem,
-    'user_id' | 'category_id' | 'name' | 'price' | 'description' | 'image_url' | 'buy_link'
+    'user_id' | 'category_id' | 'name' | 'price' | 'description' | 'image_url' | 'buy_link' | 'is_must_have'
 >;
 type CategoryInsert = Pick<Category, 'user_id' | 'name' | 'is_public'>;
 type WishlistSettingsRow = WishlistSettings;

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { toast } from "sonner";
+import { confirmDelete } from '../utils/toastHelpers';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
@@ -86,22 +88,30 @@ const FriendsWishlists = () => {
 
     const handleUnfollow = async (e: React.MouseEvent, friendId: string) => {
         e.preventDefault();
-        if (!user || !confirm('Are you sure you want to unfollow this user?')) return;
+        if (!user) return;
 
-        try {
-            const { error } = await supabase
-                .from('friends')
-                .delete()
-                .eq('user_id', user.id)
-                .eq('friend_id', friendId);
+        confirmDelete({
+            title: "Unfollow user?",
+            description: "You won't be able to see their private wishlists anymore.",
+            deleteLabel: "Unfollow",
+            onDelete: async () => {
+                try {
+                    const { error } = await supabase
+                        .from('friends')
+                        .delete()
+                        .eq('user_id', user.id)
+                        .eq('friend_id', friendId);
 
-            if (error) throw error;
+                    if (error) throw error;
 
-            setFollowing(prev => prev.filter(f => f.id !== friendId));
-        } catch (error) {
-            console.error('Error unfollowing user:', error);
-            alert('Failed to unfollow user.');
-        }
+                    setFollowing(prev => prev.filter(f => f.id !== friendId));
+                    toast.success('Unfollowed successfully');
+                } catch (error) {
+                    console.error('Error unfollowing user:', error);
+                    toast.error('Failed to unfollow user.');
+                }
+            }
+        });
     };
 
     const handleFollowBack = async (e: React.MouseEvent, userId: string) => {
@@ -117,9 +127,10 @@ const FriendsWishlists = () => {
 
             // Refetch or update state
             void fetchConnections();
+            toast.success('Following back!');
         } catch (error) {
             console.error('Error following user:', error);
-            alert('Failed to follow back.');
+            toast.error('Failed to follow back.');
         }
     };
 

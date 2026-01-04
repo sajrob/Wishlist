@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import './Profile.css';
@@ -15,7 +20,6 @@ type ProfileForm = {
 const Profile = () => {
     const { user } = useAuth();
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState('');
     const [stats, setStats] = useState<Stats>({ items: 0, categories: 0 });
     const [formData, setFormData] = useState<ProfileForm>({
         first_name: '',
@@ -72,7 +76,6 @@ const Profile = () => {
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        setMessage('');
 
         try {
             const fullName = `${formData.first_name} ${formData.last_name}`.trim();
@@ -99,9 +102,9 @@ const Profile = () => {
                 console.error('Error updating public profile:', profileError);
             }
             setFormData(prev => ({ ...prev, full_name: fullName }));
-            setMessage('Profile updated successfully!');
+            toast.success('Profile updated successfully!');
         } catch (error: any) {
-            setMessage('Error updating profile: ' + error.message);
+            toast.error('Error updating profile: ' + error.message);
         } finally {
             setLoading(false);
         }
@@ -112,77 +115,85 @@ const Profile = () => {
     };
 
     return (
-        <div className="profile-container">
-            <div className="profile-header">
-                <div className="profile-avatar">{getInitials(formData.full_name)}</div>
-                <div className="profile-info">
-                    <h1>{formData.full_name || 'User'}</h1>
-                    <p>{formData.email}</p>
+        <div className="profile-container max-w-4xl mx-auto p-6 space-y-8">
+            <div className="flex items-center gap-6 pb-8 border-bottom">
+                <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
+                    {getInitials(formData.full_name)}
+                </div>
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-bold tracking-tight">{formData.full_name || 'User'}</h1>
+                    <p className="text-muted-foreground">{formData.email}</p>
                 </div>
             </div>
 
-            <div className="profile-section">
-                <h2>Overview</h2>
-                <div className="profile-stats">
-                    <div className="stat-card">
-                        <span className="stat-number">{stats.items}</span>
-                        <span className="stat-label">Wishlist Items</span>
-                    </div>
-                    <div className="stat-card">
-                        <span className="stat-number">{stats.categories}</span>
-                        <span className="stat-label">Categories</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="md:col-span-1 space-y-6">
+                    <h2 className="text-xl font-semibold">Overview</h2>
+                    <div className="grid grid-cols-1 gap-4">
+                        <Card>
+                            <CardHeader className="p-4 pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Wishlist Items</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0">
+                                <div className="text-3xl font-bold text-primary">{stats.items}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="p-4 pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">Categories</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-0">
+                                <div className="text-3xl font-bold text-primary">{stats.categories}</div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
-            </div>
 
-            <div className="profile-section">
-                <h2>Settings</h2>
-                {message && (
-                    <div
-                        className={message.includes('Error') ? 'error-message' : 'success-message'}
-                        style={{
-                            padding: '1rem',
-                            borderRadius: '0.5rem',
-                            marginBottom: '1rem',
-                            backgroundColor: message.includes('Error') ? '#fef2f2' : '#f0fdf4',
-                            color: message.includes('Error') ? '#dc2626' : '#16a34a',
-                            border: `1px solid ${message.includes('Error') ? '#fee2e2' : '#bbf7d0'}`,
-                        }}
-                    >
-                        {message}
-                    </div>
-                )}
-                <form onSubmit={handleUpdateProfile} className="profile-form">
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                        <div className="form-group">
-                            <label>First Name</label>
-                            <input
-                                type="text"
-                                value={formData.first_name}
-                                onChange={e => setFormData({ ...formData, first_name: e.target.value })}
-                                placeholder="First Name"
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label>Last Name</label>
-                            <input
-                                type="text"
-                                value={formData.last_name}
-                                onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-                                placeholder="Last Name"
-                            />
-                        </div>
-                    </div>
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input type="email" value={formData.email} disabled style={{ opacity: 0.7, cursor: 'not-allowed' }} />
-                    </div>
-                    <div className="form-actions">
-                        <button type="submit" className="save-btn" disabled={loading}>
-                            {loading ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
-                </form>
+                <div className="md:col-span-2 space-y-6">
+                    <h2 className="text-xl font-semibold">Account Settings</h2>
+                    <Card>
+                        <form onSubmit={handleUpdateProfile}>
+                            <CardContent className="p-6 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="first_name">First Name</Label>
+                                        <Input
+                                            id="first_name"
+                                            value={formData.first_name}
+                                            onChange={e => setFormData({ ...formData, first_name: e.target.value })}
+                                            placeholder="First Name"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="last_name">Last Name</Label>
+                                        <Input
+                                            id="last_name"
+                                            value={formData.last_name}
+                                            onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+                                            placeholder="Last Name"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={formData.email}
+                                        disabled
+                                        className="bg-muted text-muted-foreground cursor-not-allowed border-dashed"
+                                    />
+                                    <p className="text-xs text-muted-foreground pt-1">Email cannot be changed.</p>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="p-6 bg-muted/20 border-t flex justify-end">
+                                <Button type="submit" disabled={loading} className="px-8 font-semibold">
+                                    {loading ? 'Saving Changes...' : 'Save Changes'}
+                                </Button>
+                            </CardFooter>
+                        </form>
+                    </Card>
+                </div>
             </div>
         </div>
     );

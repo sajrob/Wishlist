@@ -1,8 +1,9 @@
+import { Switch } from "@/components/ui/switch";
 import type { WishlistCardProps } from '../types';
 import './WishlistCard.css';
 
-const WishlistCard = ({ item, onEdit, onDelete, readOnly }: WishlistCardProps) => {
-    const { name, price, description, image_url, buy_link } = item;
+const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: WishlistCardProps) => {
+    const { id, name, price, description, image_url, is_must_have } = item;
 
     // Formatting currency
     const formattedPrice = new Intl.NumberFormat('en-US', {
@@ -24,19 +25,23 @@ const WishlistCard = ({ item, onEdit, onDelete, readOnly }: WishlistCardProps) =
                 <p className="item-description">{description || 'No description provided.'}</p>
 
                 <div className="card-actions">
-                    {buy_link && (
-                        <a
-                            href={buy_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="buy-link"
+                    <div className="flex items-center space-x-2">
+                        <Switch
+                            id={`must-have-${id}`}
+                            checked={is_must_have}
+                            onCheckedChange={(checked) => onToggleMustHave?.(id, checked)}
+                            disabled={readOnly}
+                        />
+                        <label
+                            htmlFor={`must-have-${id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
                         >
-                            Buy Now
-                        </a>
-                    )}
+                            Must Have
+                        </label>
+                    </div>
 
                     {!readOnly && (
-                        <>
+                        <div className="flex gap-1">
                             {onEdit && (
                                 <button
                                     className="action-icon-btn"
@@ -55,7 +60,7 @@ const WishlistCard = ({ item, onEdit, onDelete, readOnly }: WishlistCardProps) =
                                     🗑️
                                 </button>
                             )}
-                        </>
+                        </div>
                     )}
                 </div>
             </div>

@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
+import { toast } from "sonner";
+import { confirmDelete } from '../utils/toastHelpers';
 import WishlistCard from '../components/WishlistCard';
 import WishlistForm from '../components/WishlistForm';
 import CreateCategoryModal from '../components/CreateCategoryModal';
 import CategoryNav from '../components/CategoryNav';
 import EmptyState from '../components/EmptyState';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+} from "@/components/ui/dialog";
 import { useAuth } from '../context/AuthContext';
 import { useWishlistData, useFilteredItems } from '../hooks/useWishlistData';
 import { useCategories } from '../hooks/useCategories';
@@ -45,6 +59,7 @@ function Home() {
             description: newItem.description,
             image_url: newItem.image_url,
             buy_link: newItem.buy_link,
+            is_must_have: newItem.is_must_have || false,
         };
 
         const { data, error } = await createItem(itemData);
@@ -72,6 +87,7 @@ function Home() {
             description: formData.description,
             image_url: formData.image_url,
             buy_link: formData.buy_link,
+            is_must_have: formData.is_must_have || false,
         };
 
         const { data, error } = await updateItem(editingItem.id, updates);
@@ -86,17 +102,56 @@ function Home() {
         setEditingItem(null);
     };
 
-    const handleDeleteItem = async (itemId: string) => {
-        if (!window.confirm('Delete this item?')) return;
-
-        const { error } = await deleteItem(itemId);
+    const handleToggleMustHave = async (itemId: string, isMustHave: boolean) => {
+        const { data, error } = await updateItem(itemId, { is_must_have: isMustHave });
 
         if (error) {
-            alert('Error deleting item');
+            toast.error('Failed to update importance');
             return;
         }
 
-        setAllItems(prev => prev.filter(item => item.id !== itemId));
+        if (data) {
+            setAllItems(prev => prev.map(item => (item.id === itemId ? { ...item, is_must_have: data.is_must_have } : item)));
+        }
+    };
+
+    const handleDeleteItem = async (itemId: string) => {
+        const itemToDelete = allItems.find(i => i.id === itemId);
+
+        if (activeCategory) {
+            // Case 1: Viewing a specific wishlist - just remove from that wishlist (make uncategorized)
+            confirmDelete({
+                title: "Remove from Wishlist?",
+                description: `"${itemToDelete?.name || 'this item'}" will be removed from this wishlist but will still be available in "All Items".`,
+                deleteLabel: "Remove",
+                onDelete: async () => {
+                    const { data, error } = await updateItem(itemId, { category_id: null });
+                    if (error) {
+                        toast.error('Error removing item');
+                        return;
+                    }
+                    // Update the local state - the item still exists but its category is now null
+                    setAllItems(prev => prev.map(item => (item.id === itemId && data ? data : item)));
+                    toast.success('Item removed from wishlist');
+                }
+            });
+        } else {
+            // Case 2: Viewing "All Items" - permanent deletion
+            confirmDelete({
+                title: "Permanently Delete?",
+                description: `This will completely remove "${itemToDelete?.name || 'this item'}" from your account.`,
+                deleteLabel: "Delete Permanently",
+                onDelete: async () => {
+                    const { error } = await deleteItem(itemId);
+                    if (error) {
+                        toast.error('Error deleting item');
+                        return;
+                    }
+                    setAllItems(prev => prev.filter(item => item.id !== itemId));
+                    toast.success('Item deleted successfully');
+                }
+            });
+        }
     };
 
     const handleCreateCategory = async (categoryData: { name: string; itemIds?: string[]; is_public: boolean }) => {
@@ -128,21 +183,26 @@ function Home() {
     };
 
     const handleDeleteCategory = async (categoryId: string) => {
-        if (!window.confirm('Delete this category? Items will be uncategorized.')) return;
+        const catToDelete = categories.find(c => c.id === categoryId);
 
-        const { error } = await deleteCategory(categoryId);
+        confirmDelete({
+            title: "Delete this category?",
+            description: `Items in "${catToDelete?.name || 'this category'}" will be moved to "All Items".`,
+            onDelete: async () => {
+                const { error } = await deleteCategory(categoryId);
+                if (error) {
+                    toast.error('Error deleting category');
+                    return;
+                }
+                setCategories(prev => prev.filter(cat => cat.id !== categoryId));
+                setAllItems(prev => prev.map(item => (item.category_id === categoryId ? { ...item, category_id: null } : item)));
 
-        if (error) {
-            alert('Error deleting category: ' + (error.message || 'Unknown error'));
-            return;
-        }
-
-        setCategories(prev => prev.filter(cat => cat.id !== categoryId));
-        setAllItems(prev => prev.map(item => (item.category_id === categoryId ? { ...item, category_id: null } : item)));
-
-        if (activeCategory === categoryId) {
-            setActiveCategory(null);
-        }
+                if (activeCategory === categoryId) {
+                    setActiveCategory(null);
+                }
+                toast.success('Category deleted successfully');
+            }
+        });
     };
 
     const handleToggleCategoryPrivacy = async (categoryId: string, currentIsPublic: boolean) => {
@@ -212,7 +272,7 @@ function Home() {
                                     showActions={false}
                                 />
                                 <button className="btn btn-secondary w-full" style={{ marginTop: '1rem' }} onClick={handleOpenCategoryModal}>
-                                    <span>+</span> New Category
+                                    <span>+</span> New Wishlist
                                 </button>
                             </div>
 
@@ -266,7 +326,7 @@ function Home() {
                                                             title="Edit Category"
                                                             style={{ border: '1px solid var(--color-border)' }}
                                                         >
-                                                            ✏️
+                                                            Edit Wishlist
                                                         </button>
                                                         <button
                                                             className="btn-icon"
@@ -274,7 +334,7 @@ function Home() {
                                                             title="Delete Category"
                                                             style={{ border: '1px solid var(--color-border)' }}
                                                         >
-                                                            🗑️
+                                                            Delete Wishlist
                                                         </button>
                                                     </>
                                                 );
@@ -284,23 +344,53 @@ function Home() {
                                 </div>
                             </div>
                             <div className="header-actions">
-                                <button className="btn btn-primary" onClick={handleOpenForm}>
-                                    <span style={{ fontSize: '1.2em', lineHeight: 1 }}>+</span> Add Item
-                                </button>
+                                <Button onClick={handleOpenForm}>
+                                    <span style={{ fontSize: '1.2em', lineHeight: 1, marginRight: '0.5rem' }}>+</span> Add Item
+                                </Button>
                             </div>
                         </header>
 
-                        {/* Grid */}
                         <div className="cards-grid">
                             {wishlistItems.length === 0 ? (
                                 <div style={{ gridColumn: '1 / -1' }}>
                                     <EmptyState
                                         message={
-                                            activeCategory === null
-                                                ? 'Your wishlist is looking empty. Add your first item!'
-                                                : 'No items in this category yet.'
+                                            categories.length === 0
+                                                ? 'Get started by creating your first Wishlist.'
+                                                : activeCategory === null
+                                                    ? 'Add your first item to your wishlists'
+                                                    : 'No items in this category yet.'
                                         }
-                                    />
+                                        action={
+                                            categories.length === 0
+                                                ? {
+                                                    text: 'Create Wishlist',
+                                                    onClick: handleOpenCategoryModal,
+                                                }
+                                                : {
+                                                    text: 'Add Item',
+                                                    onClick: handleOpenForm,
+                                                }
+                                        }
+                                    >
+                                        {categories.length > 0 && activeCategory === null && (
+                                            <div className="flex flex-col items-center gap-2 mt-2">
+                                                <p className="text-xs text-muted-foreground italic">or jump to a specific wishlist:</p>
+                                                <Select onValueChange={(value) => setActiveCategory(value)}>
+                                                    <SelectTrigger className="w-[200px] h-8 text-xs">
+                                                        <SelectValue placeholder="Select a wishlist" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {categories.map((cat) => (
+                                                            <SelectItem key={cat.id} value={cat.id}>
+                                                                {cat.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        )}
+                                    </EmptyState>
                                 </div>
                             ) : (
                                 wishlistItems.map(item => (
@@ -309,6 +399,7 @@ function Home() {
                                         item={item}
                                         onEdit={() => handleEditItem(item)}
                                         onDelete={() => handleDeleteItem(item.id)}
+                                        onToggleMustHave={handleToggleMustHave}
                                     />
                                 ))
                             )}
@@ -317,31 +408,27 @@ function Home() {
                 </div>
             </div>
 
-            {/* Modals - Outside the blurred container */}
-            {isFormOpen && (
-                <div className="modal-overlay" onClick={handleCloseForm}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <WishlistForm
-                            onSubmit={editingItem ? handleUpdateItem : handleAddItem}
-                            onClose={handleCloseForm}
-                            editingItem={editingItem || undefined}
-                        />
-                    </div>
-                </div>
-            )}
-            {isCategoryModalOpen && (
-                <div className="modal-overlay" onClick={handleCloseCategoryModal}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <CreateCategoryModal
-                            items={allItems}
-                            onClose={handleCloseCategoryModal}
-                            onCreateCategory={handleCreateCategory}
-                            onUpdateCategory={handleUpdateCategory}
-                            editingCategory={editingCategory || undefined}
-                        />
-                    </div>
-                </div>
-            )}
+            {/* Add/Edit Item Modal */}
+            <Dialog open={isFormOpen} onOpenChange={(open) => !open && handleCloseForm()}>
+                <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
+                    <WishlistForm
+                        onSubmit={editingItem ? handleUpdateItem : handleAddItem}
+                        editingItem={editingItem || undefined}
+                    />
+                </DialogContent>
+            </Dialog>
+
+            {/* Add/Edit Wishlist Modal */}
+            <Dialog open={isCategoryModalOpen} onOpenChange={(open) => !open && handleCloseCategoryModal()}>
+                <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
+                    <CreateCategoryModal
+                        items={allItems}
+                        onCreateCategory={handleCreateCategory}
+                        onUpdateCategory={handleUpdateCategory}
+                        editingCategory={editingCategory || undefined}
+                    />
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

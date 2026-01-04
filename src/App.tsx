@@ -13,6 +13,7 @@ import FriendsWishlists from './pages/FriendsWishlists';
 import SharedWishlist from './pages/SharedWishlist';
 import Notifications from './pages/Notifications';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Toaster } from "@/components/ui/sonner";
 import './App.css';
 
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
@@ -87,6 +88,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
+      <Toaster position="top-center" />
     </Router>
   );
 }

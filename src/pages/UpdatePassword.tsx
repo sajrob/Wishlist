@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './Auth.css';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const UpdatePassword = () => {
     const [password, setPassword] = useState('');
@@ -30,38 +35,54 @@ const UpdatePassword = () => {
     };
 
     return (
-        <div className="auth-container">
-            <div className="auth-card">
-                <h2 className="auth-title">Update Password</h2>
-                {error && <div className="error-message">{error}</div>}
-                <form onSubmit={handleSubmit} className="auth-form">
-                    <div className="form-group">
-                        <label>New Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                            placeholder="Enter new password"
-                            minLength={6}
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Confirm Password</label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={e => setConfirmPassword(e.target.value)}
-                            required
-                            placeholder="Confirm new password"
-                            minLength={6}
-                        />
-                    </div>
-                    <button disabled={loading} className="auth-button" type="submit">
-                        {loading ? 'Updating...' : 'Update Password'}
-                    </button>
-                </form>
-            </div>
+        <div className="min-h-[80vh] flex items-center justify-center p-6 bg-transparent">
+            <Card className="w-full max-w-[450px] shadow-xl border-t-4 border-t-primary">
+                <CardHeader className="space-y-1 text-center">
+                    <CardTitle className="text-3xl font-bold tracking-tight">Update Password</CardTitle>
+                    <CardDescription>
+                        Please enter your new password below to secure your account
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-4">
+                    {error && (
+                        <Alert variant="destructive">
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>{error}</AlertDescription>
+                        </Alert>
+                    )}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="password">New Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                required
+                                placeholder="Min. 6 characters"
+                                minLength={6}
+                                className="h-11"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="confirmPassword">Confirm Password</Label>
+                            <Input
+                                id="confirmPassword"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                required
+                                placeholder="Repeat new password"
+                                minLength={6}
+                                className="h-11"
+                            />
+                        </div>
+                        <Button disabled={loading} className="w-full h-11 text-base font-semibold" type="submit">
+                            {loading ? 'Updating Password...' : 'Update Password'}
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     );
 };

@@ -90,22 +90,7 @@
   padding-top: var(--spacing-md);
 }
 
-.buy-link {
-  flex: 1;
-  text-align: center;
-  text-decoration: none;
-  background-color: var(--color-primary);
-  color: white;
-  padding: 0.625rem;
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: background-color 0.2s;
-}
 
-.buy-link:hover {
-  background-color: var(--color-primary-hover);
-}
 
 .action-icon-btn {
   width: 40px;

@@ -52,7 +52,7 @@
 
 .landing-description {
     font-size: 1.25rem;
-    color: #4b5563;
+    color: #583623;
     margin-bottom: 2.5rem;
     line-height: 1.6;
 }
@@ -75,7 +75,7 @@
 .btn-primary {
     background-color: #2563eb;
     color: white;
-    border: 2px solid #2563eb;
+    border: 2px solid #583623;
 }
 
 .btn-primary:hover {
