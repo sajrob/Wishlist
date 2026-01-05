@@ -43,7 +43,6 @@ function EmptyState({ icon, title, message, action, className = '', children }: 
             </EmptyHeader>
             {(action || children) && (
                 <EmptyContent>
-                    {children}
                     {action && (
                         action.onClick ? (
                             <Button onClick={action.onClick}>
@@ -57,6 +56,7 @@ function EmptyState({ icon, title, message, action, className = '', children }: 
                             </Button>
                         )
                     )}
+                    {children}
                 </EmptyContent>
             )}
         </Empty>

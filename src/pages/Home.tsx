@@ -358,8 +358,8 @@ function Home() {
                                             categories.length === 0
                                                 ? 'Get started by creating your first Wishlist.'
                                                 : activeCategory === null
-                                                    ? 'Add your first item to your wishlists'
-                                                    : 'No items in this category yet.'
+                                                    ? 'Add your first item'
+                                                    : 'Your ' + activeCategoryName + ' wishlist is empty, start adding items.'
                                         }
                                         action={
                                             categories.length === 0
@@ -374,8 +374,8 @@ function Home() {
                                         }
                                     >
                                         {categories.length > 0 && activeCategory === null && (
-                                            <div className="flex flex-col items-center gap-2 mt-2">
-                                                <p className="text-xs text-muted-foreground italic">or jump to a specific wishlist:</p>
+                                            <div className="flex flex-col items-center gap-2 mt-6">
+                                                <p className="text-muted-foreground italic">or jump to a specific wishlist:</p>
                                                 <Select onValueChange={(value) => setActiveCategory(value)}>
                                                     <SelectTrigger className="w-[200px] h-8 text-xs">
                                                         <SelectValue placeholder="Select a wishlist" />
@@ -405,11 +405,12 @@ function Home() {
                             )}
                         </div>
                     </main>
-                </div>
-            </div>
+                </div >
+            </div >
 
             {/* Add/Edit Item Modal */}
-            <Dialog open={isFormOpen} onOpenChange={(open) => !open && handleCloseForm()}>
+            < Dialog open={isFormOpen} onOpenChange={(open) => !open && handleCloseForm()
+            }>
                 <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
                     <WishlistForm
                         onSubmit={editingItem ? handleUpdateItem : handleAddItem}
@@ -417,10 +418,10 @@ function Home() {
                         editingItem={editingItem || undefined}
                     />
                 </DialogContent>
-            </Dialog>
+            </Dialog >
 
             {/* Add/Edit Wishlist Modal */}
-            <Dialog open={isCategoryModalOpen} onOpenChange={(open) => !open && handleCloseCategoryModal()}>
+            < Dialog open={isCategoryModalOpen} onOpenChange={(open) => !open && handleCloseCategoryModal()}>
                 <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
                     <CreateCategoryModal
                         items={allItems}
@@ -430,7 +431,7 @@ function Home() {
                         editingCategory={editingCategory || undefined}
                     />
                 </DialogContent>
-            </Dialog>
+            </Dialog >
         </>
     );
 }
