@@ -35,8 +35,8 @@ const AppContent = () => {
   return (
     <SidebarProvider>
       {!isLandingPage && <AppSidebar />}
-      <div className="flex flex-col min-h-screen w-full">
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 lg:h-[60px] lg:px-6">
+      <div className="flex flex-col h-screen w-full overflow-hidden">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 lg:h-[60px] lg:px-6 flex-shrink-0">
           {!isLandingPage && <SidebarTrigger />}
           <div className="flex-1">
             <Navbar />

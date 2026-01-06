@@ -191,6 +191,7 @@ function Home() {
         }
 
         await refetch();
+        window.dispatchEvent(new Event('categoriesUpdated'));
         if (data) {
             setActiveCategory(data.id);
         }
@@ -206,6 +207,7 @@ function Home() {
         }
 
         await refetch();
+        window.dispatchEvent(new Event('categoriesUpdated'));
         setIsCategoryModalOpen(false);
         setEditingCategory(null);
     };
@@ -224,6 +226,7 @@ function Home() {
                 }
                 setCategories(prev => prev.filter(cat => cat.id !== categoryId));
                 setAllItems(prev => prev.map(item => (item.category_id === categoryId ? { ...item, category_id: null } : item)));
+                window.dispatchEvent(new Event('categoriesUpdated'));
 
                 if (activeCategory === categoryId) {
                     setActiveCategory(null);
@@ -280,25 +283,23 @@ function Home() {
 
     const isModalOpen = isFormOpen || isCategoryModalOpen;
 
-    if (loading && !user) return <div className="flex-center" style={{ height: '80vh' }}><LoadingSpinner /></div>;
+    if (loading) return <div className="flex-center" style={{ height: '80vh' }}><LoadingSpinner /></div>;
 
     const activeCategoryName = categories.find(c => c.id === activeCategory)?.name;
 
     return (
         <>
             <div className={`app-content ${isModalOpen ? 'blurred' : ''}`}>
-                <div className="p-6 max-w-[1200px] mx-auto w-full">
-                    {/* Main Content */}
-                    <main className="dashboard-main">
-                        <header className="page-header">
+                {/* Sticky Header */}
+                <header className="sticky top-0 z-30 bg-[var(--color-background)] border-b border-transparent shadow-sm">
+                    <div className="p-6 max-w-[1200px] mx-auto w-full">
+                        <div className="flex flex-wrap justify-between items-center gap-4">
                             <div className="page-title">
-                                <h1>{activeCategory
-                                    ? `${activeCategoryName} wishlist`
+                                <h1 className="text-3xl font-bold mb-2">{activeCategory
+                                    ? `${activeCategoryName || 'Loading...'} wishlist`
                                     : 'All Items'}</h1>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-
-
-                                    {/* Category Actions moved from Sidebar */}
+                                    {/* Category Actions */}
                                     {activeCategory && (
                                         <div className="header-category-actions" style={{ display: 'flex', gap: '0.5rem' }}>
                                             {(() => {
@@ -362,7 +363,13 @@ function Home() {
                                     </DropdownMenu>
                                 )}
                             </div>
-                        </header>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Main Content */}
+                <div className="p-6 max-w-[1200px] mx-auto w-full">
+                    <main className="dashboard-main">
 
                         {!activeCategory && (
                             <div className="settings-card mb-8 max-w-sm">

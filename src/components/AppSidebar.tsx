@@ -25,6 +25,14 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function AppSidebar() {
     const { user, signOut } = useAuth();
@@ -35,11 +43,19 @@ export function AppSidebar() {
     const { categories, refetch } = useWishlistData(user?.id || null);
 
     useEffect(() => {
-        // Refetch categories when we navigate (e.g., after creating a new category)
-        if (user?.id) {
-            refetch();
-        }
-    }, [location.pathname, user?.id]);
+        // Listen for category updates from other components
+        const handleCategoriesUpdate = () => {
+            if (user?.id) {
+                refetch();
+            }
+        };
+
+        window.addEventListener('categoriesUpdated', handleCategoriesUpdate);
+
+        return () => {
+            window.removeEventListener('categoriesUpdated', handleCategoriesUpdate);
+        };
+    }, [user?.id, refetch]);
 
     const handleLogout = async () => {
         await signOut();
@@ -129,19 +145,6 @@ export function AppSidebar() {
                                     </CollapsibleContent>
                                 </SidebarMenuItem>
                             </Collapsible>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    asChild
-                                    isActive={location.pathname === "/notifications"}
-                                    tooltip="Notifications"
-                                >
-                                    <Link to="/notifications">
-                                        <Bell className="size-4" />
-                                        <span>Notifications</span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-
 
                         </SidebarMenu>
                     </SidebarGroupContent>
@@ -178,6 +181,20 @@ export function AppSidebar() {
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
+
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={location.pathname === "/groups"}
+                                    tooltip="Groups"
+                                >
+                                    <Link to="#">
+                                        <Users className="size-4" />
+                                        <span>Groups</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -186,35 +203,43 @@ export function AppSidebar() {
             <SidebarFooter className="p-4 border-t bg-muted/20">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <Collapsible className="group/user">
-                            <SidebarMenuButton
-                                asChild
-                                isActive={location.pathname === "/profile"}
-                                tooltip="Profile"
-                                className="h-12 border border-transparent hover:border-border transition-all"
-                            >
-                                <Link to="/profile">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton
+                                    className="h-12 border border-transparent hover:border-border transition-all cursor-pointer"
+                                >
                                     <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                         <User className="size-4" />
                                     </div>
                                     <div className="flex flex-col gap-0.5 overflow-hidden group-data-[collapsible=icon]:hidden">
-                                        <span className="text-sm font-bold truncate">My Profile</span>
+                                        <span className="text-sm font-bold truncate">{user.user_metadata?.first_name || user.user_metadata?.firstName || 'My Profile'}</span>
                                         <span className="text-[10px] text-muted-foreground truncate">{user.email}</span>
                                     </div>
-                                </Link>
-                            </SidebarMenuButton>
-                        </Collapsible>
-                    </SidebarMenuItem>
-
-                    <SidebarMenuItem className="mt-2">
-                        <SidebarMenuButton
-                            onClick={handleLogout}
-                            tooltip="Sign Out"
-                            className="text-destructive hover:bg-destructive/5 hover:text-destructive"
-                        >
-                            <LogOut className="size-4" />
-                            <span className="font-medium group-data-[collapsible=icon]:hidden">Sign Out</span>
-                        </SidebarMenuButton>
+                                    <ChevronRight className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent side="top" align="end" className="w-56">
+                                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                    <Link to="/profile" className="cursor-pointer">
+                                        <User className="mr-2 h-4 w-4" />
+                                        <span>Profile</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link to="/notifications" className="cursor-pointer">
+                                        <Bell className="mr-2 h-4 w-4" />
+                                        <span>Notifications</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>Sign Out</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarFooter>
