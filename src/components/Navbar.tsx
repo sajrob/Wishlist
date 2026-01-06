@@ -7,7 +7,6 @@ import './Navbar.css';
 const Navbar = () => {
     const { user, signOut } = useAuth();
     const navigate = useNavigate();
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
     const [unreadCount, setUnreadCount] = React.useState(0);
 
     React.useEffect(() => {
@@ -50,88 +49,47 @@ const Navbar = () => {
     };
 
     const handleLogout = async () => {
-        setIsMenuOpen(false);
         await signOut();
         navigate('/');
-    };
-
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    };
-
-    const closeMenu = () => {
-        setIsMenuOpen(false);
     };
 
     return (
         <nav className="navbar">
             <div className="navbar-container">
-                <Link to={user ? "/dashboard" : "/"} className="navbar-logo" onClick={closeMenu}>
+                {/* Minimal logo section */}
+                <Link to={user ? "/dashboard" : "/"} className="navbar-logo">
                     Wishlist
                 </Link>
 
-                <div className={`navbar-toggle ${isMenuOpen ? 'active' : ''}`} onClick={toggleMenu}>
-                    <span className="bar"></span>
-                    <span className="bar"></span>
-                    <span className="bar"></span>
-                </div>
-
-                <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
+                <div className="navbar-menu">
                     {user ? (
-                        <>
-                            <NavLink
-                                to="/dashboard"
-                                className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                                onClick={closeMenu}
-                            >
-                                My Wishlist
-                            </NavLink>
-                            <NavLink
-                                to="/friends-wishlists"
-                                className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                                onClick={closeMenu}
-                            >
-                                Friends
-                            </NavLink>
-                            <NavLink
-                                to="/find-users"
-                                className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                                onClick={closeMenu}
-                            >
-                                Find Friends
-                            </NavLink>
-                            <NavLink
-                                to="/profile"
-                                className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                                onClick={closeMenu}
-                            >
-                                Profile
-                            </NavLink>
-                            <Link to="/notifications" className="navbar-link notification-link" onClick={closeMenu}>
+                        <div className="flex items-center gap-4">
+                            {/* Notification Bell */}
+                            <Link to="/notifications" className="navbar-link notification-link" title="Notifications">
                                 🔔
                                 {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
                             </Link>
-                            <button onClick={handleLogout} className="navbar-btn logout">
-                                Logout
-                            </button>
-                        </>
+
+                            {/* User Info - Hidden on very small screens */}
+                            <div className="hidden sm:block text-sm font-medium text-muted-foreground bg-muted px-3 py-1 rounded-full italic">
+                                {user.email}
+                            </div>
+                        </div>
                     ) : (
                         <>
                             <NavLink
                                 to="/"
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                                onClick={closeMenu}
                             >
                                 Home
                             </NavLink>
                             <NavLink
                                 to="/login"
                                 className={({ isActive }) => (isActive ? 'navbar-link active' : 'navbar-link')}
-                                onClick={closeMenu}
                             >
                                 Login
                             </NavLink>
-                            <Link to="/signup" className="navbar-btn signup" onClick={closeMenu}>
+                            <Link to="/signup" className="navbar-btn signup">
                                 Sign Up
                             </Link>
                         </>
@@ -143,5 +101,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-

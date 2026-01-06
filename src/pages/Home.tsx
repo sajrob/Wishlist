@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { confirmDelete } from '../utils/toastHelpers';
 import WishlistCard from '../components/WishlistCard';
@@ -19,6 +19,14 @@ import {
     Dialog,
     DialogContent,
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus } from "lucide-react";
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWishlistData, useFilteredItems } from '../hooks/useWishlistData';
 import { useCategories } from '../hooks/useCategories';
@@ -31,14 +39,34 @@ import './Home.css';
 
 function Home() {
     const { user } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeCategory = searchParams.get('category');
+
+    const setActiveCategory = (id: string | null) => {
+        if (id) {
+            setSearchParams({ category: id });
+        } else {
+            setSearchParams({});
+        }
+    };
 
     const { allItems, categories, loading, setAllItems, setCategories, refetch } = useWishlistData(user?.id || null);
     const { isPublic, togglePublic } = useWishlistSettings(user?.id || null);
     const { createCategory, updateCategory, deleteCategory, toggleCategoryPrivacy } = useCategories(user?.id || '');
 
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+    useEffect(() => {
+        const action = searchParams.get('action');
+        if (action === 'new-category') {
+            setIsCategoryModalOpen(true);
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete('action');
+            setSearchParams(newParams, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
+
     const [editingItem, setEditingItem] = useState<WishlistItem | null>(null);
     const [editingCategory, setEditingCategory] = useState<(Category & { itemIds?: string[] }) | null>(null);
 
@@ -259,41 +287,7 @@ function Home() {
     return (
         <>
             <div className={`app-content ${isModalOpen ? 'blurred' : ''}`}>
-                <div className="dashboard-container">
-                    {/* Sidebar */}
-                    <aside className="dashboard-sidebar">
-                        <div className="sidebar-sticky">
-                            <div className="sidebar-section">
-                                <h2>{getUserPossessiveTitle(user)}s</h2>
-                                <CategoryNav
-                                    categories={categories}
-                                    activeCategory={activeCategory}
-                                    onCategoryChange={setActiveCategory}
-                                    showActions={false}
-                                />
-                                <button className="btn btn-secondary w-full" style={{ marginTop: '1rem' }} onClick={handleOpenCategoryModal}>
-                                    <span>+</span> New Wishlist
-                                </button>
-                            </div>
-
-                            {!activeCategory && (
-                                <div className="settings-card">
-                                    <div className="settings-title">Settings</div>
-                                    <label className="toggle-row">
-                                        <span className="toggle-text">Public Wishlist</span>
-                                        <div className="toggle-switch">
-                                            <input type="checkbox" checked={isPublic} onChange={handleTogglePublic} />
-                                            <span className="toggle-slider"></span>
-                                        </div>
-                                    </label>
-                                    <p className="toggle-helper">
-                                        {isPublic ? 'Your main list is visible to friends.' : 'Only you can see uncategorized items.'}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </aside>
-
+                <div className="p-6 max-w-[1200px] mx-auto w-full">
                     {/* Main Content */}
                     <main className="dashboard-main">
                         <header className="page-header">
@@ -312,30 +306,33 @@ function Home() {
                                                 if (!cat) return null;
                                                 return (
                                                     <>
-                                                        <button
-                                                            className="btn-icon"
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-3 text-xs font-normal"
                                                             onClick={() => handleToggleCategoryPrivacy(cat.id, cat.is_public)}
                                                             title={cat.is_public ? 'Make Private' : 'Make Public'}
-                                                            style={{ border: '1px solid var(--color-border)' }}
                                                         >
                                                             {cat.is_public ? '🌍 Public' : '🔒 Private'}
-                                                        </button>
-                                                        <button
-                                                            className="btn-icon"
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-3 text-xs font-normal"
                                                             onClick={() => handleEditCategory(cat)}
                                                             title="Edit Category"
-                                                            style={{ border: '1px solid var(--color-border)' }}
                                                         >
                                                             Edit Wishlist
-                                                        </button>
-                                                        <button
-                                                            className="btn-icon"
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-8 px-3 text-xs font-normal text-destructive hover:bg-destructive hover:text-destructive-foreground focus:ring-destructive"
                                                             onClick={() => handleDeleteCategory(cat.id)}
                                                             title="Delete Category"
-                                                            style={{ border: '1px solid var(--color-border)' }}
                                                         >
                                                             Delete Wishlist
-                                                        </button>
+                                                        </Button>
                                                     </>
                                                 );
                                             })()}
@@ -344,11 +341,46 @@ function Home() {
                                 </div>
                             </div>
                             <div className="header-actions">
-                                <Button onClick={handleOpenForm}>
-                                    <span style={{ fontSize: '1.2em', lineHeight: 1, marginRight: '0.5rem' }}>+</span> Add Item
-                                </Button>
+                                {allItems.length > 0 && (
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button>
+                                                <Plus className="h-4 w-4 mr-2" />
+                                                Add
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={handleOpenForm}>
+                                                <Plus className="h-4 w-4 mr-2" />
+                                                Add Item
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={handleOpenCategoryModal}>
+                                                <Plus className="h-4 w-4 mr-2" />
+                                                Add Wishlist
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                )}
                             </div>
                         </header>
+
+                        {!activeCategory && (
+                            <div className="settings-card mb-8 max-w-sm">
+                                <div className="settings-title">Main Wishlist Privacy</div>
+                                <div className="toggle-row" onClick={handleTogglePublic}>
+                                    <span className="toggle-text">Make Wishlist Public</span>
+                                    <div className="toggle-switch">
+                                        <input type="checkbox" checked={isPublic} readOnly />
+                                        <span className="toggle-slider"></span>
+                                    </div>
+                                </div>
+                                <p className="toggle-helper">
+                                    {isPublic
+                                        ? "🌍 Your main wishlist is visible to friends."
+                                        : "🔒 Your main wishlist is private by default. Only you can see it."}
+                                </p>
+                            </div>
+                        )}
 
                         <div className="cards-grid">
                             {wishlistItems.length === 0 ? (

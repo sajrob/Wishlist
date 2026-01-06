@@ -1,19 +1,10 @@
 .navbar {
-    background-color: var(--color-surface);
-    box-shadow: var(--shadow-sm);
-    height: var(--header-height);
+    width: 100%;
     display: flex;
     align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    border-bottom: 1px solid var(--color-border);
 }
 
 .navbar-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -30,28 +21,29 @@
 
 .navbar-menu {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     align-items: center;
 }
 
 .navbar-link {
-    color: #111827;
+    color: #4b5563;
     text-decoration: none;
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 0.95rem;
     transition: all 0.2s ease;
-    padding: 0.5rem 0;
-    border-bottom: 2px solid transparent;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
 }
 
 .navbar-link:hover {
     color: #2563eb;
+    background-color: #eff6ff;
 }
 
 .navbar-link.active {
     color: #2563eb;
     font-weight: 600;
-    border-bottom-color: #2563eb;
+    background-color: #eff6ff;
 }
 
 .navbar-btn {
@@ -84,7 +76,30 @@
     color: #111827;
 }
 
-/* Mobile Toggle Button */
+.notification-link {
+    position: relative;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    border: 2px solid white;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Mobile Toggle - only visible if needed */
 .navbar-toggle {
     display: none;
     flex-direction: column;
@@ -100,51 +115,13 @@
     transition: all 0.3s ease;
 }
 
-/* Mobile Styling */
 @media (max-width: 768px) {
-    .navbar-container {
-        padding: 0 1.5rem;
-    }
-
-    .navbar-toggle {
-        display: flex;
-        z-index: 100;
-    }
-
-    /* Hamburger Animation */
-    .navbar-toggle.active .bar:nth-child(2) {
-        opacity: 0;
-    }
-
-    .navbar-toggle.active .bar:nth-child(1) {
-        transform: translateY(7px) rotate(45deg);
-    }
-
-    .navbar-toggle.active .bar:nth-child(3) {
-        transform: translateY(-7px) rotate(-45deg);
-    }
-
     .navbar-menu {
-        position: fixed;
-        left: -100%;
-        top: 0;
-        flex-direction: column;
-        background-color: #ffffff;
-        width: 100%;
-        height: 100vh;
-        text-align: center;
-        transition: 0.3s ease-in-out;
-        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
-        padding-top: 8rem;
-        gap: 2rem;
-        z-index: 90;
-    }
-
-    .navbar-menu.active {
-        left: 0;
+        gap: 0.75rem;
     }
 
     .navbar-link {
-        font-size: 1.2rem;
+        font-size: 0.85rem;
+        padding: 0.3rem 0.5rem;
     }
 }
