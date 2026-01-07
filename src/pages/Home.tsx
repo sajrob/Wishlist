@@ -430,8 +430,8 @@ function Home() {
                           }}
                         >
                           {isPublic
-                            ? "This list is public and is visible to friends."
-                            : "Only you can see uncategorized items."}
+                            ? "Your main wishlist is visible to friends."
+                            : "Your main wishlist is private by default. Only you can see it."}
                         </p>
                       </div>
                       <label
