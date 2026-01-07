@@ -106,6 +106,9 @@ input:checked+.toggle-slider:before {
 .dashboard-main {
     flex: 1;
     width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(100vh - var(--header-height) - 2 * var(--spacing-xl));
 }
 
 .page-header {
@@ -113,7 +116,15 @@ input:checked+.toggle-slider:before {
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: var(--spacing-xl);
     gap: var(--spacing-md);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--color-background);
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .page-title h1 {

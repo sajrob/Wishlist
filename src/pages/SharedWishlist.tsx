@@ -65,63 +65,61 @@ function SharedWishlist() {
 
     return (
         <div className="app-content">
-            <div className="p-6 max-w-[1200px] mx-auto w-full">
-                <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 items-start">
-                    {/* Sidebar for this specific user's categories */}
-                    <aside className="dashboard-sidebar">
-                        <div className="sidebar-sticky">
-                            <div className="sidebar-section">
-                                <Link to="/friends-wishlists" className="btn btn-secondary w-full" style={{ marginBottom: '1.5rem', justifyContent: 'flex-start' }}>
-                                    ← Back to Friends
-                                </Link>
+            <div className="dashboard-container">
+                {/* Sidebar */}
+                <aside className="dashboard-sidebar">
+                    <div className="sidebar-sticky">
+                        <div className="sidebar-section">
+                            <Link to="/friends-wishlists" className="btn btn-secondary w-full" style={{ marginBottom: '1.5rem', justifyContent: 'flex-start' }}>
+                                ← Back to Friends
+                            </Link>
 
-                                <h2>Categories</h2>
-                                <CategoryNav
-                                    categories={categories as Category[]}
-                                    activeCategory={activeCategory}
-                                    onCategoryChange={setActiveCategory}
-                                    showActions={false}
-                                    showAllTab={false}
+                            <h2>Categories</h2>
+                            <CategoryNav
+                                categories={categories as Category[]}
+                                activeCategory={activeCategory}
+                                onCategoryChange={setActiveCategory}
+                                showActions={false}
+                                showAllTab={false}
+                            />
+                        </div>
+                    </div>
+                </aside>
+
+                {/* Main Content */}
+                <main className="dashboard-main">
+                    <header className="page-header">
+                        <div className="page-title">
+                            <h1>{title}</h1>
+                            <p className="page-subtitle">
+                                {activeCategory
+                                    ? `Viewing ${activeCategoryName}`
+                                    : 'All Public Items'}
+                            </p>
+                        </div>
+                    </header>
+
+                    {/* Grid */}
+                    <div className="cards-grid">
+                        {wishlistItems.length === 0 ? (
+                            <div style={{ gridColumn: '1 / -1' }}>
+                                <EmptyState
+                                    message={
+                                        activeCategory === null
+                                            ? isPublic
+                                                ? 'No items in this wishlist.'
+                                                : 'This wishlist is private.'
+                                            : 'No items in this category.'
+                                    }
                                 />
                             </div>
-                        </div>
-                    </aside>
-
-                    {/* Main Content */}
-                    <main className="dashboard-main">
-                        <header className="page-header">
-                            <div className="page-title">
-                                <h1>{title}</h1>
-                                <p className="page-subtitle">
-                                    {activeCategory
-                                        ? `Viewing ${activeCategoryName}`
-                                        : 'All Public Items'}
-                                </p>
-                            </div>
-                        </header>
-
-                        {/* Grid */}
-                        <div className="cards-grid">
-                            {wishlistItems.length === 0 ? (
-                                <div style={{ gridColumn: '1 / -1' }}>
-                                    <EmptyState
-                                        message={
-                                            activeCategory === null
-                                                ? isPublic
-                                                    ? 'No items in this wishlist.'
-                                                    : 'This wishlist is private.'
-                                                : 'No items in this category.'
-                                        }
-                                    />
-                                </div>
-                            ) : (
-                                wishlistItems.map(item => (
-                                    <WishlistCard key={item.id} item={item} readOnly={true} />
-                                ))
-                            )}
-                        </div>
-                    </main>
-                </div>
+                        ) : (
+                            wishlistItems.map(item => (
+                                <WishlistCard key={item.id} item={item} readOnly={true} />
+                            ))
+                        )}
+                    </div>
+                </main>
             </div>
         </div>
     );
