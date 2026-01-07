@@ -4,9 +4,9 @@ import { confirmDelete } from "../utils/toastHelpers";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
 import CreateCategoryModal from "../components/CreateCategoryModal";
-import CategoryNav from "../components/CategoryNav";
 import EmptyState from "../components/EmptyState";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { AppSidebar } from "../components/AppSidebar";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -16,12 +16,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import { useAuth } from "../context/AuthContext";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useCategories } from "../hooks/useCategories";
 import { useWishlistSettings } from "../hooks/useWishlistSettings";
 import { createItem, updateItem, deleteItem } from "../utils/supabaseHelpers";
-import { getUserPossessiveTitle } from "../utils/nameUtils";
 import type { Category, WishlistItem, ItemFormData } from "../types";
 import "../App.css";
 import "./Home.css";
@@ -309,170 +314,120 @@ function Home() {
   )?.name;
 
   return (
-    <>
-      <div className={`app-content ${isModalOpen ? "blurred" : ""}`}>
-        <div className="dashboard-container">
-          {/* Sidebar */}
-          <aside className="dashboard-sidebar">
-            <div className="sidebar-sticky">
-              <div className="sidebar-section">
-                <h2>{getUserPossessiveTitle(user)}s</h2>
-                <CategoryNav
-                  categories={categories}
-                  activeCategory={activeCategory}
-                  onCategoryChange={setActiveCategory}
-                  showActions={false}
-                />
-                <button
-                  className="btn btn-secondary w-full"
-                  style={{ marginTop: "1rem" }}
-                  onClick={handleOpenCategoryModal}
-                >
-                  <span>+</span> New Wishlist
-                </button>
-              </div>
+    <SidebarProvider>
+      <AppSidebar
+        activeCategory={activeCategory}
+        onCategoryChange={setActiveCategory}
+        onCreateCategory={handleOpenCategoryModal}
+        categories={categories}
+      />
+      <SidebarInset className="flex flex-col bg-background">
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+            <div className="flex-1">
+              <h1 className="text-lg font-semibold">
+                {activeCategory
+                  ? `${activeCategoryName} Wishlist`
+                  : "All Items"}
+              </h1>
             </div>
-          </aside>
-
-          {/* Main Content */}
-          <main className="dashboard-main">
-            <header className="page-header">
-              <div className="page-title">
-                <h1>
-                  {activeCategory
-                    ? `${activeCategoryName} Wishlist`
-                    : "All Items"}
-                </h1>
-                <div
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Category Actions */}
+            {activeCategory && (
+              <div className="flex gap-2">
+                {(() => {
+                  const cat = categories.find((c) => c.id === activeCategory);
+                  if (!cat) return null;
+                  return (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-normal"
+                        onClick={() =>
+                          handleToggleCategoryPrivacy(cat.id, cat.is_public)
+                        }
+                        title={cat.is_public ? "Make Private" : "Make Public"}
+                      >
+                        {cat.is_public ? "🌍 Public" : "🔒 Private"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-normal"
+                        onClick={() => handleEditCategory(cat)}
+                        title="Edit Category"
+                      >
+                        Edit Wishlist
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs font-normal text-destructive hover:bg-destructive hover:text-destructive-foreground focus:ring-destructive"
+                        onClick={() => handleDeleteCategory(cat.id)}
+                        title="Delete Category"
+                      >
+                        Delete Wishlist
+                      </Button>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+            {!activeCategory && (
+              <div className="flex items-center gap-2 text-sm">
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium">
+                    {isPublic ? "Public Wishlist" : "Private Wishlist"}
+                  </span>
+                  <p className="text-xs text-muted-foreground">
+                    {isPublic
+                      ? "Your main wishlist is visible to friends."
+                      : "Your main wishlist is private by default. Only you can see it."}
+                  </p>
+                </div>
+                <label className="flex items-center cursor-pointer">
+                  <div className="toggle-switch" style={{ margin: 0 }}>
+                    <input
+                      type="checkbox"
+                      checked={isPublic}
+                      onChange={handleTogglePublic}
+                      style={{ margin: 0 }}
+                    />
+                    <span className="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            )}
+            {wishlistItems.length > 0 && (
+              <Button onClick={handleOpenForm}>
+                <span
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "1rem",
-                    flexWrap: "wrap",
+                    fontSize: "1.2em",
+                    lineHeight: 1,
+                    marginRight: "0.5rem",
                   }}
                 >
-                  {/* Category Actions moved from Sidebar */}
-                  {activeCategory && (
-                    <div
-                      className="header-category-actions"
-                      style={{ display: "flex", gap: "0.5rem" }}
-                    >
-                      {(() => {
-                        const cat = categories.find(
-                          (c) => c.id === activeCategory
-                        );
-                        if (!cat) return null;
-                        return (
-                          <>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 px-3 text-xs font-normal"
-                              onClick={() =>
-                                handleToggleCategoryPrivacy(
-                                  cat.id,
-                                  cat.is_public
-                                )
-                              }
-                              title={
-                                cat.is_public ? "Make Private" : "Make Public"
-                              }
-                            >
-                              {cat.is_public ? "🌍 Public" : "🔒 Private"}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 px-3 text-xs font-normal"
-                              onClick={() => handleEditCategory(cat)}
-                              title="Edit Category"
-                            >
-                              Edit Wishlist
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 px-3 text-xs font-normal text-destructive hover:bg-destructive hover:text-destructive-foreground focus:ring-destructive"
-                              onClick={() => handleDeleteCategory(cat.id)}
-                              title="Delete Category"
-                            >
-                              Delete Wishlist
-                            </Button>
-                          </>
-                        );
-                      })()}
-                    </div>
-                  )}
-                  {!activeCategory && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        fontSize: "0.875rem",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "0.25rem",
-                        }}
-                      >
-                        <span style={{ fontWeight: 500 }}>
-                          {isPublic ? "Public Wishlist" : "Private Wishlist"}
-                        </span>
-                        <p
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "#666",
-                            margin: 0,
-                          }}
-                        >
-                          {isPublic
-                            ? "Your main wishlist is visible to friends."
-                            : "Your main wishlist is private by default. Only you can see it."}
-                        </p>
-                      </div>
-                      <label
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <div className="toggle-switch" style={{ margin: 0 }}>
-                          <input
-                            type="checkbox"
-                            checked={isPublic}
-                            onChange={handleTogglePublic}
-                            style={{ margin: 0 }}
-                          />
-                          <span className="toggle-slider"></span>
-                        </div>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="header-actions">
-                {wishlistItems.length > 0 && (
-                  <Button onClick={handleOpenForm}>
-                    <span
-                      style={{
-                        fontSize: "1.2em",
-                        lineHeight: 1,
-                        marginRight: "0.5rem",
-                      }}
-                    >
-                      +
-                    </span>{" "}
-                    Add Item
-                  </Button>
-                )}
-              </div>
-            </header>
+                  +
+                </span>{" "}
+                Add Item
+              </Button>
+            )}
+          </div>
+        </header>
 
+        <div
+          className={`flex-1 overflow-auto ${
+            isModalOpen ? "blur-sm pointer-events-none" : ""
+          }`}
+        >
+          <div className="flex flex-col gap-4 p-4">
             <div className="cards-grid">
               {wishlistItems.length === 0 ? (
                 <div style={{ gridColumn: "1 / -1" }}>
@@ -533,9 +488,9 @@ function Home() {
                 ))
               )}
             </div>
-          </main>
+          </div>
         </div>
-      </div>
+      </SidebarInset>
 
       {/* Add/Edit Item Modal */}
       <Dialog
@@ -566,7 +521,7 @@ function Home() {
           />
         </DialogContent>
       </Dialog>
-    </>
+    </SidebarProvider>
   );
 }
 
