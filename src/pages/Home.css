@@ -111,6 +111,11 @@ input:checked+.toggle-slider:before {
     max-height: calc(100vh - var(--header-height) - 2 * var(--spacing-xl));
 }
 
+/* Reduce top padding to minimize space between navbar and header */
+.dashboard-container {
+    padding-top: var(--spacing-sm);
+}
+
 .page-header {
     display: flex;
     flex-wrap: wrap;
@@ -122,8 +127,8 @@ input:checked+.toggle-slider:before {
     top: 0;
     z-index: 10;
     background-color: var(--color-background);
-    padding-top: var(--spacing-md);
-    padding-bottom: var(--spacing-md);
+    padding-top: var(--spacing-xs);
+    padding-bottom: var(--spacing-sm);
     border-bottom: 1px solid var(--color-border);
 }
 

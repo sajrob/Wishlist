@@ -499,7 +499,7 @@ function Home() {
                     }
                   >
                     {categories.length > 0 && activeCategory === null && (
-                      <div className="flex flex-col items-center gap-2 mt-6">
+                      <div className="flex flex-col items-center gap-2 mt-2">
                         <p className="text-muted-foreground italic">
                           or jump to a specific wishlist:
                         </p>
