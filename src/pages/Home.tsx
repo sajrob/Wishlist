@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { Plus } from "lucide-react";
 import { confirmDelete } from "../utils/toastHelpers";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
@@ -395,17 +396,9 @@ function Home() {
           </div>
           <div className="flex items-center gap-2 ml-auto">
             {wishlistItems.length > 0 && (
-              <Button onClick={handleOpenForm}>
-                <span
-                  style={{
-                    fontSize: "1.2em",
-                    lineHeight: 1,
-                    marginRight: "0.5rem",
-                  }}
-                >
-                  +
-                </span>{" "}
-                Add Item
+              <Button onClick={handleOpenForm} size="sm" className="h-8 gap-1.5 px-3 sm:px-4">
+                <Plus className="size-4" />
+                <span className="hidden sm:inline">Add Item</span>
               </Button>
             )}
           </div>

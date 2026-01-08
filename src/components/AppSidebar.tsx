@@ -61,19 +61,14 @@ export function AppSidebar({
   categories,
 }: AppSidebarProps) {
   const { user, signOut } = useAuth();
-  const { isMobile, setOpenMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
+  const { setOpen, isMobile } = useSidebar();
 
-  const handleNavClick = React.useCallback(() => {
+  const handleNavClick = () => {
     if (isMobile) {
-      setOpenMobile(false);
+      setOpen(false);
     }
-  }, [isMobile, setOpenMobile]);
-
-  const handleCategorySelect = (categoryId: string | null) => {
-    onCategoryChange(categoryId);
-    handleNavClick();
   };
 
   const handleLogout = async () => {
@@ -137,7 +132,7 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild onClick={handleNavClick}>
+            <SidebarMenuButton size="lg" asChild>
               <Link to="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Heart className="size-4" />
@@ -169,7 +164,10 @@ export function AppSidebar({
                       <Home />
                       <Link
                         to="/dashboard"
-                        onClick={() => handleCategorySelect(null)}
+                        onClick={() => {
+                          onCategoryChange(null);
+                          handleNavClick();
+                        }}
                       >
                         <span>
                           {getUserPossessiveTitle(
@@ -186,7 +184,10 @@ export function AppSidebar({
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
-                          onClick={() => handleCategorySelect(null)}
+                          onClick={() => {
+                            onCategoryChange(null);
+                            handleNavClick();
+                          }}
                           isActive={
                             activeCategory === null &&
                             location.pathname === "/dashboard"
@@ -199,7 +200,10 @@ export function AppSidebar({
                       {categories.map((category) => (
                         <SidebarMenuSubItem key={category.id}>
                           <SidebarMenuSubButton
-                            onClick={() => handleCategorySelect(category.id)}
+                            onClick={() => {
+                              onCategoryChange(category.id);
+                              handleNavClick();
+                            }}
                             isActive={activeCategory === category.id}
                           >
                             <Package className="size-4" />
@@ -213,10 +217,7 @@ export function AppSidebar({
                         </SidebarMenuSubItem>
                       ))}
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton onClick={() => {
-                          onCreateCategory();
-                          handleNavClick();
-                        }}>
+                        <SidebarMenuSubButton onClick={onCreateCategory}>
                           <Plus />
                           <span>New Wishlist</span>
                         </SidebarMenuSubButton>
@@ -231,9 +232,8 @@ export function AppSidebar({
                     asChild
                     isActive={item.active}
                     tooltip={item.title}
-                    onClick={handleNavClick}
                   >
-                    <Link to={item.url}>
+                    <Link to={item.url} onClick={handleNavClick}>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -292,10 +292,7 @@ export function AppSidebar({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => {
-                  navigate("/profile");
-                  handleNavClick();
-                }}>
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User />
                   Profile
                 </DropdownMenuItem>
