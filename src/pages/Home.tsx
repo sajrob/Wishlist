@@ -340,8 +340,8 @@ function Home() {
                     <div className="flex items-center gap-2">
                       <p className="text-xs text-muted-foreground whitespace-nowrap">
                         {isPublic
-                          ? "🌍 Public - Visible to friends"
-                          : "🔒 Private - Only you can see it"}
+                          ? "Public - Visible to friends"
+                          : "Hidden - Only you can see it"}
                       </p>
                       <label className="flex items-center cursor-pointer scale-75 origin-left h-4">
                         <div className="toggle-switch">
