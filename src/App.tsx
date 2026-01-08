@@ -12,6 +12,7 @@ import FindUsers from './pages/FindUsers';
 import FriendsWishlists from './pages/FriendsWishlists';
 import SharedWishlist from './pages/SharedWishlist';
 import Notifications from './pages/Notifications';
+import ContactUs from './pages/ContactUs';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from "@/components/ui/sonner";
 import './App.css';
@@ -85,7 +86,8 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/contact" element={<ContactUs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
       <Toaster position="top-center" />

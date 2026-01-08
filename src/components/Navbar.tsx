@@ -95,29 +95,6 @@ const Navbar = () => {
               >
                 My Wishlist
               </NavLink>
-              <NavLink
-                to="/contact"
-                className={({ isActive }) =>
-                  isActive ? "navbar-link active" : "navbar-link"
-                }
-                onClick={closeMenu}
-              >
-                Contact
-              </NavLink>
-
-              <Link
-                to="/notifications"
-                className="navbar-link notification-link"
-                onClick={closeMenu}
-              >
-                🔔
-                {unreadCount > 0 && (
-                  <span className="notification-badge">{unreadCount}</span>
-                )}
-              </Link>
-              <button onClick={handleLogout} className="navbar-btn logout">
-                Logout
-              </button>
             </>
           ) : (
             <>
@@ -130,6 +107,7 @@ const Navbar = () => {
               >
                 Home
               </NavLink>
+
               <NavLink
                 to="/login"
                 className={({ isActive }) =>
@@ -148,6 +126,15 @@ const Navbar = () => {
               </Link>
             </>
           )}
+          <NavLink
+            to="/contact"
+            className={({ isActive }) =>
+              isActive ? "navbar-link active" : "navbar-link"
+            }
+            onClick={closeMenu}
+          >
+            Contact
+          </NavLink>
         </div>
       </div>
     </nav>

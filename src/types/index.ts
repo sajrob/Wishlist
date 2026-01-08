@@ -16,6 +16,7 @@ export interface WishlistItem {
     description: string;
     image_url: string;
     buy_link: string;
+    currency?: string;
     is_must_have: boolean;
     created_at: string;
 }
@@ -98,6 +99,7 @@ export interface ItemFormData {
     description: string;
     image_url: string;
     buy_link: string;
+    currency?: string;
     is_must_have?: boolean;
 }
 

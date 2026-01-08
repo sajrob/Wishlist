@@ -70,6 +70,7 @@ function Home() {
       image_url: newItem.image_url,
       buy_link: newItem.buy_link,
       is_must_have: newItem.is_must_have || false,
+      currency: newItem.currency || 'USD',
     };
 
     const { data, error } = await createItem(itemData);
@@ -98,6 +99,7 @@ function Home() {
       image_url: formData.image_url,
       buy_link: formData.buy_link,
       is_must_have: formData.is_must_have || false,
+      currency: formData.currency || 'USD',
     };
 
     const { data, error } = await updateItem(editingItem.id, updates);
@@ -142,9 +144,8 @@ function Home() {
       // Case 1: Viewing a specific wishlist - just remove from that wishlist (make uncategorized)
       confirmDelete({
         title: "Remove from Wishlist?",
-        description: `"${
-          itemToDelete?.name || "this item"
-        }" will be removed from this wishlist but will still be available in "All Items".`,
+        description: `"${itemToDelete?.name || "this item"
+          }" will be removed from this wishlist but will still be available in "All Items".`,
         deleteLabel: "Remove",
         onDelete: async () => {
           const { data, error } = await updateItem(itemId, {
@@ -165,9 +166,8 @@ function Home() {
       // Case 2: Viewing "All Items" - permanent deletion
       confirmDelete({
         title: "Permanently Delete?",
-        description: `This will completely remove "${
-          itemToDelete?.name || "this item"
-        }" from your account.`,
+        description: `This will completely remove "${itemToDelete?.name || "this item"
+          }" from your account.`,
         deleteLabel: "Delete Permanently",
         onDelete: async () => {
           const { error } = await deleteItem(itemId);
@@ -219,9 +219,8 @@ function Home() {
 
     confirmDelete({
       title: "Delete this category?",
-      description: `Items in "${
-        catToDelete?.name || "this category"
-      }" will be moved to "All Items".`,
+      description: `Items in "${catToDelete?.name || "this category"
+        }" will be moved to "All Items".`,
       onDelete: async () => {
         const { error } = await deleteCategory(categoryId);
         if (error) {
@@ -314,14 +313,14 @@ function Home() {
   )?.name;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
       <AppSidebar
         activeCategory={activeCategory}
         onCategoryChange={setActiveCategory}
         onCreateCategory={handleOpenCategoryModal}
         categories={categories}
       />
-      <SidebarInset className="flex flex-col bg-background">
+      <SidebarInset className="flex flex-col bg-background overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
@@ -329,82 +328,72 @@ function Home() {
               orientation="vertical"
               className="mr-2 data-[orientation=vertical]:h-4"
             />
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">
-                {activeCategory
-                  ? `${activeCategoryName} Wishlist`
-                  : "All Items"}
-              </h1>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col">
+                <h1 className="text-lg font-semibold leading-none">
+                  {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
+                </h1>
+
+                <div className="flex items-center gap-2 mt-1">
+                  {!activeCategory ? (
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-muted-foreground whitespace-nowrap">
+                        {isPublic
+                          ? "🌍 Public - Visible to friends"
+                          : "🔒 Private - Only you can see it"}
+                      </p>
+                      <label className="flex items-center cursor-pointer scale-75 origin-left h-4">
+                        <div className="toggle-switch">
+                          <input
+                            type="checkbox"
+                            checked={isPublic}
+                            onChange={handleTogglePublic}
+                          />
+                          <span className="toggle-slider"></span>
+                        </div>
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      {(() => {
+                        const cat = categories.find((c) => c.id === activeCategory);
+                        if (!cat) return null;
+                        return (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-muted/50 hover:bg-muted text-muted-foreground"
+                              onClick={() => handleToggleCategoryPrivacy(cat.id, cat.is_public)}
+                            >
+                              {cat.is_public ? "🌍 Public" : "🔒 Private"}
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-muted/50 hover:bg-muted text-muted-foreground"
+                              onClick={() => handleEditCategory(cat)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-destructive/10 hover:bg-destructive/20 text-destructive border-none"
+                              onClick={() => handleDeleteCategory(cat.id)}
+                            >
+                              Delete
+                            </Button>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            {/* Category Actions */}
-            {activeCategory && (
-              <div className="flex gap-2">
-                {(() => {
-                  const cat = categories.find((c) => c.id === activeCategory);
-                  if (!cat) return null;
-                  return (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-normal"
-                        onClick={() =>
-                          handleToggleCategoryPrivacy(cat.id, cat.is_public)
-                        }
-                        title={cat.is_public ? "Make Private" : "Make Public"}
-                      >
-                        {cat.is_public ? "🌍 Public" : "🔒 Private"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-normal"
-                        onClick={() => handleEditCategory(cat)}
-                        title="Edit Category"
-                      >
-                        Edit Wishlist
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 px-3 text-xs font-normal text-destructive hover:bg-destructive hover:text-destructive-foreground focus:ring-destructive"
-                        onClick={() => handleDeleteCategory(cat.id)}
-                        title="Delete Category"
-                      >
-                        Delete Wishlist
-                      </Button>
-                    </>
-                  );
-                })()}
-              </div>
-            )}
-            {!activeCategory && (
-              <div className="flex items-center gap-2 text-sm">
-                <div className="flex flex-col gap-1">
-                  <span className="font-medium">
-                    {isPublic ? "Public Wishlist" : "Private Wishlist"}
-                  </span>
-                  <p className="text-xs text-muted-foreground">
-                    {isPublic
-                      ? "Your main wishlist is visible to friends."
-                      : "Your main wishlist is private by default. Only you can see it."}
-                  </p>
-                </div>
-                <label className="flex items-center cursor-pointer">
-                  <div className="toggle-switch" style={{ margin: 0 }}>
-                    <input
-                      type="checkbox"
-                      checked={isPublic}
-                      onChange={handleTogglePublic}
-                      style={{ margin: 0 }}
-                    />
-                    <span className="toggle-slider"></span>
-                  </div>
-                </label>
-              </div>
-            )}
             {wishlistItems.length > 0 && (
               <Button onClick={handleOpenForm}>
                 <span
@@ -423,10 +412,10 @@ function Home() {
         </header>
 
         <div
-          className={`flex-1 overflow-auto ${
-            isModalOpen ? "blur-sm pointer-events-none" : ""
-          }`}
+          className={`flex-1 overflow-y-auto ${isModalOpen ? "blur-sm pointer-events-none" : ""
+            }`}
         >
+
           <div className="flex flex-col gap-4 p-4">
             <div className="cards-grid">
               {wishlistItems.length === 0 ? (
@@ -436,21 +425,21 @@ function Home() {
                       categories.length === 0
                         ? "Get started by creating your first Wishlist."
                         : activeCategory === null
-                        ? "Add your first item"
-                        : "Your " +
+                          ? "Add your first item"
+                          : "Your " +
                           activeCategoryName +
                           " wishlist is empty, start adding items."
                     }
                     action={
                       categories.length === 0
                         ? {
-                            text: "Create Wishlist",
-                            onClick: handleOpenCategoryModal,
-                          }
+                          text: "Create Wishlist",
+                          onClick: handleOpenCategoryModal,
+                        }
                         : {
-                            text: "Add Item",
-                            onClick: handleOpenForm,
-                          }
+                          text: "Add Item",
+                          onClick: handleOpenForm,
+                        }
                     }
                   >
                     {categories.length > 0 && activeCategory === null && (
@@ -511,7 +500,7 @@ function Home() {
         open={isCategoryModalOpen}
         onOpenChange={(open) => !open && handleCloseCategoryModal()}
       >
-        <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
+        <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl">
           <CreateCategoryModal
             items={allItems}
             onCreateCategory={handleCreateCategory}

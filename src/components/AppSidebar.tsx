@@ -108,10 +108,10 @@ export function AppSidebar({
       active: location.pathname === "/find-users",
     },
     {
-      title: "Profile",
-      icon: User,
-      url: "/profile",
-      active: location.pathname === "/profile",
+      title: "Groups",
+      icon: Users,
+      url: "/groups",
+      active: location.pathname === "/groups",
     },
     {
       title: "Notifications",

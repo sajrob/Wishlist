@@ -1,16 +1,30 @@
 import { Switch } from "@/components/ui/switch";
 import type { WishlistCardProps } from '../types';
+import { CURRENCIES } from './CurrencySelect';
 import { ensureAbsoluteUrl } from '../utils/urlUtils';
 import './WishlistCard.css';
 
 const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: WishlistCardProps) => {
-    const { id, name, price, description, image_url, is_must_have, buy_link } = item;
+    const { id, name, price, description, image_url, is_must_have, buy_link, currency } = item;
 
     // Formatting currency
-    const formattedPrice = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(price);
+    const displayCurrency = currency || 'SLE';
+    let formattedPrice;
+
+    if (displayCurrency === 'SLE') {
+        formattedPrice = `Le ${Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    } else {
+        try {
+            formattedPrice = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: displayCurrency,
+            }).format(Number(price));
+        } catch (e) {
+            const cur = CURRENCIES.find(c => c.code === displayCurrency);
+            const symbol = cur?.symbol || displayCurrency;
+            formattedPrice = `${symbol}${Number(price).toFixed(2)}`;
+        }
+    }
 
     return (
         <div className="wishlist-card">
