@@ -32,6 +32,7 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { getUserPossessiveTitle, getInitials } from "@/utils/nameUtils";
@@ -60,8 +61,20 @@ export function AppSidebar({
   categories,
 }: AppSidebarProps) {
   const { user, signOut } = useAuth();
+  const { isMobile, setOpenMobile } = useSidebar();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleNavClick = React.useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, setOpenMobile]);
+
+  const handleCategorySelect = (categoryId: string | null) => {
+    onCategoryChange(categoryId);
+    handleNavClick();
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -73,9 +86,8 @@ export function AppSidebar({
     const meta = user.user_metadata || {};
     const fullName =
       (meta as any).full_name ||
-      `${(meta as any).first_name || ""} ${
-        (meta as any).last_name || ""
-      }`.trim();
+      `${(meta as any).first_name || ""} ${(meta as any).last_name || ""
+        }`.trim();
     return getInitials(fullName || user.email || "User");
   }, [user]);
 
@@ -84,9 +96,8 @@ export function AppSidebar({
     const meta = user.user_metadata || {};
     return (
       (meta as any).full_name ||
-      `${(meta as any).first_name || ""} ${
-        (meta as any).last_name || ""
-      }`.trim() ||
+      `${(meta as any).first_name || ""} ${(meta as any).last_name || ""
+        }`.trim() ||
       user.email?.split("@")[0] ||
       "User"
     );
@@ -126,7 +137,7 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild onClick={handleNavClick}>
               <Link to="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Heart className="size-4" />
@@ -158,7 +169,7 @@ export function AppSidebar({
                       <Home />
                       <Link
                         to="/dashboard"
-                        onClick={() => onCategoryChange(null)}
+                        onClick={() => handleCategorySelect(null)}
                       >
                         <span>
                           {getUserPossessiveTitle(
@@ -175,7 +186,7 @@ export function AppSidebar({
                     <SidebarMenuSub>
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
-                          onClick={() => onCategoryChange(null)}
+                          onClick={() => handleCategorySelect(null)}
                           isActive={
                             activeCategory === null &&
                             location.pathname === "/dashboard"
@@ -188,7 +199,7 @@ export function AppSidebar({
                       {categories.map((category) => (
                         <SidebarMenuSubItem key={category.id}>
                           <SidebarMenuSubButton
-                            onClick={() => onCategoryChange(category.id)}
+                            onClick={() => handleCategorySelect(category.id)}
                             isActive={activeCategory === category.id}
                           >
                             <Package className="size-4" />
@@ -202,7 +213,10 @@ export function AppSidebar({
                         </SidebarMenuSubItem>
                       ))}
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton onClick={onCreateCategory}>
+                        <SidebarMenuSubButton onClick={() => {
+                          onCreateCategory();
+                          handleNavClick();
+                        }}>
                           <Plus />
                           <span>New Wishlist</span>
                         </SidebarMenuSubButton>
@@ -217,6 +231,7 @@ export function AppSidebar({
                     asChild
                     isActive={item.active}
                     tooltip={item.title}
+                    onClick={handleNavClick}
                   >
                     <Link to={item.url}>
                       <item.icon />
@@ -277,7 +292,10 @@ export function AppSidebar({
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                <DropdownMenuItem onClick={() => {
+                  navigate("/profile");
+                  handleNavClick();
+                }}>
                   <User />
                   Profile
                 </DropdownMenuItem>
