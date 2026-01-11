@@ -1,77 +1,69 @@
-# Wishlist App
+# Wishlist
 
-A modern web application for creating and managing personal wishlists. Users can create accounts, add items they want, organize them into categories, and keep track of their gift wishes.
+A modern, social wishlist application designed to help you organize your gift ideas and share them with friends.
 
-## Features
+## 🚀 Features
 
-- User authentication (email/password and Google OAuth)
-- Create, edit, and delete wishlist items
-- Organize items into custom categories
-- User profile management
-- Responsive design for mobile and desktop
-- Real-time data synchronization
+- **Personalized Wishlists**: Create and manage items across different categories.
+- **Privacy Controls**: Set wishlists or specific categories as public or private.
+- **Social Connectivity**: Follow friends, see their public wishlists, and manage your followers.
+- **Real-time Sync**: Powered by Supabase for instant updates across devices.
+- **Modern UI**: A sleek, responsive interface built with Tailwind CSS and Radix UI components.
+- **Auth & Profiles**: Secure email/password login and customizable user profiles.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend:** React, React Router, Vite
-- **Backend:** Supabase (PostgreSQL, Authentication)
-- **Styling:** CSS
-- **Deployment:** Vercel
-- **Analytics:** Vercel Analytics
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS, Shadcn/UI
+- **Backend**: Supabase (Auth, Database, Storage)
+- **Routing**: React Router
+- **Deployment**: Vercel
 
-## Getting Started
+#### Getting Started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
-- A Supabase account
 
 ### Installation
 
-1. Clone the repository:
-```bash
-git clone <your-repo-url>
-cd Wishlist
-```
+1. **Clone the repository**:
+   ```bash
+   git clone <your-repo-url>
+   cd Wishlist
+   ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-3. Create a `.env` file in the root directory with your Supabase credentials:
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
+3. **Configure Environment Variables**:
+   Create a `.env` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-4. Run the database migrations using the `supabase_schema.sql` file in your Supabase project
+4. **Database Setup**:
+   Initialize your Supabase project using the provided `supabase_schema.sql` (if available) or by manually creating the `items`, `categories`, and `follows` tables.
 
-5. Start the development server:
-```bash
-npm run dev
-```
+5. **Run the app**:
+   ```bash
+   npm run dev
+   ```
 
-The app will be available at `http://localhost:5173`
+The application will be running at `http://localhost:5173`.
 
-## Available Scripts
+## 📂 Project Structure
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build locally
+- `src/components`: Reusable UI components and Radix primitives.
+- `src/pages`: Main application views (Home, Friends, Profile, etc.).
+- `src/context`: React Context for global state (Auth).
+- `src/hooks`: Custom React hooks for data fetching and logic.
+- `src/lib`: Utility configurations (Supabase client, utils).
 
-## Project Structure
+## 📄 License
 
-```
-src/
-├── components/     # Reusable UI components
-├── pages/          # Page components
-├── context/        # React context providers
-├── App.jsx         # Main application component
-└── main.jsx        # Application entry point
-```
-
-## License
-
-This project is open source and available under the MIT License.
+This project is licensed under the MIT License.

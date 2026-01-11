@@ -1,12 +1,20 @@
 import React from 'react';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
 
 export interface Currency {
     code: string;
@@ -172,6 +180,8 @@ export const CURRENCIES: Currency[] = [
     { code: 'ZMW', name: 'Zambian Kwacha', symbol: 'ZK' },
 ];
 
+const POPULAR_CURRENCIES = ['USD', 'EUR', 'GBP', 'SLE'];
+
 interface CurrencySelectProps {
     value?: string;
     onValueChange: (value: string) => void;
@@ -189,35 +199,106 @@ export const CurrencySelect = ({
     className,
     disabled,
     variant = 'default',
-    placeholder = 'SLE'
+    placeholder = 'USD'
 }: CurrencySelectProps) => {
-    const handleValueChange = (code: string) => {
+    const [open, setOpen] = React.useState(false);
+
+    const handleSelect = (code: string) => {
         onValueChange(code);
         if (onCurrencySelect) {
             const currency = CURRENCIES.find(c => c.code === code);
             if (currency) onCurrencySelect(currency);
         }
+        setOpen(false);
     };
 
+    const selectedCurrency = React.useMemo(() =>
+        CURRENCIES.find(c => c.code === value),
+        [value]);
+
+    const popularList = React.useMemo(() =>
+        CURRENCIES.filter(c => POPULAR_CURRENCIES.includes(c.code)),
+        []);
+
+    const otherList = React.useMemo(() =>
+        CURRENCIES.filter(c => !POPULAR_CURRENCIES.includes(c.code)),
+        []);
+
     return (
-        <Select value={value} onValueChange={handleValueChange} disabled={disabled}>
-            <SelectTrigger className={cn(
-                variant === 'small' ? "w-full h-8 text-xs" : "w-[120px] h-11",
-                "focus:ring-0",
-                className
-            )}>
-                <SelectValue placeholder={placeholder} />
-            </SelectTrigger>
-            <SelectContent className="max-h-[300px]">
-                {CURRENCIES.map((currency) => (
-                    <SelectItem key={currency.code} value={currency.code}>
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium">{currency.code}</span>
-                            <span className="text-muted-foreground text-xs">{currency.symbol}</span>
-                        </div>
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    disabled={disabled}
+                    className={cn(
+                        "justify-between font-normal",
+                        variant === 'small' ? "w-full h-8 text-xs px-2" : "w-[140px] h-11 px-3",
+                        className
+                    )}
+                >
+                    <div className="flex items-center gap-1.5 truncate">
+                        <span className="font-semibold text-primary">{selectedCurrency?.code || placeholder}</span>
+                        {variant !== 'small' && <span className="opacity-50 text-xs truncate">{selectedCurrency?.name}</span>}
+                    </div>
+                    <ChevronsUpDown className="ml-1 h-3 w-3 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[240px] p-0" align="start">
+                <Command>
+                    <CommandInput placeholder="Search currency..." className="h-9" />
+                    <CommandList>
+                        <CommandEmpty>No currency found.</CommandEmpty>
+                        <CommandGroup heading="Popular">
+                            {popularList.map((currency) => (
+                                <CommandItem
+                                    key={currency.code}
+                                    value={currency.code + " " + currency.name}
+                                    onSelect={() => handleSelect(currency.code)}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            value === currency.code ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold">{currency.code}</span>
+                                            <span className="text-muted-foreground text-xs">{currency.symbol}</span>
+                                        </div>
+                                        <span className="text-[10px] text-muted-foreground line-clamp-1">{currency.name}</span>
+                                    </div>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                        <CommandGroup heading="All Currencies">
+                            {otherList.map((currency) => (
+                                <CommandItem
+                                    key={currency.code}
+                                    value={currency.code + " " + currency.name}
+                                    onSelect={() => handleSelect(currency.code)}
+                                >
+                                    <Check
+                                        className={cn(
+                                            "mr-2 h-4 w-4",
+                                            value === currency.code ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold">{currency.code}</span>
+                                            <span className="text-muted-foreground text-xs">{currency.symbol}</span>
+                                        </div>
+                                        <span className="text-[10px] text-muted-foreground line-clamp-1">{currency.name}</span>
+                                    </div>
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
     );
 };

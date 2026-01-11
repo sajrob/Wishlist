@@ -59,7 +59,9 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
         }));
     };
 
-    const selectedCurrency = CURRENCIES.find(c => c.code === formData.currency) || CURRENCIES.find(c => c.code === 'USD');
+    const selectedCurrency = React.useMemo(() =>
+        CURRENCIES.find(c => c.code === formData.currency) || CURRENCIES.find(c => c.code === 'USD'),
+        [formData.currency]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
