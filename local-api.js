@@ -27,20 +27,52 @@ app.get('/api/scrape', async (req, res) => {
                 'Upgrade-Insecure-Requests': '1'
             },
             timeout: 10000,
+            includeJSONLD: true,
         });
 
         // Extract title
-        const title = metadata['og:title'] || metadata['twitter:title'] || metadata['title'] || '';
+        let title = metadata['og:title'] || metadata['twitter:title'] || metadata['title'] || '';
 
         // Extract description
-        const description = metadata['og:description'] || metadata['twitter:description'] || metadata['description'] || '';
+        let description = metadata['og:description'] || metadata['twitter:description'] || metadata['description'] || '';
 
         // Extract image
-        const image = metadata['og:image'] || metadata['twitter:image'] || metadata['image'] || '';
+        let image = metadata['og:image'] || metadata['twitter:image'] || metadata['image'] || '';
 
         // Extract price
         let price = '';
         let currency = 'USD';
+
+        // Helper: Check JSON-LD
+        if (metadata.jsonld) {
+            const jsonLd = metadata.jsonld;
+            // Support both single object and array of objects
+            const items = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+
+            for (const item of items) {
+                if (!item) continue;
+
+                // Check for Product
+                if (item['@type'] === 'Product' || item['@type'] === 'http://schema.org/Product') {
+                    if (!title && item.name) title = item.name;
+                    if (!description && item.description) description = item.description;
+                    if (!image && item.image) {
+                        image = Array.isArray(item.image) ? item.image[0] : (item.image.url || item.image);
+                    }
+
+                    // Check offers
+                    const offers = item.offers;
+                    if (offers) {
+                        const offer = Array.isArray(offers) ? offers[0] : offers;
+                        if (offer) {
+                            if (offer.price) price = offer.price;
+                            if (offer.priceCurrency) currency = offer.priceCurrency;
+                            if (!price && offer.lowPrice) price = offer.lowPrice; // AggregateOffer
+                        }
+                    }
+                }
+            }
+        }
 
         const priceTags = [
             'og:price:amount',
@@ -50,13 +82,15 @@ app.get('/api/scrape', async (req, res) => {
             'twitter:data1'
         ];
 
-        for (const tag of priceTags) {
-            const value = metadata[tag];
-            if (value) {
-                const val = value.toString().replace(/[^\d.]/g, '');
-                if (val && !isNaN(parseFloat(val))) {
-                    price = val;
-                    break;
+        if (!price) {
+            for (const tag of priceTags) {
+                const value = metadata[tag];
+                if (value) {
+                    const val = value.toString().replace(/[^\d.]/g, '');
+                    if (val && !isNaN(parseFloat(val))) {
+                        price = val;
+                        break;
+                    }
                 }
             }
         }
