@@ -208,15 +208,54 @@
 }
 
 @media (max-width: 640px) {
+    .find-users-container {
+        padding: var(--spacing-lg) var(--spacing-md);
+    }
+
+    .find-users-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .find-users-header {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .search-box {
+        margin-bottom: 1.5rem;
+    }
+
+    .search-input {
+        padding: 0.6rem 1.1rem;
+        font-size: 0.95rem;
+    }
+
     .user-list-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        gap: var(--spacing-sm);
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+    }
+
+    .user-item-main {
+        gap: var(--spacing-sm);
     }
 
     .user-actions {
-        width: 100%;
-        justify-content: flex-end;
-        /* Or space-between */
+        margin-left: auto;
+    }
+
+    .action-btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
     }
 }

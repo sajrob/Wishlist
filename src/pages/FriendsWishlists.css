@@ -252,18 +252,62 @@
 /* Responsive */
 @media (max-width: 640px) {
     .tabs-container {
-        gap: var(--spacing-xs);
+        gap: 0;
+        justify-content: space-between;
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0 var(--spacing-sm);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-bottom: 2px solid var(--color-border);
     }
 
     .tab-btn {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.9rem;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.8rem;
+        flex: 1;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+    .tab-count {
+        padding: 1px 5px;
+        font-size: 0.65rem;
+    }
+
+    /* Make cards smaller on mobile */
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: var(--spacing-sm);
+    }
+
+    .wishlist-card .card-image-container {
+        height: 100px;
+    }
+
+    .wishlist-card .item-name {
+        font-size: 0.85rem;
+    }
+
+    .mutual-badge {
+        font-size: 0.6rem;
+        padding: 0px 4px;
+        margin-left: 4px;
+    }
+
+    .card-content {
+        padding: var(--spacing-sm);
+    }
+
+    .follow-btn-small,
+    .unfollow-btn-small {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
     }
 
     .friend-list-item {
         flex-direction: row;
-        /* Keep row for social view */
         align-items: center;
+        padding: var(--spacing-md);
     }
-
 }
