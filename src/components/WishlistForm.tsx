@@ -143,7 +143,7 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                     <div className="space-y-1">
                         <Label htmlFor="buy_link" className="text-xs flex items-center gap-1.5">
                             <Link2 className="w-3 h-3" />
-                            Product URL
+                            Product URL (Optional)
                             <span className="text-[10px] text-muted-foreground font-normal ml-auto flex items-center gap-1">
                                 <Sparkles className="w-2.5 h-2.5 text-amber-500" />
                                 Auto-fills details
@@ -163,7 +163,6 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                                 }}
                                 placeholder="Paste link here (Amazon, Etsy, etc.)"
                                 className={`h-9 text-sm pr-9 transition-all ${isScraping ? 'border-primary/50 ring-1 ring-primary/20' : ''}`}
-                                required
                             />
                             <div className="absolute right-2 top-1/2 -translate-y-1/2">
                                 {isScraping ? (
@@ -265,7 +264,7 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                     </div>
 
                     <div className="space-y-1">
-                        <Label htmlFor="image_url" className="text-xs">Image URL</Label>
+                        <Label htmlFor="image_url" className="text-xs">Image URL (Optional)</Label>
                         <Input
                             id="image_url"
                             name="image_url"
@@ -274,7 +273,6 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                             onChange={handleChange}
                             placeholder="https://..."
                             className="h-8 text-sm"
-                            required
                         />
                     </div>
                 </CardContent>
