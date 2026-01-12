@@ -25,9 +25,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const metadata = await urlMetadata(url, {
             requestHeaders: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.google.com/',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-User': '?1',
+                'Upgrade-Insecure-Requests': '1'
             },
             timeout: 10000,
         });
@@ -83,6 +89,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
     } catch (error) {
         console.error('Scraping error:', error);
-        return res.status(500).json({ error: 'Failed to scrape metadata: ' + (error instanceof Error ? error.message : String(error)) });
+
+        let errorMessage = 'Failed to scrape metadata';
+        const errorText = String(error);
+
+        if (errorText.includes('403') || errorText.includes('Forbidden')) {
+            errorMessage = 'This site blocks automated access. Please enter details manually.';
+        } else if (errorText.includes('timeout')) {
+            errorMessage = 'Request timed out. Site took too long to respond.';
+        }
+
+        return res.status(500).json({ error: errorMessage });
     }
 }
