@@ -20,7 +20,7 @@ import "../App.css";
 function SharedWishlist() {
     const { userId } = useParams<{ userId: string }>();
 
-    const { allItems, categories, loading } = useWishlistData(userId || null);
+    const { allItems, categories, loading } = useWishlistData(userId || null, { includeClaims: true });
     const { isPublic } = useWishlistSettingsReadOnly(userId || null);
 
     const [activeCategory, setActiveCategory] = useState<string | null>(null);

@@ -7,6 +7,14 @@ import type { Dispatch, SetStateAction } from 'react';
 
 // ==================== DATABASE MODELS ====================
 
+export interface Claim {
+    id: string;
+    item_id: string;
+    user_id: string;
+    created_at: string;
+    profiles?: Profile; // Joined data
+}
+
 export interface WishlistItem {
     id: string;
     user_id: string;
@@ -19,6 +27,7 @@ export interface WishlistItem {
     currency?: string;
     is_must_have: boolean;
     created_at: string;
+    claims?: Claim[];
 }
 
 export interface Category {

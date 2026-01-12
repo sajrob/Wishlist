@@ -6,6 +6,7 @@
 import { supabase } from '../supabaseClient';
 import type {
     Category,
+    Claim,
     Profile,
     SupabaseResponse,
     WishlistItem,
@@ -21,13 +22,18 @@ type WishlistSettingsRow = WishlistSettings;
 
 // ==================== ITEMS ====================
 
-export async function fetchUserItems(userId: string): Promise<SupabaseResponse<WishlistItem[]>> {
+export async function fetchUserItems(
+    userId: string,
+    includeClaims = false
+): Promise<SupabaseResponse<WishlistItem[]>> {
     try {
-        const { data, error } = await supabase
+        let query = supabase
             .from('items')
-            .select('*')
+            .select(includeClaims ? '*, claims(*, profiles(*))' : '*')
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
+
+        const { data, error } = await (query as any);
 
         if (error) throw error;
         return { data: data || [], error: null };
@@ -346,6 +352,47 @@ export async function fetchItemsByCategories(
         console.error('Error fetching items by categories:', error);
         return { data: null, error: error as Error };
     }
+}// ==================== CLAIMS ====================
+
+export async function toggleClaim(
+    itemId: string,
+    userId: string,
+    isClaimed: boolean
+): Promise<SupabaseResponse<boolean>> {
+    try {
+        if (isClaimed) {
+            // Unclaim
+            const { error } = await supabase
+                .from('claims')
+                .delete()
+                .eq('item_id', itemId)
+                .eq('user_id', userId);
+            if (error) throw error;
+        } else {
+            // Claim
+            const { error } = await supabase
+                .from('claims')
+                .insert([{ item_id: itemId, user_id: userId }]);
+            if (error) throw error;
+        }
+        return { data: true, error: null };
+    } catch (error) {
+        console.error('Error toggling claim:', error);
+        return { data: null, error: error as Error };
+    }
 }
 
+export async function fetchItemClaims(itemId: string): Promise<SupabaseResponse<Claim[]>> {
+    try {
+        const { data, error } = await supabase
+            .from('claims')
+            .select('*, profiles(*)')
+            .eq('item_id', itemId);
 
+        if (error) throw error;
+        return { data: data || [], error: null };
+    } catch (error) {
+        console.error('Error fetching item claims:', error);
+        return { data: null, error: error as Error };
+    }
+}

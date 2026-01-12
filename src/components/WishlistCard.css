@@ -176,3 +176,59 @@
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
   filter: brightness(1.1);
 }
+
+.claim-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.claim-badge:hover {
+  transform: scale(1.05);
+}
+
+.claim-badge .badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.avatar-stack-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
+
+.avatar-stack {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-stack>span {
+  margin-right: -10px;
+  transition: transform 0.2s ease;
+  z-index: 1;
+}
+
+.avatar-stack>span:hover {
+  transform: translateY(-4px);
+  z-index: 10;
+}
+
+.claimed-text {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-left: 12px;
+}

@@ -9,10 +9,11 @@ import type { Category, CategoryStats, UseWishlistDataReturn, WishlistItem } fro
 
 type Options = {
     autoFetch?: boolean;
+    includeClaims?: boolean;
 };
 
 export function useWishlistData(userId: string | null, options: Options = {}): UseWishlistDataReturn {
-    const { autoFetch = true } = options;
+    const { autoFetch = true, includeClaims = false } = options;
 
     const [allItems, setAllItems] = useState<WishlistItem[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
@@ -30,7 +31,7 @@ export function useWishlistData(userId: string | null, options: Options = {}): U
 
         try {
             const [itemsResponse, categoriesResponse] = await Promise.all([
-                fetchUserItems(userId),
+                fetchUserItems(userId, includeClaims),
                 fetchUserCategories(userId),
             ]);
 
@@ -51,7 +52,7 @@ export function useWishlistData(userId: string | null, options: Options = {}): U
         } finally {
             setLoading(false);
         }
-    }, [userId]);
+    }, [userId, includeClaims]);
 
     useEffect(() => {
         if (autoFetch && userId) {
