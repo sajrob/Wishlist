@@ -14,18 +14,23 @@ app.get('/api/scrape', async (req, res) => {
     }
 
     try {
+        let headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+            'Upgrade-Insecure-Requests': '1'
+        };
+
+        // Shein Anti-Bot Bypass: Use Facebook Crawler UA (proven to get OG tags)
+        if (url.includes('shein.')) {
+            headers['User-Agent'] = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
+        }
+
         const metadata = await urlMetadata(url, {
-            requestHeaders: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Referer': 'https://www.google.com/',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'cross-site',
-                'Sec-Fetch-User': '?1',
-                'Upgrade-Insecure-Requests': '1'
-            },
+            requestHeaders: headers,
             timeout: 10000,
             includeJSONLD: true,
         });
@@ -145,13 +150,13 @@ app.get('/api/scrape', async (req, res) => {
         if (!price || !image) {
             console.log('Metadata incomplete, attempting raw HTML scan...');
             try {
+                // Reuse the headers we defined at the top (which includes the FB Bot for Shein)
                 const response = await fetch(url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    }
+                    headers,
+                    redirect: 'follow'
                 });
+                console.log('Raw Fetch Status:', response.status);
+                console.log('Raw Fetch URL (post-redirect):', response.url);
                 const html = await response.text();
 
                 // 1. Amazon Price: <span class="a-offscreen">$99.99</span>
@@ -176,10 +181,38 @@ app.get('/api/scrape', async (req, res) => {
 
                 // 3. Shein/General: "price":12.34 or "price":"12.34" in scripts
                 if (!price) {
-                    const scriptPrice = html.match(/"price"\s*:\s*["']?(\d+\.?\d*)["']?/);
-                    if (scriptPrice) {
-                        price = scriptPrice[1];
+                    // Shein often uses usage "salePrice" or "retailPrice" in their JSON blobs
+                    const sheinSale = html.match(/"salePrice"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    const sheinRetail = html.match(/"retailPrice"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    const generalPrice = html.match(/"price"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    const productPrice = html.match(/"productPrice"\s*:\s*["']?(\d+\.?\d*)["']?/);
+
+                    if (sheinSale) {
+                        price = sheinSale[1];
+                        console.log('Found Shein Sale Price via Raw HTML');
+                    } else if (sheinRetail) {
+                        price = sheinRetail[1];
+                        console.log('Found Shein Retail Price via Raw HTML');
+                    } else if (productPrice) {
+                        price = productPrice[1];
+                        console.log('Found Shein Product Price via Raw HTML');
+                    } else if (generalPrice) {
+                        price = generalPrice[1];
                         console.log('Found Script Price via Raw HTML');
+                    }
+                }
+
+                // 4. Shein Image Fallback (often hidden in productIntroData)
+                if (!image && url.includes('shein.com')) {
+                    const sheinImg = html.match(/"original_image_url"\s*:\s*["'](https:\/\/[^"']+)["']/);
+                    const sheinMain = html.match(/"mainImage"\s*:\s*["'](https:\/\/[^"']+)["']/);
+
+                    if (sheinImg) {
+                        image = sheinImg[1];
+                        console.log('Found Shein Image (original) via Raw HTML');
+                    } else if (sheinMain) {
+                        image = sheinMain[1];
+                        console.log('Found Shein Image (main) via Raw HTML');
                     }
                 }
 

@@ -23,18 +23,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
+        let headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+            'Upgrade-Insecure-Requests': '1'
+        };
+
+        // Shein Anti-Bot Bypass: Use Facebook Crawler UA (proven to get OG tags)
+        if (url.includes('shein.')) {
+            headers['User-Agent'] = 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
+        }
+
         const metadata = await urlMetadata(url, {
-            requestHeaders: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Referer': 'https://www.google.com/',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'cross-site',
-                'Sec-Fetch-User': '?1',
-                'Upgrade-Insecure-Requests': '1'
-            },
+            requestHeaders: headers as any,
             timeout: 10000,
             // @ts-ignore
             includeJSONLD: true,
@@ -149,11 +154,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (!price || !image) {
             try {
                 const response = await fetch(url, {
-                    headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                        'Accept-Language': 'en-US,en;q=0.9',
-                    }
+                    headers,
+                    redirect: 'follow'
                 });
                 const html = await response.text();
 
@@ -177,13 +179,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
                 // 3. Shein/General: "price":12.34 or "price":"12.34" in scripts
                 if (!price) {
-                    const scriptPrice = html.match(/"price"\s*:\s*["']?(\d+\.?\d*)["']?/);
-                    if (scriptPrice) {
-                        price = scriptPrice[1];
+                    const sheinSale = html.match(/"salePrice"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    const sheinRetail = html.match(/"retailPrice"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    const generalPrice = html.match(/"price"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    const productPrice = html.match(/"productPrice"\s*:\s*["']?(\d+\.?\d*)["']?/);
+
+                    if (sheinSale) {
+                        price = sheinSale[1];
+                    } else if (sheinRetail) {
+                        price = sheinRetail[1];
+                    } else if (productPrice) {
+                        price = productPrice[1];
+                    } else if (generalPrice) {
+                        price = generalPrice[1];
                     }
                 }
 
-                // 4. Amazon Image: "large":"https://..."
+                // 4. Shein Image Fallback
+                if (!image && url.includes('shein.com')) {
+                    const sheinImg = html.match(/"original_image_url"\s*:\s*["'](https:\/\/[^"']+)["']/);
+                    const sheinMain = html.match(/"mainImage"\s*:\s*["'](https:\/\/[^"']+)["']/);
+
+                    if (sheinImg) {
+                        image = sheinImg[1];
+                    } else if (sheinMain) {
+                        image = sheinMain[1];
+                    }
+                }
+
+                // 5. Amazon Image: "large":"https://..."
                 if (!image) {
                     // Look for JSON object with main image
                     const amzImgMatch = html.match(/"large":"(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/);
