@@ -45,15 +45,30 @@ app.get('/api/scrape', async (req, res) => {
 
         // Helper: Check JSON-LD
         if (metadata.jsonld) {
-            const jsonLd = metadata.jsonld;
-            // Support both single object and array of objects
-            const items = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+            console.log('JSON-LD found:', true);
+            let items = metadata.jsonld;
+            if (!Array.isArray(items)) items = [items];
+
+            // Flatten @graph if present (common in WP/Yoast)
+            let flattenedItems = [];
+            for (const item of items) {
+                if (item && item['@graph'] && Array.isArray(item['@graph'])) {
+                    flattenedItems = flattenedItems.concat(item['@graph']);
+                } else {
+                    flattenedItems.push(item);
+                }
+            }
+            items = flattenedItems;
 
             for (const item of items) {
                 if (!item) continue;
 
+                // Debug log types found
+                console.log('JSON-LD Type:', item['@type']);
+
                 // Check for Product
                 if (item['@type'] === 'Product' || item['@type'] === 'http://schema.org/Product') {
+                    console.log('Product Found');
                     if (!title && item.name) title = item.name;
                     if (!description && item.description) description = item.description;
                     if (!image && item.image) {
@@ -68,11 +83,16 @@ app.get('/api/scrape', async (req, res) => {
                             if (offer.price) price = offer.price;
                             if (offer.priceCurrency) currency = offer.priceCurrency;
                             if (!price && offer.lowPrice) price = offer.lowPrice; // AggregateOffer
+                            if (!price && offer.highPrice) price = offer.highPrice;
                         }
                     }
                 }
             }
+        } else {
+            console.log('No JSON-LD found');
         }
+
+        console.log('Scraped Data:', { title: title.substring(0, 30) + '...', price, currency, image: !!image });
 
         const priceTags = [
             'og:price:amount',
@@ -95,9 +115,101 @@ app.get('/api/scrape', async (req, res) => {
             }
         }
 
+        // Fallback: Check description for price (e.g. "$19.99")
+        // Extended Fallback: Check description/title for price with improved regex
+        if (!price) {
+            // Regex to match $19.99, $1,234.50, USD 15.00, etc.
+            const priceRegexStrict = /[$€£¥]\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/i;
+            const priceRegexCurrency = /(?:USD|EUR|GBP)\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/i;
+
+            // Try Strict Symbol first ($19.99)
+            let descMatch = description.match(priceRegexStrict) || title.match(priceRegexStrict);
+
+            // If not found, try Currency Code (USD 19.99)
+            if (!descMatch) {
+                descMatch = description.match(priceRegexCurrency) || title.match(priceRegexCurrency);
+            }
+
+            if (descMatch) {
+                price = descMatch[1].replace(/,/g, '');
+            }
+        }
+
         const currencyTag = metadata['og:price:currency'] || metadata['product:price:currency'];
         if (currencyTag) {
             currency = currencyTag.toString().toUpperCase();
+        }
+
+        // SUPER FALLBACK: Raw HTML Scan (if price/image missing)
+        // url-metadata does not expose raw HTML, so we fetch again if needed
+        if (!price || !image) {
+            console.log('Metadata incomplete, attempting raw HTML scan...');
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    }
+                });
+                const html = await response.text();
+
+                // 1. Amazon Price: <span class="a-offscreen">$99.99</span>
+                if (!price) {
+                    const amazonPriceMatch = html.match(/class=["']a-offscreen["']>([^<]+)</);
+                    if (amazonPriceMatch) {
+                        price = amazonPriceMatch[1].replace(/[^\d.]/g, ''); // Extract 99.99
+                        console.log('Found Amazon Price via Raw HTML');
+                    }
+                }
+
+                // 2. Amazon Price Alternative: <span class="a-price-whole">99<
+                if (!price) {
+                    const amazonWhole = html.match(/class=["']a-price-whole["']>([^<]+)</);
+                    if (amazonWhole) {
+                        const amazonFraction = html.match(/class=["']a-price-fraction["']>([^<]+)</);
+                        price = amazonWhole[1].trim() + (amazonFraction ? '.' + amazonFraction[1].trim() : ''); // 99 or 99.99
+                        price = price.replace(/[^\d.]/g, '');
+                        console.log('Found Amazon Price (Whole) via Raw HTML');
+                    }
+                }
+
+                // 3. Shein/General: "price":12.34 or "price":"12.34" in scripts
+                if (!price) {
+                    const scriptPrice = html.match(/"price"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    if (scriptPrice) {
+                        price = scriptPrice[1];
+                        console.log('Found Script Price via Raw HTML');
+                    }
+                }
+
+                // 4. Amazon Image: "large":"https://..."
+                if (!image) {
+                    // Look for JSON object with main image
+                    const amzImgMatch = html.match(/"large":"(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/);
+                    if (amzImgMatch) {
+                        image = amzImgMatch[1];
+                        console.log('Found Amazon Image via Raw HTML');
+                    }
+                }
+
+                // 5. General Image Fallback: Look for first larger image
+                if (!image) {
+                    const imgMatch = html.match(/<img[^>]+src=["'](https:\/\/[^"']+\.(?:jpg|png|webp))["'][^>]*>/i);
+                    if (imgMatch) {
+                        image = imgMatch[1];
+                    }
+                }
+
+            } catch (err) {
+                console.log('Raw fetch failed:', err.message);
+            }
+        }
+
+        console.log('Final Scraped Data:', { title: title.substring(0, 30) + '...', price, currency, image: !!image });
+
+        if (image && image.startsWith('http:')) {
+            image = image.replace('http:', 'https:');
         }
 
         res.json({

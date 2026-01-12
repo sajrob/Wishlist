@@ -55,9 +55,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Helper: Check JSON-LD
         if (metadata.jsonld) {
-            const jsonLd = metadata.jsonld;
-            // Support both single object and array of objects
-            const items = Array.isArray(jsonLd) ? jsonLd : [jsonLd];
+            let items = metadata.jsonld;
+            if (!Array.isArray(items)) items = [items];
+
+            // Flatten @graph if present
+            let flattenedItems: any[] = [];
+            for (const item of items) {
+                if (item && item['@graph'] && Array.isArray(item['@graph'])) {
+                    flattenedItems = flattenedItems.concat(item['@graph']);
+                } else {
+                    flattenedItems.push(item);
+                }
+            }
+            items = flattenedItems;
 
             for (const item of items) {
                 if (!item) continue;
@@ -78,6 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                             if (offer.price) price = offer.price;
                             if (offer.priceCurrency) currency = offer.priceCurrency;
                             if (!price && offer.lowPrice) price = offer.lowPrice; // AggregateOffer
+                            if (!price && offer.highPrice) price = offer.highPrice;
                         }
                     }
                 }
@@ -108,10 +119,94 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
         }
 
+        // Extended Fallback: Check description/title for price with improved regex
+        if (!price) {
+            // Regex to match $19.99, $1,234.50, USD 15.00, etc.
+            const priceRegexStrict = /[$€£¥]\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/i;
+            const priceRegexCurrency = /(?:USD|EUR|GBP)\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/i;
+
+            // Try Strict Symbol first ($19.99)
+            let descMatch = description.match(priceRegexStrict) || title.match(priceRegexStrict);
+
+            // If not found, try Currency Code (USD 19.99)
+            if (!descMatch) {
+                descMatch = description.match(priceRegexCurrency) || title.match(priceRegexCurrency);
+            }
+
+            if (descMatch) {
+                price = descMatch[1].replace(/,/g, '');
+            }
+        }
+
         // Check currency
         const currencyTag = (metadata as any)['og:price:currency'] || (metadata as any)['product:price:currency'];
         if (currencyTag) {
             currency = currencyTag.toString().toUpperCase();
+        }
+
+        // SUPER FALLBACK: Raw HTML Scan (if price/image missing)
+        // url-metadata does not expose raw HTML, so we fetch again if needed
+        if (!price || !image) {
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    }
+                });
+                const html = await response.text();
+
+                // 1. Amazon Price: <span class="a-offscreen">$99.99</span>
+                if (!price) {
+                    const amazonPriceMatch = html.match(/class=["']a-offscreen["']>([^<]+)</);
+                    if (amazonPriceMatch) {
+                        price = amazonPriceMatch[1].replace(/[^\d.]/g, ''); // Extract 99.99
+                    }
+                }
+
+                // 2. Amazon Price Alternative: <span class="a-price-whole">99<
+                if (!price) {
+                    const amazonWhole = html.match(/class=["']a-price-whole["']>([^<]+)</);
+                    if (amazonWhole) {
+                        const amazonFraction = html.match(/class=["']a-price-fraction["']>([^<]+)</);
+                        price = amazonWhole[1].trim() + (amazonFraction ? '.' + amazonFraction[1].trim() : ''); // 99 or 99.99
+                        price = price.replace(/[^\d.]/g, '');
+                    }
+                }
+
+                // 3. Shein/General: "price":12.34 or "price":"12.34" in scripts
+                if (!price) {
+                    const scriptPrice = html.match(/"price"\s*:\s*["']?(\d+\.?\d*)["']?/);
+                    if (scriptPrice) {
+                        price = scriptPrice[1];
+                    }
+                }
+
+                // 4. Amazon Image: "large":"https://..."
+                if (!image) {
+                    // Look for JSON object with main image
+                    const amzImgMatch = html.match(/"large":"(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/);
+                    if (amzImgMatch) {
+                        image = amzImgMatch[1];
+                    }
+                }
+
+                // 5. General Image Fallback: Look for first larger image
+                if (!image) {
+                    const imgMatch = html.match(/<img[^>]+src=["'](https:\/\/[^"']+\.(?:jpg|png|webp))["'][^>]*>/i);
+                    if (imgMatch) {
+                        image = imgMatch[1];
+                    }
+                }
+
+            } catch (err) {
+                console.error('Raw fetch failed:', err);
+            }
+        }
+
+        if (image && image.startsWith('http:')) {
+            image = image.replace('http:', 'https:');
         }
 
         return res.status(200).json({
