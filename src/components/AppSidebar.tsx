@@ -50,8 +50,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface AppSidebarProps {
   activeCategory: string | null;
   onCategoryChange: (categoryId: string | null) => void;
-  onCreateCategory: () => void;
+  onCreateCategory?: () => void;
   categories: Category[];
+  title?: string;
+  showCreateCategory?: boolean;
+  showAllItems?: boolean;
 }
 
 export function AppSidebar({
@@ -59,6 +62,9 @@ export function AppSidebar({
   onCategoryChange,
   onCreateCategory,
   categories,
+  title,
+  showCreateCategory = true,
+  showAllItems = true,
 }: AppSidebarProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -119,12 +125,6 @@ export function AppSidebar({
       url: "/groups",
       active: location.pathname === "/groups",
     },
-    {
-      title: "Notifications",
-      icon: Bell,
-      url: "/notifications",
-      active: location.pathname === "/notifications",
-    },
   ];
 
   return (
@@ -155,7 +155,7 @@ export function AppSidebar({
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      tooltip={getUserPossessiveTitle(
+                      tooltip={title || getUserPossessiveTitle(
                         user,
                         "Wishlists",
                         "My Wishlists"
@@ -170,7 +170,7 @@ export function AppSidebar({
                         }}
                       >
                         <span>
-                          {getUserPossessiveTitle(
+                          {title || getUserPossessiveTitle(
                             user,
                             "Wishlists",
                             "My Wishlists"
@@ -182,21 +182,20 @@ export function AppSidebar({
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          onClick={() => {
-                            onCategoryChange(null);
-                            handleNavClick();
-                          }}
-                          isActive={
-                            activeCategory === null &&
-                            location.pathname === "/dashboard"
-                          }
-                        >
-                          <Package />
-                          <span>All Items</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
+                      {showAllItems && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            onClick={() => {
+                              onCategoryChange(null);
+                              handleNavClick();
+                            }}
+                            isActive={activeCategory === null}
+                          >
+                            <Package />
+                            <span>All Items</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
                       {categories.map((category) => (
                         <SidebarMenuSubItem key={category.id}>
                           <SidebarMenuSubButton
@@ -216,12 +215,14 @@ export function AppSidebar({
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}
-                      <SidebarMenuSubItem>
-                        <SidebarMenuSubButton onClick={onCreateCategory}>
-                          <Plus />
-                          <span>New Wishlist</span>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
+                      {showCreateCategory && onCreateCategory && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton onClick={onCreateCategory}>
+                            <Plus />
+                            <span>New Wishlist</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </SidebarMenuItem>
@@ -295,6 +296,10 @@ export function AppSidebar({
                 <DropdownMenuItem onClick={() => navigate("/profile")}>
                   <User />
                   Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/notifications")}>
+                  <Bell />
+                  Notifications
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />

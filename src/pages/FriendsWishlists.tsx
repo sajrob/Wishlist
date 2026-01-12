@@ -5,6 +5,13 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { AppSidebar } from "../components/AppSidebar";
+import {
+    SidebarProvider,
+    SidebarInset,
+    SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import { fetchFriends, fetchFollowers, fetchProfiles } from '../utils/supabaseHelpers';
 import { getInitials, getFirstName } from '../utils/nameUtils';
 import type { FriendWishlistSummary } from '../types';
@@ -88,6 +95,7 @@ const FriendsWishlists = () => {
 
     const handleUnfollow = async (e: React.MouseEvent, friendId: string) => {
         e.preventDefault();
+        e.stopPropagation();
         if (!user) return;
 
         confirmDelete({
@@ -116,6 +124,7 @@ const FriendsWishlists = () => {
 
     const handleFollowBack = async (e: React.MouseEvent, userId: string) => {
         e.preventDefault();
+        e.stopPropagation();
         if (!user) return;
 
         try {
@@ -137,7 +146,7 @@ const FriendsWishlists = () => {
     const renderList = (list: FriendWishlistSummary[], type: ConnectionTab) => {
         if (list.length === 0) {
             return (
-                <div className="empty-state-card">
+                <div className="empty-state-card mt-4">
                     <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
                         {type === 'friends' ? '🤝' : type === 'following' ? '🎁' : '👥'}
                     </div>
@@ -161,43 +170,41 @@ const FriendsWishlists = () => {
         }
 
         return (
-            <div className="wishlists-list">
+            <div className="cards-grid">
                 {list.map(person => {
                     const isFollowing = following.some(f => f.id === person.id);
                     const isMutual = mutualFriends.some(f => f.id === person.id);
 
                     return (
-                        <Link key={person.id} to={`/wishlist/${person.id}`} className="friend-list-item">
-                            <div className="friend-item-main">
-                                <div className="friend-avatar">
+                        <Link key={person.id} to={`/wishlist/${person.id}`} className="wishlist-card">
+                            <div className="card-image-container flex items-center justify-center bg-muted/30">
+                                <div className="friend-avatar scale-150">
                                     {getInitials(person.name)}
                                 </div>
-                                <div className="friend-info">
-                                    <span className="friend-name">
-                                        {person.name}
-                                        {isMutual && <span className="mutual-badge">Mutual</span>}
-                                    </span>
-                                </div>
                             </div>
-
-                            <div className="friend-item-meta">
-                                <div className="friend-actions">
-                                    {isFollowing ? (
-                                        <button
-                                            className="unfollow-btn-small"
-                                            onClick={(e) => handleUnfollow(e, person.id)}
-                                            title="Unfollow"
-                                        >
-                                            Unfollow
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="follow-btn-small"
-                                            onClick={(e) => handleFollowBack(e, person.id)}
-                                        >
-                                            Follow Back
-                                        </button>
-                                    )}
+                            <div className="card-content">
+                                <div className="item-header flex-col items-start gap-1">
+                                    <h2 className="item-name">{person.name}</h2>
+                                    {isMutual && <span className="mutual-badge ml-0">Mutual Friend</span>}
+                                </div>
+                                <div className="card-actions mt-auto border-t pt-2">
+                                    <div className="owner-actions">
+                                        {isFollowing ? (
+                                            <button
+                                                className="unfollow-btn-small"
+                                                onClick={(e) => handleUnfollow(e, person.id)}
+                                            >
+                                                Unfollow
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="follow-btn-small"
+                                                onClick={(e) => handleFollowBack(e, person.id)}
+                                            >
+                                                Follow Back
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </Link>
@@ -216,37 +223,58 @@ const FriendsWishlists = () => {
     }
 
     return (
-        <div className="friends-wishlists-container">
-            <div className="friends-wishlists-header">
-                <h1>Social Network</h1>
-                <p>Manage your friends, followers, and following</p>
-            </div>
+        <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
+            <AppSidebar
+                activeCategory={null}
+                onCategoryChange={() => { }}
+                categories={[]}
+            />
+            <SidebarInset className="flex flex-col bg-background overflow-hidden">
+                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
+                    <div className="flex items-center gap-2">
+                        <SidebarTrigger className="-ml-1" />
+                        <Separator
+                            orientation="vertical"
+                            className="mr-2 data-[orientation=vertical]:h-4"
+                        />
+                        <div className="flex-1 min-w-0">
+                            <div className="flex flex-col">
+                                <h1 className="text-lg font-semibold leading-none">Social Network</h1>
+                                <p className="text-xs text-muted-foreground mt-1">Friends, followers, and following</p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
 
-            <div className="tabs-container">
-                <button
-                    className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('friends')}
-                >
-                    Friends <span className="tab-count">{mutualFriends.length}</span>
-                </button>
-                <button
-                    className={`tab-btn ${activeTab === 'following' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('following')}
-                >
-                    Following <span className="tab-count">{following.length}</span>
-                </button>
-                <button
-                    className={`tab-btn ${activeTab === 'followers' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('followers')}
-                >
-                    Followers <span className="tab-count">{followers.length}</span>
-                </button>
-            </div>
-
-            {activeTab === 'friends' && renderList(mutualFriends, 'friends')}
-            {activeTab === 'following' && renderList(following, 'following')}
-            {activeTab === 'followers' && renderList(followers, 'followers')}
-        </div>
+                <div className="flex-1 overflow-y-auto">
+                    <div className="flex flex-col gap-4 p-4">
+                        <div className="tabs-container mb-0 border-none pb-0">
+                            <button
+                                className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('friends')}
+                            >
+                                Friends <span className="tab-count">{mutualFriends.length}</span>
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'following' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('following')}
+                            >
+                                Following <span className="tab-count">{following.length}</span>
+                            </button>
+                            <button
+                                className={`tab-btn ${activeTab === 'followers' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('followers')}
+                            >
+                                Followers <span className="tab-count">{followers.length}</span>
+                            </button>
+                        </div>
+                        {activeTab === 'friends' && renderList(mutualFriends, 'friends')}
+                        {activeTab === 'following' && renderList(following, 'following')}
+                        {activeTab === 'followers' && renderList(followers, 'followers')}
+                    </div>
+                </div>
+            </SidebarInset>
+        </SidebarProvider>
     );
 };
 
