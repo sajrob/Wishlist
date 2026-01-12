@@ -435,9 +435,22 @@ input:checked+.toggle-slider:before {
 
 /* Mobile Adjustments */
 @media (max-width: 640px) {
+
+  /* Show one card per row on mobile */
   .cards-grid {
     grid-template-columns: 1fr;
-    gap: var(--spacing-md);
+    gap: var(--spacing-xl);
+    justify-items: center;
+  }
+
+  .wishlist-card {
+    max-width: 340px;
+    width: 100%;
+  }
+
+  .wishlist-card .card-image-container {
+    aspect-ratio: 1 / 1;
+    height: auto;
   }
 }
 
