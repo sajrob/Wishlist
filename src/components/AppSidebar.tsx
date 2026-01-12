@@ -132,12 +132,12 @@ export function AppSidebar({
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild tooltip="Wishlist">
               <Link to="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 group-data-[collapsible=icon]:size-4 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Heart className="size-4" />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-semibold">Wishlist</span>
                   <span className="truncate text-xs">Your wishlists</span>
                 </div>
@@ -155,13 +155,13 @@ export function AppSidebar({
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
+                      asChild
                       tooltip={title || getUserPossessiveTitle(
                         user,
                         "Wishlists",
                         "My Wishlists"
                       )}
                     >
-                      <Home />
                       <Link
                         to="/dashboard"
                         onClick={() => {
@@ -169,15 +169,16 @@ export function AppSidebar({
                           handleNavClick();
                         }}
                       >
-                        <span>
+                        <Home />
+                        <span className="group-data-[collapsible=icon]:hidden">
                           {title || getUserPossessiveTitle(
                             user,
                             "Wishlists",
                             "My Wishlists"
                           )}
                         </span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                       </Link>
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -236,7 +237,7 @@ export function AppSidebar({
                   >
                     <Link to={item.url} onClick={handleNavClick}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -263,7 +264,7 @@ export function AppSidebar({
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-semibold">{userName}</span>
                     <span className="truncate text-xs">{userEmail}</span>
                   </div>
