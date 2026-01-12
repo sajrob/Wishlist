@@ -5,8 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
-import { CurrencySelect, CURRENCIES, type Currency } from './CurrencySelect';
+import { CurrencySelect, CURRENCIES } from './CurrencySelect';
 import type { ItemFormData, WishlistFormProps } from '../types';
+import { toast } from "sonner";
+import { Loader2, Link2, Sparkles } from "lucide-react";
 
 const initialForm: ItemFormData = {
     name: '',
@@ -20,6 +22,54 @@ const initialForm: ItemFormData = {
 
 const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormProps) => {
     const [formData, setFormData] = useState<ItemFormData>(initialForm);
+    const [isScraping, setIsScraping] = useState(false);
+
+    const handleScrape = async (url: string) => {
+        if (!url || !url.startsWith('http')) return;
+
+        setIsScraping(true);
+        const promise = (async () => {
+            const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+
+            // Check content type to catch Vite returning index.html for unknown routes
+            const contentType = res.headers.get("content-type");
+            if (contentType && contentType.includes("text/html")) {
+                throw new Error("API not running? Try: npx vercel dev");
+            }
+
+            if (!res.ok) {
+                const errData = await res.json().catch(() => ({}));
+                throw new Error(errData.error || `Error ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            setFormData(prev => ({
+                ...prev,
+                name: data.title || prev.name,
+                description: data.description || prev.description,
+                image_url: data.image || prev.image_url,
+                price: data.price || prev.price,
+                currency: data.currency || prev.currency,
+                buy_link: url
+            }));
+            return data;
+        })();
+
+        toast.promise(promise, {
+            loading: 'Fetching item details...',
+            success: (data) => `Magically filled: ${data.title || 'Item details'}`,
+            error: (err) => err.message || 'Could not fetch details automatically',
+        });
+
+        try {
+            await promise;
+        } catch (e) {
+            // Error handled by toast.promise
+        } finally {
+            setIsScraping(false);
+        }
+    };
 
     useEffect(() => {
         if (editingItem) {
@@ -43,6 +93,15 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
             ...prev,
             [name]: value,
         }));
+
+        // If pasting into buy_link and it's a URL, try scraping
+        if (name === 'buy_link' && value.length > 10 && value.startsWith('http') && !editingItem) {
+            // We use a small delay or check if it looks like a full URL
+            if (value.includes('.') && (value.endsWith('/') || value.split('/').length > 3)) {
+                // Potential auto-scrape trigger removed to avoid too many calls on typing
+                // Instead, we'll use a better approach with a button or onBlur
+            }
+        }
     };
 
     const handleSwitchChange = (checked: boolean) => {
@@ -80,6 +139,60 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
             </CardHeader>
             <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-3.5 pt-2">
+                    {/* URL Input (Magic Scrape) */}
+                    <div className="space-y-1">
+                        <Label htmlFor="buy_link" className="text-xs flex items-center gap-1.5">
+                            <Link2 className="w-3 h-3" />
+                            Product URL
+                            <span className="text-[10px] text-muted-foreground font-normal ml-auto flex items-center gap-1">
+                                <Sparkles className="w-2.5 h-2.5 text-amber-500" />
+                                Auto-fills details
+                            </span>
+                        </Label>
+                        <div className="relative">
+                            <Input
+                                id="buy_link"
+                                name="buy_link"
+                                type="url"
+                                value={formData.buy_link}
+                                onChange={handleChange}
+                                onBlur={(e) => {
+                                    if (!editingItem && e.target.value.startsWith('http') && !formData.name) {
+                                        handleScrape(e.target.value);
+                                    }
+                                }}
+                                placeholder="Paste link here (Amazon, Etsy, etc.)"
+                                className={`h-9 text-sm pr-9 transition-all ${isScraping ? 'border-primary/50 ring-1 ring-primary/20' : ''}`}
+                                required
+                            />
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                                {isScraping ? (
+                                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                                ) : (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 hover:bg-transparent"
+                                        onClick={() => handleScrape(formData.buy_link)}
+                                        disabled={!formData.buy_link.startsWith('http')}
+                                    >
+                                        <Sparkles className={`w-4 h-4 ${formData.buy_link.startsWith('http') ? 'text-amber-500' : 'text-muted-foreground/30'}`} />
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative py-1">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t border-muted-foreground/10" />
+                        </div>
+                        <div className="relative flex justify-center text-[10px] uppercase">
+                            <span className="bg-background px-2 text-muted-foreground/50 font-medium">Item Details</span>
+                        </div>
+                    </div>
+
                     {/* Row 1: Item Name (2/3) and Must Have (1/3) */}
                     <div className="grid grid-cols-3 gap-3 items-end">
                         <div className="col-span-2 space-y-1">
@@ -151,33 +264,18 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                            <Label htmlFor="image_url" className="text-xs">Image URL</Label>
-                            <Input
-                                id="image_url"
-                                name="image_url"
-                                type="url"
-                                value={formData.image_url}
-                                onChange={handleChange}
-                                placeholder="https://..."
-                                className="h-8 text-sm"
-                                required
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <Label htmlFor="buy_link" className="text-xs">Shop Link</Label>
-                            <Input
-                                id="buy_link"
-                                name="buy_link"
-                                type="url"
-                                value={formData.buy_link}
-                                onChange={handleChange}
-                                placeholder="https://..."
-                                className="h-8 text-sm"
-                                required
-                            />
-                        </div>
+                    <div className="space-y-1">
+                        <Label htmlFor="image_url" className="text-xs">Image URL</Label>
+                        <Input
+                            id="image_url"
+                            name="image_url"
+                            type="url"
+                            value={formData.image_url}
+                            onChange={handleChange}
+                            placeholder="https://..."
+                            className="h-8 text-sm"
+                            required
+                        />
                     </div>
                 </CardContent>
                 <CardFooter className="flex gap-2 pt-2 pb-4">
@@ -194,5 +292,3 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
 };
 
 export default WishlistForm;
-
-
