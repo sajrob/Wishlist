@@ -434,6 +434,13 @@ input:checked+.toggle-slider:before {
 }
 
 /* Mobile Adjustments */
+@media (max-width: 640px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+}
+
 @media (max-width: 1024px) {
   .dashboard-sidebar {
     position: static;

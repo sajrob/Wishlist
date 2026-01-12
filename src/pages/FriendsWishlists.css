@@ -275,10 +275,10 @@
         font-size: 0.65rem;
     }
 
-    /* Make cards smaller on mobile */
+    /* Show one card per row on mobile */
     .cards-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: var(--spacing-sm);
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
     }
 
     .wishlist-card .card-image-container {
