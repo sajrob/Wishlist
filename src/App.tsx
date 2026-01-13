@@ -87,7 +87,7 @@ function App() {
             }
           />
           <Route path="/contact" element={<ContactUs />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
       <Toaster position="top-center" />

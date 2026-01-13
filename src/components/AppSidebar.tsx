@@ -109,7 +109,7 @@ export function AppSidebar({
   const navItems = [
     {
       title: "Friends",
-      icon: Users,
+      icon: User,
       url: "/friends-wishlists",
       active: location.pathname === "/friends-wishlists",
     },
