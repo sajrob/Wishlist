@@ -29,7 +29,15 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
 
         setIsScraping(true);
         const promise = (async () => {
-            const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`);
+            // Get current session for Auth token
+            const { data: { session } } = await import('../supabaseClient').then(m => m.supabase.auth.getSession());
+            const token = session?.access_token;
+
+            const res = await fetch(`/api/scrape?url=${encodeURIComponent(url)}`, {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`
+                } : undefined
+            });
 
             // Check content type to catch Vite returning index.html for unknown routes
             const contentType = res.headers.get("content-type");

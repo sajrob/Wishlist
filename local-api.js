@@ -6,12 +6,41 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Helper: Validate URL (SSRF Protection)
+function isSafeUrl(urlS) {
+    try {
+        const u = new URL(urlS);
+        if (!['http:', 'https:'].includes(u.protocol)) return false;
+        const hostname = u.hostname.toLowerCase();
+        // Block loopback and private ranges
+        return !(
+            hostname === 'localhost' ||
+            hostname === '127.0.0.1' ||
+            hostname === '::1' ||
+            hostname === '0.0.0.0' ||
+            hostname.startsWith('192.168.') ||
+            hostname.startsWith('10.') ||
+            hostname.startsWith('172.16.') ||
+            hostname.includes('internal')
+        );
+    } catch {
+        return false;
+    }
+}
+
 app.get('/api/scrape', async (req, res) => {
     const { url } = req.query;
 
     if (!url || typeof url !== 'string') {
         return res.status(400).json({ error: 'URL is required' });
     }
+
+    if (!isSafeUrl(url)) {
+        return res.status(403).json({ error: 'Invalid or restricted URL' });
+    }
+
+    // Local API currently allows requests without strict Auth check for dev convenience.
+    // In production (api/scrape.ts), Supabase Auth is enforced.
 
     try {
         let headers = {
