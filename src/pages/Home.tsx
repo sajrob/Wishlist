@@ -22,6 +22,12 @@ import {
   SidebarInset,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "../context/AuthContext";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
@@ -52,6 +58,7 @@ function Home() {
   const [editingCategory, setEditingCategory] = useState<
     (Category & { itemIds?: string[] }) | null
   >(null);
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
   const wishlistItems = useFilteredItems(allItems, activeCategory);
 
@@ -195,6 +202,11 @@ function Home() {
       return;
     }
 
+    if (data && !data.is_public && categories.length < 4) {
+      setIsTooltipOpen(true);
+      setTimeout(() => setIsTooltipOpen(false), 10000);
+    }
+
     await refetch();
     if (data) {
       setActiveCategory(data.id);
@@ -331,8 +343,9 @@ function Home() {
             />
             <div className="flex-1 min-w-0">
               <div className="flex flex-col">
-                <h1 className="text-lg font-semibold leading-none">
+                <h1 className="text-lg font-semibold leading-none flex items-center gap-2">
                   {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
+                  <span className="text-muted-foreground font-normal text-xs">({wishlistItems.length})</span>
                 </h1>
 
                 <div className="flex items-center gap-2 mt-1">
@@ -361,14 +374,32 @@ function Home() {
                         if (!cat) return null;
                         return (
                           <>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-muted/50 hover:bg-muted text-muted-foreground"
-                              onClick={() => handleToggleCategoryPrivacy(cat.id, cat.is_public)}
-                            >
-                              {cat.is_public ? "🌍 Public" : "🔒 Private"}
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-muted/50 hover:bg-muted text-muted-foreground"
+                                    onClick={() => {
+                                      handleToggleCategoryPrivacy(cat.id, cat.is_public);
+                                      setIsTooltipOpen(false);
+                                    }}
+                                  >
+                                    {cat.is_public ? "🌍 Public" : "🔒 Private"}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom" className="max-w-[200px] p-3 bg-white border-2 border-blue-500">
+                                  <p className="font-medium text-black">
+                                    Wishlist is private by default.
+                                    <br />
+                                    <span className="text-black/70 font-normal text-xs">
+                                      Click to allow other users to see it.
+                                    </span>
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                             <Button
                               variant="secondary"
                               size="sm"
@@ -388,7 +419,7 @@ function Home() {
                           </>
                         );
                       })()}
-                    </div>
+                    </div >
                   )}
                 </div>
               </div>
