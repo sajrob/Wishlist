@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { FriendCardSkeleton } from '../components/FriendCardSkeleton';
 import { AppSidebar } from "../components/AppSidebar";
 import {
     SidebarProvider,
@@ -144,6 +145,17 @@ const FriendsWishlists = () => {
     };
 
     const renderList = (list: FriendWishlistSummary[], type: ConnectionTab) => {
+        if (loading) {
+            // Show skeleton loading state
+            return (
+                <div className="cards-grid">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                        <FriendCardSkeleton key={i} />
+                    ))}
+                </div>
+            );
+        }
+
         if (list.length === 0) {
             return (
                 <div className="empty-state-card mt-4">
@@ -213,14 +225,6 @@ const FriendsWishlists = () => {
             </div>
         );
     };
-
-    if (loading) {
-        return (
-            <div className="flex-center" style={{ height: '80vh' }}>
-                <LoadingSpinner />
-            </div>
-        );
-    }
 
     return (
         <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">

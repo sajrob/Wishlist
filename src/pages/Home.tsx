@@ -8,6 +8,7 @@ import CreateCategoryModal from "../components/CreateCategoryModal";
 import EmptyState from "../components/EmptyState";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { AppSidebar } from "../components/AppSidebar";
+import { WishlistCardSkeleton } from "../components/WishlistCardSkeleton";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -332,6 +333,7 @@ function Home() {
         onCategoryChange={setActiveCategory}
         onCreateCategory={handleOpenCategoryModal}
         categories={categories}
+        loading={loading}
       />
       <SidebarInset className="flex flex-col bg-background overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
@@ -442,7 +444,12 @@ function Home() {
 
           <div className="flex flex-col gap-4 p-4">
             <div className="cards-grid">
-              {wishlistItems.length === 0 ? (
+              {loading ? (
+                // Show skeleton loading state
+                Array.from({ length: 6 }).map((_, i) => (
+                  <WishlistCardSkeleton key={i} />
+                ))
+              ) : wishlistItems.length === 0 ? (
                 <div style={{ gridColumn: "1 / -1" }}>
                   <EmptyState
                     message={

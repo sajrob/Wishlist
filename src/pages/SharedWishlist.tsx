@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import WishlistCard from "../components/WishlistCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import EmptyState from "../components/EmptyState";
+import { WishlistCardSkeleton } from "../components/WishlistCardSkeleton";
 import { AppSidebar } from "../components/AppSidebar";
 import {
     SidebarProvider,
@@ -70,13 +71,6 @@ function SharedWishlist() {
     // Find active category name for title
     const activeCategoryName = categories.find((c) => c.id === activeCategory)?.name;
 
-    if (loading)
-        return (
-            <div className="flex-center" style={{ height: "80vh" }}>
-                <LoadingSpinner />
-            </div>
-        );
-
     if (error)
         return (
             <div className="app-content">
@@ -97,6 +91,7 @@ function SharedWishlist() {
                 title={sidebarTitle}
                 showCreateCategory={false}
                 showAllItems={isPublic}
+                loading={loading}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden">
                 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
@@ -126,7 +121,12 @@ function SharedWishlist() {
                 <div className="flex-1 overflow-y-auto">
                     <div className="flex flex-col gap-4 p-4">
                         <div className="cards-grid">
-                            {wishlistItems.length === 0 ? (
+                            {loading ? (
+                                // Show skeleton loading state
+                                Array.from({ length: 6 }).map((_, i) => (
+                                    <WishlistCardSkeleton key={i} />
+                                ))
+                            ) : wishlistItems.length === 0 ? (
                                 <div style={{ gridColumn: "1 / -1" }}>
                                     <EmptyState
                                         message={

@@ -46,6 +46,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SidebarCategorySkeleton } from "./SidebarCategorySkeleton";
 
 interface AppSidebarProps {
   activeCategory: string | null;
@@ -55,6 +56,7 @@ interface AppSidebarProps {
   title?: string;
   showCreateCategory?: boolean;
   showAllItems?: boolean;
+  loading?: boolean;
 }
 
 export function AppSidebar({
@@ -65,6 +67,7 @@ export function AppSidebar({
   title,
   showCreateCategory = true,
   showAllItems = true,
+  loading = false,
 }: AppSidebarProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -197,25 +200,29 @@ export function AppSidebar({
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       )}
-                      {categories.map((category) => (
-                        <SidebarMenuSubItem key={category.id}>
-                          <SidebarMenuSubButton
-                            onClick={() => {
-                              onCategoryChange(category.id);
-                              handleNavClick();
-                            }}
-                            isActive={activeCategory === category.id}
-                          >
-                            <Package className="size-4" />
-                            <span>{category.name}</span>
-                            {category.is_public && (
-                              <span className="ml-auto text-xs opacity-70">
-                                🌍
-                              </span>
-                            )}
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+                      {loading ? (
+                        <SidebarCategorySkeleton count={3} />
+                      ) : (
+                        categories.map((category) => (
+                          <SidebarMenuSubItem key={category.id}>
+                            <SidebarMenuSubButton
+                              onClick={() => {
+                                onCategoryChange(category.id);
+                                handleNavClick();
+                              }}
+                              isActive={activeCategory === category.id}
+                            >
+                              <Package className="size-4" />
+                              <span>{category.name}</span>
+                              {category.is_public && (
+                                <span className="ml-auto text-xs opacity-70">
+                                  🌍
+                                </span>
+                              )}
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))
+                      )}
                       {showCreateCategory && onCreateCategory && (
                         <SidebarMenuSubItem>
                           <SidebarMenuSubButton onClick={onCreateCategory}>
