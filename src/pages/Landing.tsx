@@ -1,3 +1,7 @@
+/**
+ * Landing page component for unauthenticated users.
+ * Provides a high-level overview of the app's features and a call to action for signing up.
+ */
 import React from "react";
 import { Link } from "react-router-dom";
 import "./Landing.css";

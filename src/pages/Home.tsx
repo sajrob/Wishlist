@@ -1,3 +1,7 @@
+/**
+ * Home page component that serves as the main dashboard for users to manage their wishlists
+ * and items. It provides functionality for adding, editing, and deleting items and categories.
+ */
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";

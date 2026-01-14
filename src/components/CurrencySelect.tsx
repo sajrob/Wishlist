@@ -1,3 +1,7 @@
+/**
+ * CurrencySelect component that provides a searchable dropdown for selecting currency codes.
+ * Includes a comprehensive list of world currencies with their names and symbols.
+ */
 import React from 'react';
 import { Check, ChevronsUpDown } from "lucide-react"
 import { cn } from "@/lib/utils";

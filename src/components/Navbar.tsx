@@ -1,3 +1,7 @@
+/**
+ * Navbar component that provides top-level navigation and brand identity.
+ * Adapts based on the user's authentication state, showing links for login/signup or dashboard access.
+ */
 import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";

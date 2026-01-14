@@ -1,3 +1,7 @@
+/**
+ * WishlistForm component that provides a form for adding or editing wishlist items.
+ * Includes features like automatic product detail scraping and currency selection.
+ */
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";

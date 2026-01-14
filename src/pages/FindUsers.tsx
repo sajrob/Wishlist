@@ -1,3 +1,7 @@
+/**
+ * Find Users page component that allows users to search for and follow other users.
+ * Facilitates social interaction by letting users discover and view friends' wishlists.
+ */
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { confirmDelete } from '../utils/toastHelpers';

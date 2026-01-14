@@ -1,3 +1,7 @@
+/**
+ * Main App component that defines the application's routing structure and global providers.
+ * Manages public and private routes, authentication context, and global UI components like the Navbar and Toaster.
+ */
 import React, { ReactNode } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';

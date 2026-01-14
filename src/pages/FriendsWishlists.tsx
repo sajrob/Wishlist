@@ -1,3 +1,8 @@
+/**
+ * Friends Wishlists page component that manages social connections.
+ * Displays mutual friends, people the user follows, and the user's followers,
+ * providing links to view their respective wishlists.
+ */
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from "sonner";
 import { confirmDelete } from '../utils/toastHelpers';

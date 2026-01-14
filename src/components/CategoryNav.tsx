@@ -1,3 +1,7 @@
+/**
+ * CategoryNav component that handles filtering and navigation of wishlist categories.
+ * Allows users to switch between different wishlists and manage category-specific actions.
+ */
 import React from 'react';
 import type { Category } from '../types';
 import './CategoryNav.css';

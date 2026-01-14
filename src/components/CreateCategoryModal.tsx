@@ -1,3 +1,7 @@
+/**
+ * CreateCategoryModal component that provides a modal interface for creating or editing categories/wishlists.
+ * Users can name the category, set its privacy, and associate existing items with it.
+ */
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

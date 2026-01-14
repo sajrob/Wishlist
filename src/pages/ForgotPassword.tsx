@@ -1,3 +1,7 @@
+/**
+ * Forgot Password page component that handles the password reset flow.
+ * Allows users to request a password reset link by providing their email address.
+ */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

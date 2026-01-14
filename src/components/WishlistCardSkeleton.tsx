@@ -1,3 +1,7 @@
+/**
+ * WishlistCardSkeleton component that provides a loading state for wishlist items.
+ * Uses shadcn/ui skeleton components to mimic the WishlistCard layout.
+ */
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function WishlistCardSkeleton() {

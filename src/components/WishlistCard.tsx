@@ -1,3 +1,7 @@
+/**
+ * WishlistCard component that represents an individual item within a wishlist.
+ * Displays item details, price, and actions like editing, deleting, or claiming (for friends).
+ */
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

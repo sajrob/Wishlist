@@ -1,3 +1,7 @@
+/**
+ * LoadingSpinner component that displays a rotating indicator during data fetching or processing.
+ * Supports inline and full-page styles with a customizable message.
+ */
 interface LoadingSpinnerProps {
     message?: string;
     inline?: boolean;

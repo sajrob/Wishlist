@@ -1,3 +1,7 @@
+/**
+ * Sign Up page component that handles user registration.
+ * Collects user details and facilitates account creation via email/password or Google.
+ */
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -188,7 +192,7 @@ const SignUp = () => {
             </Link>
           </p>
           <div className="flex justify-center w-full">
-            <Link to="/forgot-password" size="sm" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
               Forgot your password?
             </Link>
           </div>

@@ -1,3 +1,7 @@
+/**
+ * Update Password page component that allows users to set a new password.
+ * Typically used after a password reset request or when a user wants to change their password.
+ */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

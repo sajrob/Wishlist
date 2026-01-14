@@ -1,3 +1,7 @@
+/**
+ * EmptyState component that displays a placeholder message when there is no content to show.
+ * Useful for guiding users to take an action, like adding their first item or creating a wishlist.
+ */
 import { IconPackage } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";

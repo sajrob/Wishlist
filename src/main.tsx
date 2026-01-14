@@ -1,3 +1,7 @@
+/**
+ * Entry point for the React application.
+ * Renders the root App component and initializes global styles and analytics.
+ */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Analytics } from '@vercel/analytics/react';

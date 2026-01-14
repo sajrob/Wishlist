@@ -1,3 +1,7 @@
+/**
+ * FriendCardSkeleton component that provides a loading state for friend/user cards.
+ * Uses shadcn/ui skeleton components to mimic the layout while data is being fetched.
+ */
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function FriendCardSkeleton() {

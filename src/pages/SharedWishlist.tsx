@@ -1,3 +1,7 @@
+/**
+ * Shared Wishlist page component that displays another user's public wishlists.
+ * Provides a read-only view of items and allows for social interaction.
+ */
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import WishlistCard from "../components/WishlistCard";

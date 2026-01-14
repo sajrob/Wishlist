@@ -1,3 +1,7 @@
+/**
+ * Profile page component that allows users to view and update their account information.
+ * Displays user statistics and provides a form to edit personal details like name.
+ */
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";

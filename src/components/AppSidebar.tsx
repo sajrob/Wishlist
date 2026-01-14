@@ -1,3 +1,7 @@
+/**
+ * AppSidebar component that provides the main navigation for the application.
+ * Includes links to wishlists, categories, social features, and user account settings.
+ */
 import * as React from "react";
 import {
   Home,

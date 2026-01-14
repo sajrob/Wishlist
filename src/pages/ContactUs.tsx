@@ -1,3 +1,7 @@
+/**
+ * Contact Us page component providing a form for users to send messages or feedback
+ * to the support team. Includes placeholder contact information.
+ */
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { toast } from 'sonner';

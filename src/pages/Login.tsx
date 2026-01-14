@@ -1,3 +1,7 @@
+/**
+ * Login page component that facilitates user authentication.
+ * Supports email/password login and third-party authentication via Google.
+ */
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";

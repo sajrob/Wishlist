@@ -1,3 +1,7 @@
+/**
+ * SidebarCategorySkeleton component that provides a loading state for category links in the sidebar.
+ * Displays a list of skeletons representing the category name and icon.
+ */
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function SidebarCategorySkeleton({ count = 3 }: { count?: number }) {

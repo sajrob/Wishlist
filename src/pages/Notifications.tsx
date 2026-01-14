@@ -1,3 +1,7 @@
+/**
+ * Notifications page component that displays user-specific alerts and updates.
+ * Shows activity such as new followers and allows users to mark notifications as read.
+ */
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
