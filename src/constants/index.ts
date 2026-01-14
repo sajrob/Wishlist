@@ -29,7 +29,7 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
     PROFILE: '/profile',
     FIND_USERS: '/find-users',
-    FRIENDS_WISHLISTS: '/friends-wishlists',
+    FRIENDS_WISHLISTS: '/friends',
     SHARED_WISHLIST: (userId: string) => `/wishlist/${userId}`,
 } as const;
 

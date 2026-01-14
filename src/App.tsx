@@ -67,7 +67,7 @@ function App() {
             }
           />
           <Route
-            path="/friends-wishlists"
+            path="/friends"
             element={
               <PrivateRoute>
                 <FriendsWishlists />

@@ -117,8 +117,8 @@ export function AppSidebar({
     {
       title: "Friends",
       icon: User,
-      url: "/friends-wishlists",
-      active: location.pathname === "/friends-wishlists",
+      url: "/friends",
+      active: location.pathname === "/friends",
     },
     {
       title: "Find Friends",
