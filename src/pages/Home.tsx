@@ -348,10 +348,16 @@ function Home() {
                 <div className="flex items-center justify-between gap-4">
                   <h1 className="text-base md:text-lg font-semibold leading-none flex items-center">
                     {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                    <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-muted text-muted-foreground rounded-full font-medium border border-border/50 tabular-nums">
+                    <span className="ml-2 px-2 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full font-bold border border-primary/20 tabular-nums">
                       {wishlistItems.length}
                     </span>
                   </h1>
+                  {wishlistItems.length > 0 && (
+                    <Button onClick={handleOpenForm} size="sm" className="h-8 gap-1.5 px-3 sm:px-4 shadow-sm">
+                      <Plus className="size-4" />
+                      <span className="hidden sm:inline">Add Item</span>
+                    </Button>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 mt-1">
@@ -374,7 +380,7 @@ function Home() {
                       </label>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       {(() => {
                         const cat = categories.find((c) => c.id === activeCategory);
                         if (!cat) return null;
@@ -450,14 +456,7 @@ function Home() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 ml-auto">
-            {wishlistItems.length > 0 && (
-              <Button onClick={handleOpenForm} size="sm" className="h-8 gap-1.5 px-3 sm:px-4">
-                <Plus className="size-4" />
-                <span className="hidden sm:inline">Add Item</span>
-              </Button>
-            )}
-          </div>
+
         </header>
 
         <div className={`flex-1 overflow-y-auto ${isModalOpen ? "blur-sm pointer-events-none" : ""}`}>
