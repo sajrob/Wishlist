@@ -4,13 +4,14 @@
  */
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Share2 } from "lucide-react";
 import { confirmDelete } from "../utils/toastHelpers";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
 import CreateCategoryModal from "../components/CreateCategoryModal";
 import EmptyState from "../components/EmptyState";
 import LoadingSpinner from "../components/LoadingSpinner";
+import ShareModal from '../components/ShareModal';
 import { AppSidebar } from "../components/AppSidebar";
 import { WishlistCardSkeleton } from "../components/WishlistCardSkeleton";
 import { Button } from "@/components/ui/button";
@@ -59,13 +60,14 @@ function Home() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<WishlistItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<
     (Category & { itemIds?: string[] }) | null
   >(null);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
 
-  const wishlistItems = useFilteredItems(allItems, activeCategory);
+  const wishlistItems = useFilteredItems(allItems as WishlistItem[], activeCategory);
 
   const handleTogglePublic = async () => {
     await togglePublic();
@@ -154,11 +156,9 @@ function Home() {
     const itemToDelete = allItems.find((i) => i.id === itemId);
 
     if (activeCategory) {
-      // Case 1: Viewing a specific wishlist - just remove from that wishlist (make uncategorized)
       confirmDelete({
         title: "Remove from Wishlist?",
-        description: `"${itemToDelete?.name || "this item"
-          }" will be removed from this wishlist but will still be available in "All Items".`,
+        description: `"${itemToDelete?.name || "this item"}" will be removed from this wishlist but will still be available in "All Items".`,
         deleteLabel: "Remove",
         onDelete: async () => {
           const { data, error } = await updateItem(itemId, {
@@ -168,7 +168,6 @@ function Home() {
             toast.error("Error removing item");
             return;
           }
-          // Update the local state - the item still exists but its category is now null
           setAllItems((prev) =>
             prev.map((item) => (item.id === itemId && data ? data : item))
           );
@@ -176,11 +175,9 @@ function Home() {
         },
       });
     } else {
-      // Case 2: Viewing "All Items" - permanent deletion
       confirmDelete({
         title: "Permanently Delete?",
-        description: `This will completely remove "${itemToDelete?.name || "this item"
-          }" from your account.`,
+        description: `This will completely remove "${itemToDelete?.name || "this item"}" from your account.`,
         deleteLabel: "Delete Permanently",
         onDelete: async () => {
           const { error } = await deleteItem(itemId);
@@ -237,8 +234,7 @@ function Home() {
 
     confirmDelete({
       title: "Delete this category?",
-      description: `Items in "${catToDelete?.name || "this category"
-        }" will be moved to "All Items".`,
+      description: `Items in "${catToDelete?.name || "this category"}" will be moved to "All Items".`,
       onDelete: async () => {
         const { error } = await deleteCategory(categoryId);
         if (error) {
@@ -317,7 +313,7 @@ function Home() {
     setEditingCategory(null);
   };
 
-  const isModalOpen = isFormOpen || isCategoryModalOpen;
+  const isModalOpen = isFormOpen || isCategoryModalOpen || isShareModalOpen;
 
   if (loading && !user)
     return (
@@ -339,7 +335,7 @@ function Home() {
         categories={categories}
         loading={loading}
       />
-      <SidebarInset className="flex flex-col bg-background overflow-hidden">
+      <SidebarInset className="flex flex-col bg-background overflow-hidden border-l">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
@@ -349,10 +345,22 @@ function Home() {
             />
             <div className="flex-1 min-w-0">
               <div className="flex flex-col">
-                <h1 className="text-lg font-semibold leading-none flex items-center gap-2">
-                  {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                  <span className="tab-count">{wishlistItems.length}</span>
-                </h1>
+                <div className="flex items-center justify-between gap-4">
+                  <h1 className="text-lg font-semibold leading-none flex items-center gap-2">
+                    {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
+                    <span className="tab-count">{wishlistItems.length}</span>
+                  </h1>
+
+                  {activeCategory && (
+                    <button
+                      onClick={() => setIsShareModalOpen(true)}
+                      className="text-[10px] uppercase tracking-wider font-bold flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
+                    >
+                      <Share2 className="w-3 h-3" />
+                      Share
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-2 mt-1">
                   {!activeCategory ? (
@@ -425,7 +433,7 @@ function Home() {
                           </>
                         );
                       })()}
-                    </div >
+                    </div>
                   )}
                 </div>
               </div>
@@ -441,16 +449,11 @@ function Home() {
           </div>
         </header>
 
-        <div
-          className={`flex-1 overflow-y-auto ${isModalOpen ? "blur-sm pointer-events-none" : ""
-            }`}
-        >
-
+        <div className={`flex-1 overflow-y-auto ${isModalOpen ? "blur-sm pointer-events-none" : ""}`}>
           <div className="flex flex-col gap-4 p-4">
             <div className="cards-grid">
               {loading ? (
-                // Show skeleton loading state
-                Array.from({ length: 6 }).map((_, i) => (
+                Array.from({ length: 8 }).map((_, i) => (
                   <WishlistCardSkeleton key={i} />
                 ))
               ) : wishlistItems.length === 0 ? (
@@ -461,9 +464,7 @@ function Home() {
                         ? "Get started by creating your first Wishlist."
                         : activeCategory === null
                           ? "Add your first item"
-                          : "Your " +
-                          activeCategoryName +
-                          " wishlist is empty, start adding items."
+                          : "Your " + activeCategoryName + " wishlist is empty, start adding items."
                     }
                     action={
                       categories.length === 0
@@ -479,12 +480,8 @@ function Home() {
                   >
                     {categories.length > 0 && activeCategory === null && (
                       <div className="flex flex-col items-center gap-2 mt-2">
-                        <p className="text-muted-foreground italic">
-                          or jump to a specific wishlist:
-                        </p>
-                        <Select
-                          onValueChange={(value) => setActiveCategory(value)}
-                        >
+                        <p className="text-muted-foreground italic">or jump to a specific wishlist:</p>
+                        <Select onValueChange={(value) => setActiveCategory(value)}>
                           <SelectTrigger className="w-[200px] h-8 text-xs">
                             <SelectValue placeholder="Select a wishlist" />
                           </SelectTrigger>
@@ -516,11 +513,7 @@ function Home() {
         </div>
       </SidebarInset>
 
-      {/* Add/Edit Item Modal */}
-      <Dialog
-        open={isFormOpen}
-        onOpenChange={(open) => !open && handleCloseForm()}
-      >
+      <Dialog open={isFormOpen} onOpenChange={(open) => !open && handleCloseForm()}>
         <DialogContent className="sm:max-w-[550px] p-0 overflow-hidden border-none shadow-2xl">
           <WishlistForm
             onSubmit={editingItem ? handleUpdateItem : handleAddItem}
@@ -530,11 +523,7 @@ function Home() {
         </DialogContent>
       </Dialog>
 
-      {/* Add/Edit Wishlist Modal */}
-      <Dialog
-        open={isCategoryModalOpen}
-        onOpenChange={(open) => !open && handleCloseCategoryModal()}
-      >
+      <Dialog open={isCategoryModalOpen} onOpenChange={(open) => !open && handleCloseCategoryModal()}>
         <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden border-none shadow-2xl">
           <CreateCategoryModal
             items={allItems}
@@ -545,6 +534,16 @@ function Home() {
           />
         </DialogContent>
       </Dialog>
+
+      {activeCategory && (
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          categoryId={activeCategory}
+          categoryName={activeCategoryName || ''}
+          ownerName={user?.user_metadata?.first_name || 'My'}
+        />
+      )}
     </SidebarProvider>
   );
 }

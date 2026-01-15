@@ -17,6 +17,7 @@ import FriendsWishlists from './pages/FriendsWishlists';
 import SharedWishlist from './pages/SharedWishlist';
 import Notifications from './pages/Notifications';
 import ContactUs from './pages/ContactUs';
+import SharePage from './pages/SharePage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Toaster } from "@/components/ui/sonner";
 import './App.css';
@@ -82,13 +83,12 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/notifications"
-            element={
-              <PrivateRoute>
-                <Notifications />
-              </PrivateRoute>
-            }
+          <Route path="/share/:categoryId" element={<SharePage />} />
+          <Route path="/notifications" element={
+            <PrivateRoute>
+              <Notifications />
+            </PrivateRoute>
+          }
           />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="*" element={<Navigate to="/" replace />} />

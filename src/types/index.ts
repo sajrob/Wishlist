@@ -68,10 +68,19 @@ export interface Notification {
     id: string;
     user_id: string;
     actor_id: string; // The person who triggered the notification
-    type: 'follow' | string;
+    type: 'follow' | 'wishlist_share' | string;
     message: string;
+    category_id?: string;
     is_read: boolean;
     created_at: string;
+}
+
+export interface SharedLink {
+    id: string;
+    created_at: string;
+    category_id: string;
+    shared_by: string;
+    target_user_id?: string;
 }
 
 export interface AuthUser {

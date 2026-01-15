@@ -320,6 +320,28 @@ export async function fetchFollowers(
     }
 }
 
+export async function fetchMutualFriends(userId: string): Promise<SupabaseResponse<Profile[]>> {
+    try {
+        // Fetch people YOU follow
+        const { data: following, error: fError } = await fetchFriends(userId);
+        if (fError) throw fError;
+
+        // Fetch people who follow YOU
+        const { data: followers, error: folError } = await fetchFollowers(userId);
+        if (folError) throw folError;
+
+        const followingIds = new Set((following || []).map(f => f.friend_id));
+        const mutualIds = (followers || []).map(f => f.user_id).filter(id => followingIds.has(id));
+
+        if (mutualIds.length === 0) return { data: [], error: null };
+
+        return await fetchProfiles(mutualIds);
+    } catch (error) {
+        console.error('Error fetching mutual friends:', error);
+        return { data: null, error: error as Error };
+    }
+}
+
 export async function fetchPublicCategories(
     userIds: string[],
 ): Promise<SupabaseResponse<Array<Pick<Category, 'user_id' | 'id' | 'name' | 'is_public'>>>> {

@@ -14,11 +14,13 @@ import {
     SidebarInset,
     SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Share2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
 import { fetchProfile } from "../utils/supabaseHelpers";
+import ShareModal from '../components/ShareModal';
 import { getFirstName, getPossessiveName } from "../utils/nameUtils";
 import type { WishlistItem, Profile } from "../types";
 import "../App.css";
@@ -30,6 +32,7 @@ function SharedWishlist() {
     const { isPublic } = useWishlistSettingsReadOnly(userId || null);
 
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -115,11 +118,22 @@ function SharedWishlist() {
                                     </>
                                 ) : (
                                     <>
-                                        <h1 className="text-lg font-semibold leading-none">
-                                            {activeCategory
-                                                ? `${activeCategoryName} Wishlist`
-                                                : title}
-                                        </h1>
+                                        <div className="flex items-center justify-between gap-4">
+                                            <h1 className="text-lg font-semibold leading-none">
+                                                {activeCategory
+                                                    ? `${activeCategoryName} Wishlist`
+                                                    : title}
+                                            </h1>
+                                            {activeCategory && (
+                                                <button
+                                                    onClick={() => setIsShareModalOpen(true)}
+                                                    className="text-[10px] uppercase tracking-wider font-bold flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
+                                                >
+                                                    <Share2 className="w-3 h-3" />
+                                                    Share
+                                                </button>
+                                            )}
+                                        </div>
                                         <p className="text-xs text-muted-foreground mt-1">
                                             {activeCategory
                                                 ? `Viewing items in ${activeCategoryName}`
@@ -161,6 +175,16 @@ function SharedWishlist() {
                     </div>
                 </div>
             </SidebarInset>
+
+            {activeCategory && (
+                <ShareModal
+                    isOpen={isShareModalOpen}
+                    onClose={() => setIsShareModalOpen(false)}
+                    categoryId={activeCategory}
+                    categoryName={activeCategoryName || ''}
+                    ownerName={firstName || 'User'}
+                />
+            )}
         </SidebarProvider>
     );
 }
