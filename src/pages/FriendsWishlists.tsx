@@ -25,12 +25,29 @@ import './FriendsWishlists.css';
 
 type ConnectionTab = 'friends' | 'following' | 'followers';
 
+// Module-level cache to persist data across route changes within the same session
+let cachedFollowing: FriendWishlistSummary[] | null = null;
+let cachedFollowers: FriendWishlistSummary[] | null = null;
+let cachedActiveTab: ConnectionTab = 'friends';
+
+// Try to initialize from sessionStorage if available
+try {
+    const storedFollowing = sessionStorage.getItem('wishlist_cachedFollowing');
+    const storedFollowers = sessionStorage.getItem('wishlist_cachedFollowers');
+    const storedTab = sessionStorage.getItem('wishlist_activeTab');
+    if (storedFollowing && !cachedFollowing) cachedFollowing = JSON.parse(storedFollowing);
+    if (storedFollowers && !cachedFollowers) cachedFollowers = JSON.parse(storedFollowers);
+    if (storedTab) cachedActiveTab = storedTab as ConnectionTab;
+} catch (e) {
+    console.error('Error loading cache from sessionStorage:', e);
+}
+
 const FriendsWishlists = () => {
     const { user } = useAuth();
-    const [following, setFollowing] = useState<FriendWishlistSummary[]>([]);
-    const [followers, setFollowers] = useState<FriendWishlistSummary[]>([]);
-    const [activeTab, setActiveTab] = useState<ConnectionTab>('friends');
-    const [loading, setLoading] = useState(true);
+    const [following, setFollowing] = useState<FriendWishlistSummary[]>(cachedFollowing || []);
+    const [followers, setFollowers] = useState<FriendWishlistSummary[]>(cachedFollowers || []);
+    const [activeTab, setActiveTab] = useState<ConnectionTab>(cachedActiveTab);
+    const [loading, setLoading] = useState(!cachedFollowing);
 
     useEffect(() => {
         if (user) {
@@ -40,7 +57,10 @@ const FriendsWishlists = () => {
 
     const fetchConnections = async () => {
         if (!user) return;
-        setLoading(true);
+        // Only show loading skeletons if we don't have any data yet
+        if (!cachedFollowing || cachedFollowing.length === 0) {
+            setLoading(true);
+        }
         try {
             // Fetch people YOU follow
             const { data: followingData, error: fError } = await fetchFriends(user.id);
@@ -87,11 +107,27 @@ const FriendsWishlists = () => {
 
             setFollowing(followingList);
             setFollowers(followersList);
+            cachedFollowing = followingList;
+            cachedFollowers = followersList;
+
+            // Update sessionStorage
+            try {
+                sessionStorage.setItem('wishlist_cachedFollowing', JSON.stringify(followingList));
+                sessionStorage.setItem('wishlist_cachedFollowers', JSON.stringify(followersList));
+            } catch (e) {
+                console.error('Error saving cache to sessionStorage:', e);
+            }
         } catch (error) {
             console.error('Error fetching connections:', error);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleTabChange = (tab: ConnectionTab) => {
+        setActiveTab(tab);
+        cachedActiveTab = tab;
+        sessionStorage.setItem('wishlist_activeTab', tab);
     };
 
     const mutualFriends = useMemo(() => {
@@ -260,19 +296,19 @@ const FriendsWishlists = () => {
                         <div className="tabs-container mb-0 border-none pb-0">
                             <button
                                 className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('friends')}
+                                onClick={() => handleTabChange('friends')}
                             >
                                 Friends <span className="tab-count">{mutualFriends.length}</span>
                             </button>
                             <button
                                 className={`tab-btn ${activeTab === 'following' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('following')}
+                                onClick={() => handleTabChange('following')}
                             >
                                 Following <span className="tab-count">{following.length}</span>
                             </button>
                             <button
                                 className={`tab-btn ${activeTab === 'followers' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('followers')}
+                                onClick={() => handleTabChange('followers')}
                             >
                                 Followers <span className="tab-count">{followers.length}</span>
                             </button>
