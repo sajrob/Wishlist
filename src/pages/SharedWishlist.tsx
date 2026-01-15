@@ -15,6 +15,7 @@ import {
     SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
 import { fetchProfile } from "../utils/supabaseHelpers";
@@ -107,16 +108,25 @@ function SharedWishlist() {
                         />
                         <div className="flex-1 min-w-0">
                             <div className="flex flex-col">
-                                <h1 className="text-lg font-semibold leading-none">
-                                    {activeCategory
-                                        ? `${activeCategoryName} Wishlist`
-                                        : title}
-                                </h1>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {activeCategory
-                                        ? `Viewing items in ${activeCategoryName}`
-                                        : "All Public Items"}
-                                </p>
+                                {loading ? (
+                                    <>
+                                        <Skeleton className="h-4 w-[150px] mb-2" />
+                                        <Skeleton className="h-3 w-[100px]" />
+                                    </>
+                                ) : (
+                                    <>
+                                        <h1 className="text-lg font-semibold leading-none">
+                                            {activeCategory
+                                                ? `${activeCategoryName} Wishlist`
+                                                : title}
+                                        </h1>
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            {activeCategory
+                                                ? `Viewing items in ${activeCategoryName}`
+                                                : "All Public Items"}
+                                        </p>
+                                    </>
+                                )}
                             </div>
                         </div>
                     </div>
