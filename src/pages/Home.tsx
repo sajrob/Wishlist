@@ -4,7 +4,7 @@
  */
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Share2 } from "lucide-react";
+import { Plus, Share2, Pencil, Trash2, Globe, Lock } from "lucide-react";
 import { confirmDelete } from "../utils/toastHelpers";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
@@ -350,18 +350,6 @@ function Home() {
                     {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
                     <span className="tab-count">{wishlistItems.length}</span>
                   </h1>
-
-                  {activeCategory && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsShareModalOpen(true)}
-                      className="h-8 px-4 text-[10px] uppercase tracking-wider font-bold gap-2 rounded-full border-primary/20 bg-primary/5 text-primary hover:bg-[#2563eb] hover:text-white hover:border-[#2563eb] transition-all shadow-sm group"
-                    >
-                      <Share2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                      Share
-                    </Button>
-                  )}
                 </div>
 
                 <div className="flex items-center gap-2 mt-1">
@@ -394,43 +382,62 @@ function Home() {
                               <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant="secondary"
+                                    variant="outline"
                                     size="sm"
-                                    className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-muted/50 hover:bg-muted text-muted-foreground"
+                                    className={`h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-muted-foreground/10 transition-all ${cat.is_public
+                                        ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200/50"
+                                        : "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200/50"
+                                      }`}
                                     onClick={() => {
                                       handleToggleCategoryPrivacy(cat.id, cat.is_public);
                                       setIsTooltipOpen(false);
                                     }}
                                   >
-                                    {cat.is_public ? "🌍 Public" : "🔒 Private"}
+                                    {cat.is_public ? <Globe className="size-3" /> : <Lock className="size-3" />}
+                                    <span className="hidden sm:inline">{cat.is_public ? "Public" : "Private"}</span>
                                   </Button>
                                 </TooltipTrigger>
-                                <TooltipContent side="bottom" className="max-w-[200px] p-3 bg-white border-2 border-blue-500">
-                                  <p className="font-medium text-black">
-                                    Wishlist is private by default.
-                                    <br />
-                                    <span className="text-black/70 font-normal text-xs">
-                                      Click to allow other users to see it.
-                                    </span>
+                                <TooltipContent side="bottom" className="max-w-[200px] p-3 bg-white border-2 border-blue-500 pb-4">
+                                  <p className="font-medium text-black mb-1">
+                                    {cat.is_public ? "List is Visible" : "List is Hidden"}
+                                  </p>
+                                  <p className="text-black/70 font-normal text-[11px] leading-relaxed">
+                                    {cat.is_public
+                                      ? "Anyone with the link can view these items."
+                                      : "Only you can see this list. Click to make it public."}
                                   </p>
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
+
                             <Button
-                              variant="secondary"
+                              variant="outline"
                               size="sm"
-                              className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-muted/50 hover:bg-muted text-muted-foreground"
+                              className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-muted-foreground/10 bg-muted/30 hover:bg-muted text-muted-foreground"
                               onClick={() => handleEditCategory(cat)}
                             >
-                              Edit
+                              <Pencil className="size-3" />
+                              <span className="hidden sm:inline">Edit</span>
                             </Button>
+
                             <Button
-                              variant="secondary"
+                              variant="outline"
                               size="sm"
-                              className="h-5 px-1.5 text-[10px] uppercase tracking-wider font-bold bg-destructive/10 hover:bg-destructive/20 text-destructive border-none"
+                              className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-destructive/10 bg-destructive/5 hover:bg-destructive/10 text-destructive shadow-none"
                               onClick={() => handleDeleteCategory(cat.id)}
                             >
-                              Delete
+                              <Trash2 className="size-3" />
+                              <span className="hidden sm:inline">Delete</span>
+                            </Button>
+
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-none"
+                              onClick={() => setIsShareModalOpen(true)}
+                            >
+                              <Share2 className="size-3" />
+                              <span className="hidden sm:inline">Share</span>
                             </Button>
                           </>
                         );

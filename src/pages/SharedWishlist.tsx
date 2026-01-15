@@ -171,29 +171,29 @@ function SharedWishlist() {
                                     </>
                                 ) : (
                                     <>
-                                        <div className="flex items-center justify-between gap-4">
-                                            <h1 className="text-lg font-semibold leading-none">
+                                        <h1 className="text-lg font-semibold leading-none">
+                                            {activeCategory
+                                                ? `${activeCategoryName} Wishlist`
+                                                : title}
+                                        </h1>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <p className="text-xs text-muted-foreground whitespace-nowrap">
                                                 {activeCategory
-                                                    ? `${activeCategoryName} Wishlist`
-                                                    : title}
-                                            </h1>
+                                                    ? `Viewing items in ${activeCategoryName}`
+                                                    : "All Public Items"}
+                                            </p>
                                             {activeCategory && (
                                                 <Button
-                                                    variant="outline"
+                                                    variant="secondary"
                                                     size="sm"
+                                                    className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold bg-primary/10 hover:bg-primary/20 text-primary border-none gap-1.5 rounded-lg active:scale-95 transition-all"
                                                     onClick={() => setIsShareModalOpen(true)}
-                                                    className="h-8 px-4 text-[10px] uppercase tracking-wider font-bold gap-2 rounded-full border-primary/20 bg-primary/5 text-primary hover:bg-[#2563eb] hover:text-white hover:border-[#2563eb] transition-all shadow-sm group"
                                                 >
-                                                    <Share2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
-                                                    Share
+                                                    <Share2 className="size-3" />
+                                                    <span className="hidden sm:inline">Share List</span>
                                                 </Button>
                                             )}
                                         </div>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {activeCategory
-                                                ? `Viewing items in ${activeCategoryName}`
-                                                : "All Public Items"}
-                                        </p>
                                     </>
                                 )}
                             </div>

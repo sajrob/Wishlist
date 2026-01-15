@@ -197,7 +197,7 @@ const FindUsers = () => {
                                     ))}
                                 </div>
                             ) : users.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500">
+                                <div className="flex flex-col items-center justify-center py-10 text-center animate-in fade-in zoom-in duration-500">
                                     {hasSearched ? (
                                         <>
                                             <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-6">

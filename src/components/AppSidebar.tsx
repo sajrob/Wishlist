@@ -167,12 +167,13 @@ export function AppSidebar({
       url: "/find-users",
       active: location.pathname === "/find-users",
     },
-    {
-      title: "Groups",
-      icon: Users,
-      url: "/groups",
-      active: location.pathname === "/groups",
-    },
+    //this is for the collaborative wishlist feature
+    // {
+    //   title: "Groups",
+    //   icon: Users,
+    //   url: "/groups",
+    //   active: location.pathname === "/groups",
+    // },
   ];
 
   return (
