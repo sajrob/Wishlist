@@ -22,7 +22,10 @@ import {
     ExternalLink,
     Gift,
     Users,
-    Globe
+    Globe,
+    Search,
+    UserPlus,
+    X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSharing } from '../hooks/useSharing';
@@ -30,6 +33,8 @@ import { fetchMutualFriends } from '../utils/supabaseHelpers';
 import { useAuth } from '../context/AuthContext';
 import { Profile } from '../types';
 import { toast } from 'sonner';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from '../utils/nameUtils';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -37,6 +42,12 @@ interface ShareModalProps {
     categoryId: string;
     categoryName: string;
     ownerName: string;
+    avatar_url?: string;
+    user_metadata?: {
+        first_name?: string;
+        last_name?: string;
+        full_name?: string;
+    };
 }
 
 const ShareModal: React.FC<ShareModalProps> = ({
@@ -53,6 +64,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
     const [loadingFriends, setLoadingFriends] = useState(false);
     const [copied, setCopied] = useState(false);
     const [sharingToFriends, setSharingToFriends] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const shareUrl = getShareUrl(categoryId);
     const displayOwnerName = ownerName.endsWith('s') ? ownerName : `${ownerName}'s`;
@@ -166,50 +178,132 @@ const ShareModal: React.FC<ShareModalProps> = ({
                     </div>
 
                     <div className="flex-1 min-h-[360px] w-full relative overflow-y-auto overflow-x-hidden custom-scrollbar">
-                        <TabsContent value="friends" className="p-6 m-0 h-full flex flex-col data-[state=inactive]:hidden">
+                        <TabsContent value="friends" className="p-0 m-0 h-full flex flex-col data-[state=inactive]:hidden">
                             <div className="flex-1 overflow-hidden flex flex-col">
-                                <h3 className="text-sm font-medium mb-3 text-muted-foreground">Select mutual friends</h3>
-                                {loadingFriends ? (
-                                    <div className="flex items-center justify-center p-8">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                <div className="p-5 border-b bg-muted/5 flex items-center justify-between sticky top-0 z-10 backdrop-blur-sm">
+                                    <div>
+                                        <h3 className="text-[13px] font-bold text-foreground">Select mutual friends</h3>
+                                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Only people you follow who follow you back</p>
                                     </div>
-                                ) : friends.length === 0 ? (
-                                    <div className="text-center p-8 text-muted-foreground bg-muted/20 rounded-lg">
-                                        <p>No mutual friends found.</p>
-                                        <p className="text-xs mt-1">Connect with more people to share internally!</p>
+                                    <div className="text-xs font-bold bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                        {selectedFriends.length} selected
                                     </div>
-                                ) : (
-                                    <ScrollArea className="flex-1 pr-4">
-                                        <div className="space-y-3">
-                                            {friends.map(friend => (
-                                                <div key={friend.id} className="flex items-center space-x-3 p-2 hover:bg-muted/50 rounded-lg transition-colors">
-                                                    <Checkbox
-                                                        id={`friend-${friend.id}`}
-                                                        checked={selectedFriends.includes(friend.id)}
-                                                        onCheckedChange={() => toggleFriend(friend.id)}
-                                                    />
-                                                    <Label
-                                                        htmlFor={`friend-${friend.id}`}
-                                                        className="flex-1 flex items-center cursor-pointer font-normal"
-                                                    >
-                                                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs mr-3">
-                                                            {friend.first_name?.[0] || friend.full_name?.[0]}
-                                                        </div>
-                                                        <span>{friend.full_name}</span>
-                                                    </Label>
-                                                </div>
-                                            ))}
+                                </div>
+
+                                {friends.length > 5 && (
+                                    <div className="px-5 py-3 bg-muted/5 border-b border-dashed">
+                                        <div className="relative group">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                                            <Input
+                                                placeholder="Search friends..."
+                                                className="h-9 pl-9 pr-4 text-xs rounded-xl bg-card border-muted-foreground/10 focus-visible:ring-primary/20 transition-all"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                            {searchQuery && (
+                                                <button
+                                                    onClick={() => setSearchQuery('')}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                                >
+                                                    <X className="size-3" />
+                                                </button>
+                                            )}
                                         </div>
-                                    </ScrollArea>
+                                    </div>
                                 )}
+
+                                <div className="flex-1 overflow-hidden p-4">
+                                    {loadingFriends ? (
+                                        <div className="flex flex-col items-center justify-center p-12 gap-3">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                            <p className="text-xs font-bold text-muted-foreground animate-pulse">FINDING FRIENDS...</p>
+                                        </div>
+                                    ) : friends.length === 0 ? (
+                                        <div className="flex flex-col items-center justify-center p-8 text-center bg-muted/20 rounded-[24px] border border-dashed border-muted-foreground/20 m-2">
+                                            <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+                                                <Users className="size-6 text-muted-foreground/40" />
+                                            </div>
+                                            <p className="font-bold text-sm">No mutual friends found</p>
+                                            <p className="text-[11px] text-muted-foreground mt-1 max-w-[200px]">Connect with more people to share wishlists directly!</p>
+                                            <Button variant="outline" size="sm" className="mt-4 h-8 rounded-xl text-[10px] font-bold uppercase tracking-wider">
+                                                Find Friends
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <ScrollArea className="h-[280px] pr-2">
+                                            <div className="space-y-2 pb-2">
+                                                {friends
+                                                    .filter(f => f.full_name?.toLowerCase().includes(searchQuery.toLowerCase()))
+                                                    .map(friend => {
+                                                        const isSelected = selectedFriends.includes(friend.id);
+                                                        return (
+                                                            <div
+                                                                key={friend.id}
+                                                                onClick={() => toggleFriend(friend.id)}
+                                                                className={cn(
+                                                                    "group relative flex items-center gap-3 p-2 pl-2 pr-4 rounded-full border transition-all cursor-pointer",
+                                                                    isSelected
+                                                                        ? "bg-primary/10 border-primary/40 shadow-sm"
+                                                                        : "bg-card hover:bg-muted/50 border-muted-foreground/10"
+                                                                )}
+                                                            >
+                                                                <Avatar className="size-9 border-2 border-background shadow-sm group-hover:scale-105 transition-transform duration-300">
+                                                                    <AvatarImage src={friend.avatar_url} />
+                                                                    <AvatarFallback className="bg-primary/5 text-primary font-bold text-[10px] lowercase">
+                                                                        {getInitials(friend.full_name || "")}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="font-bold text-[12px] truncate leading-tight">
+                                                                        {friend.full_name}
+                                                                    </p>
+                                                                    <p className="text-[9px] text-muted-foreground font-semibold flex items-center gap-1 mt-0.5 uppercase tracking-tight">
+                                                                        <div className="size-1 rounded-full bg-green-500" />
+                                                                        Mutual
+                                                                    </p>
+                                                                </div>
+
+                                                                <div className={cn(
+                                                                    "size-5 rounded-full border-2 flex items-center justify-center transition-all",
+                                                                    isSelected
+                                                                        ? "bg-primary border-primary"
+                                                                        : "border-muted-foreground/20 group-hover:border-primary/50"
+                                                                )}>
+                                                                    {isSelected && <Check className="size-3 text-white stroke-[3px]" />}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                {friends.filter(f => f.full_name?.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && searchQuery && (
+                                                    <div className="text-center py-8">
+                                                        <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">No friends match "{searchQuery}"</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </ScrollArea>
+                                    )}
+                                </div>
                             </div>
-                            <Button
-                                className="w-full mt-4"
-                                disabled={selectedFriends.length === 0 || sharingToFriends}
-                                onClick={handleInternalShare}
-                            >
-                                {sharingToFriends ? "Sending..." : `Send to ${selectedFriends.length} Friend${selectedFriends.length !== 1 ? 's' : ''}`}
-                            </Button>
+                            <div className="p-4 bg-muted/5 border-t">
+                                <Button
+                                    className="w-full h-12 rounded-[18px] font-bold text-sm shadow-lg shadow-primary/20 active:scale-95 transition-all gap-2"
+                                    disabled={selectedFriends.length === 0 || sharingToFriends}
+                                    onClick={handleInternalShare}
+                                >
+                                    {sharingToFriends ? (
+                                        <>
+                                            <div className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Share2 className="size-4" />
+                                            Share with {selectedFriends.length} Friend{selectedFriends.length !== 1 ? 's' : ''}
+                                        </>
+                                    )}
+                                </Button>
+                            </div>
                         </TabsContent>
 
                         <TabsContent value="external" className="p-0 m-0 h-full data-[state=inactive]:hidden flex flex-col overflow-hidden">

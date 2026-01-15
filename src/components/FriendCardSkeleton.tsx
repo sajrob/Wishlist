@@ -1,31 +1,26 @@
-/**
- * FriendCardSkeleton component that provides a loading state for friend/user cards.
- * Uses shadcn/ui skeleton components to mimic the layout while data is being fetched.
- */
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function FriendCardSkeleton() {
     return (
-        <div className="wishlist-card rounded-lg border bg-card p-4">
-            <div className="flex flex-col gap-4">
-                {/* Avatar skeleton */}
-                <div className="card-image-container flex items-center justify-center bg-muted/30">
-                    <Skeleton className="h-20 w-20 rounded-full" />
-                </div>
+        <Card className="overflow-hidden border-muted-foreground/10 bg-card/50 backdrop-blur-sm rounded-[24px]">
+            <CardContent className="p-3">
+                <div className="flex items-center gap-4">
+                    {/* Avatar Skeleton */}
+                    <Skeleton className="size-14 rounded-full border-2 border-background shadow-md shrink-0" />
 
-                <div className="card-content flex flex-col gap-3">
-                    {/* Name skeleton */}
-                    <Skeleton className="h-6 w-3/4 mx-auto" />
+                    <div className="flex-1 space-y-2 min-w-0 pr-2">
+                        {/* Name Skeleton */}
+                        <Skeleton className="h-4 w-1/2" />
 
-                    {/* Badge skeleton (optional, smaller) */}
-                    <Skeleton className="h-4 w-1/2 mx-auto" />
-
-                    {/* Action button skeleton */}
-                    <div className="card-actions mt-auto border-t pt-2">
-                        <Skeleton className="h-9 w-full" />
+                        {/* Subtitle/Link Skeleton */}
+                        <Skeleton className="h-3 w-3/4" />
                     </div>
+
+                    {/* Action Button Skeleton */}
+                    <Skeleton className="h-8 w-16 sm:w-20 rounded-full shrink-0" />
                 </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }

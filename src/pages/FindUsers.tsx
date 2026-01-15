@@ -160,25 +160,25 @@ const FindUsers = () => {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto px-4 py-8 md:px-8">
-                    <div className="max-w-3xl mx-auto flex flex-col gap-8">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8">
+                    <div className="max-w-3xl mx-auto flex flex-col gap-6 sm:gap-8">
                         {/* Search Bar */}
-                        <form onSubmit={handleSearchSubmit} className="relative group max-w-xl mx-auto w-full">
+                        <form onSubmit={handleSearchSubmit} className="relative group max-w-xl mx-auto w-full transition-all duration-300">
                             <Input
                                 type="text"
                                 placeholder="Search by name..."
-                                className="h-12 pl-12 pr-4 text-base rounded-2xl shadow-sm border-2 border-muted-foreground/10 focus-visible:ring-primary/20 focus-visible:border-primary transition-all bg-card/50 backdrop-blur-sm"
+                                className="h-11 sm:h-12 pl-11 sm:pl-12 pr-4 text-sm sm:text-base rounded-2xl shadow-sm border-2 border-muted-foreground/10 focus-visible:ring-primary/20 focus-visible:border-primary transition-all bg-card/50 backdrop-blur-sm"
                                 value={query}
                                 onChange={handleSearchChange}
                             />
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 sm:size-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                             <Button
                                 type="submit"
                                 size="sm"
-                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 rounded-xl px-4 font-semibold shadow-none"
+                                className="absolute right-1.5 sm:right-2 top-1/2 -translate-y-1/2 h-8 sm:h-9 rounded-xl px-3 sm:px-4 text-xs font-bold sm:font-semibold shadow-none active:scale-95 transition-all"
                                 disabled={searching}
                             >
-                                {searching ? <Loader2 className="size-4 animate-spin" /> : "Search"}
+                                {searching ? <Loader2 className="size-3.5 sm:size-4 animate-spin" /> : "Search"}
                             </Button>
                         </form>
 
@@ -227,32 +227,34 @@ const FindUsers = () => {
                                         return (
                                             <div
                                                 key={profile.id}
-                                                className="group relative flex items-center gap-4 p-4 rounded-2xl border bg-card hover:shadow-xl hover:border-primary/20 transition-all duration-300"
+                                                className="group relative flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border bg-card hover:shadow-xl hover:border-primary/20 transition-all duration-300"
                                             >
-                                                <Avatar className="size-14 border shadow-sm group-hover:scale-105 transition-transform">
-                                                    <AvatarImage src={profile.avatar_url} />
-                                                    <AvatarFallback className="text-lg bg-primary/5 text-primary font-bold">
-                                                        {getInitials(profile.full_name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
+                                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                    <Avatar className="size-12 sm:size-14 border shadow-sm group-hover:scale-105 transition-transform shrink-0">
+                                                        <AvatarImage src={profile.avatar_url} />
+                                                        <AvatarFallback className="text-base sm:text-lg bg-primary/5 text-primary font-bold">
+                                                            {getInitials(profile.full_name)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
 
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                                                        {profile.full_name}
-                                                    </h3>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {isFollowing ? "Following" : "Discovering"}
-                                                    </p>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors text-sm sm:text-base">
+                                                            {profile.full_name}
+                                                        </h3>
+                                                        <p className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight">
+                                                            {isFollowing ? "Following" : "Discovering"}
+                                                        </p>
+                                                    </div>
                                                 </div>
 
-                                                <div className="shrink-0 flex gap-2">
+                                                <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-none border-dashed">
                                                     {isFollowing ? (
                                                         <>
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
                                                                 asChild
-                                                                className="h-8 rounded-xl px-3 text-xs font-bold border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-none"
+                                                                className="h-8 flex-1 sm:flex-none rounded-xl px-4 text-[11px] font-bold border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-none"
                                                             >
                                                                 <Link to={`/wishlist/${profile.id}`}>View</Link>
                                                             </Button>
@@ -270,9 +272,9 @@ const FindUsers = () => {
                                                         <Button
                                                             size="sm"
                                                             onClick={() => handleFollow(profile.id, profile.full_name)}
-                                                            className="h-8 rounded-xl px-4 text-xs font-bold gap-1.5 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                                                            className="h-9 sm:h-8 w-full sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
                                                         >
-                                                            <UserPlus className="size-3.5" />
+                                                            <UserPlus className="size-4" />
                                                             Follow
                                                         </Button>
                                                     )}
