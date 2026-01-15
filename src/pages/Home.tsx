@@ -351,7 +351,7 @@ function Home() {
               <div className="flex flex-col">
                 <h1 className="text-lg font-semibold leading-none flex items-center gap-2">
                   {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                  <span className="text-muted-foreground font-normal text-xs">({wishlistItems.length})</span>
+                  <span className="tab-count">{wishlistItems.length}</span>
                 </h1>
 
                 <div className="flex items-center gap-2 mt-1">

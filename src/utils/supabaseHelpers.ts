@@ -31,6 +31,7 @@ export async function fetchUserItems(
             .from('items')
             .select(includeClaims ? '*, claims(*, profiles(*))' : '*')
             .eq('user_id', userId)
+            .order('is_must_have', { ascending: false })
             .order('created_at', { ascending: false });
 
         const { data, error } = await (query as any);

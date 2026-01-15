@@ -137,6 +137,11 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
 
             <div className="card-image-container">
                 <img src={image_url || 'https://via.placeholder.com/400x300?text=No+Image'} alt={name} className="card-image" />
+                {is_must_have && (
+                    <div className="must-have-badge">
+                        Must Have
+                    </div>
+                )}
             </div>
             <div className="card-content">
                 <div className="item-header">
@@ -179,11 +184,6 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                 <div className="card-actions">
                     {readOnly ? (
                         <div className="shared-actions">
-                            {is_must_have && (
-                                <div className="must-have-tag">
-                                    Must Have
-                                </div>
-                            )}
                             {buy_link && (
                                 <a
                                     href={ensureAbsoluteUrl(buy_link)}
