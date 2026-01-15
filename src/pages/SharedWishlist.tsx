@@ -17,6 +17,7 @@ import {
 import { Share2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
 import { fetchProfile } from "../utils/supabaseHelpers";
@@ -136,13 +137,15 @@ function SharedWishlist() {
                                                     : title}
                                             </h1>
                                             {activeCategory && (
-                                                <button
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
                                                     onClick={() => setIsShareModalOpen(true)}
-                                                    className="text-[10px] uppercase tracking-wider font-bold flex items-center gap-1.5 px-3 py-1 bg-primary/10 text-primary rounded-full hover:bg-primary/20 transition-colors"
+                                                    className="h-8 px-4 text-[10px] uppercase tracking-wider font-bold gap-2 rounded-full border-primary/20 bg-primary/5 text-primary hover:bg-[#2563eb] hover:text-white hover:border-[#2563eb] transition-all shadow-sm group"
                                                 >
-                                                    <Share2 className="w-3 h-3" />
+                                                    <Share2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
                                                     Share
-                                                </button>
+                                                </Button>
                                             )}
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-1">

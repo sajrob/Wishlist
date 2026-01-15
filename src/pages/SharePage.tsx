@@ -6,8 +6,9 @@ import { fetchWishlistSettings, fetchProfile } from '../utils/supabaseHelpers';
 import { WishlistCardSkeleton } from '../components/WishlistCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Gift, Lock, UserPlus, ArrowRight } from 'lucide-react';
+import { Gift, Lock, UserPlus, ArrowRight, UserCheck } from 'lucide-react';
 import { getFirstName, getPossessiveName } from '../utils/nameUtils';
+import { toast } from 'sonner';
 import type { WishlistItem, Profile, Category } from '../types';
 
 const SharePage = () => {
@@ -20,6 +21,8 @@ const SharePage = () => {
     const [ownerProfile, setOwnerProfile] = useState<Profile | null>(null);
     const [items, setItems] = useState<WishlistItem[]>([]);
     const [isPrivate, setIsPrivate] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowLoading, setIsFollowLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -41,19 +44,42 @@ const SharePage = () => {
             if (catError || !catData) throw new Error('Category not found');
             setCategory(catData);
 
+            const ownerId = catData.user_id;
+
             // 2. Fetch owner profile
-            const { data: profData, error: profError } = await fetchProfile(catData.user_id);
+            const { data: profData, error: profError } = await fetchProfile(ownerId);
             if (profError) throw profError;
             setOwnerProfile(profData);
 
-            // 3. Fetch owner's privacy setting (might fail for guests due to RLS)
-            const { data: settings } = await fetchWishlistSettings(catData.user_id);
+            // 3. Check Friendship/Following if logged in
+            let followingStatus = false;
+            if (user) {
+                const { data: friendData } = await supabase
+                    .from('friends')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .eq('friend_id', ownerId)
+                    .maybeSingle();
+                followingStatus = !!friendData;
+                setIsFollowing(followingStatus);
+            }
 
-            // 4. Privacy Check
-            const isTargetPrivate = (settings && !settings.is_public) || !catData.is_public;
+            // 4. Fetch owner's privacy setting
+            const { data: settings } = await fetchWishlistSettings(ownerId);
+            const listIsPublic = settings?.is_public ?? false;
+
+            // 5. Smart Redirect Logic
+            // If logged in AND (following OR category-is-public OR list-is-public)
+            if (user && (followingStatus || catData.is_public || listIsPublic)) {
+                navigate(`/wishlist/${ownerId}?category=${categoryId}`, { replace: true });
+                return;
+            }
+
+            // 6. Privacy Check for rendering
+            const isTargetPrivate = !catData.is_public && !listIsPublic;
             setIsPrivate(isTargetPrivate);
 
-            // 5. Fetch items
+            // 7. Fetch items (preview items)
             const { data: itemsData, error: itemsError } = await supabase
                 .from('items')
                 .select('*')
@@ -67,6 +93,28 @@ const SharePage = () => {
             setError(err.message || 'Could not load shared wishlist');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFollow = async () => {
+        if (!user || !ownerProfile) return;
+        setIsFollowLoading(true);
+        try {
+            const { error } = await supabase
+                .from('friends')
+                .insert([{ user_id: user.id, friend_id: ownerProfile.id }]);
+
+            if (error) throw error;
+            setIsFollowing(true);
+            toast.success(`You are now following ${getFirstName(ownerProfile)}!`);
+
+            // Redirect now that follow is successful
+            navigate(`/wishlist/${ownerProfile.id}?category=${categoryId}`, { replace: true });
+        } catch (err: any) {
+            console.error('Error following user:', err);
+            toast.error('Could not follow user.');
+        } finally {
+            setIsFollowLoading(false);
         }
     };
 
@@ -136,36 +184,55 @@ const SharePage = () => {
 
                 {/* Teaser or Content */}
                 <div className="relative flex-1 overflow-hidden min-h-0">
-                    {isGuest && (
+                    {(!user || (!isFollowing && isPrivate)) && (
                         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-4">
                             <div className="bg-background/90 backdrop-blur-xl p-6 rounded-2xl shadow-2xl border text-center max-w-sm mx-auto pointer-events-auto transform -translate-y-4">
                                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-4">
-                                    <UserPlus className="size-6" />
+                                    {user ? <UserPlus className="size-6" /> : <Lock className="size-6" />}
                                 </div>
                                 <h2 className="text-xl font-bold mb-2">
                                     {isPrivate ? 'This list is private' : 'See the full list'}
                                 </h2>
                                 <p className="text-sm text-muted-foreground mb-6">
-                                    {isPrivate
-                                        ? `Sign up to request access and see items in ${firstName}'s wishlist.`
-                                        : items.length > 0
-                                            ? `Sign up to see all ${items.length} items in ${firstName}'s wishlist and claim one!`
-                                            : `Sign up to see the items in ${firstName}'s wishlist and claim one to help celebrate!`
+                                    {!user
+                                        ? (isPrivate
+                                            ? `Sign up to request access and see items in ${firstName}'s private wishlist.`
+                                            : `Sign up to see all ${items.length} items and start claiming!`)
+                                        : `Follow ${firstName} to see their private wishlists and celebrate together!`
                                     }
                                 </p>
-                                <Button asChild className="w-full h-10 text-sm font-semibold shadow-md active:scale-[0.98] transition-all">
-                                    <Link to={`/signup?redirect_to=${encodeURIComponent(window.location.pathname)}`}>
-                                        Sign Up to View List
-                                    </Link>
-                                </Button>
-                                <p className="mt-4 text-[11px] text-muted-foreground">
-                                    Already have an account? <Link to="/login" className="text-primary hover:underline font-medium">Log in</Link>
-                                </p>
+
+                                {user ? (
+                                    <Button
+                                        className="w-full h-11 text-sm font-semibold shadow-md active:scale-[0.98] transition-all gap-2"
+                                        onClick={handleFollow}
+                                        disabled={isFollowLoading}
+                                    >
+                                        {isFollowLoading ? 'Following...' : (
+                                            <>
+                                                <UserPlus className="size-4" />
+                                                Follow {firstName} to View
+                                            </>
+                                        )}
+                                    </Button>
+                                ) : (
+                                    <Button asChild className="w-full h-11 text-sm font-semibold shadow-md active:scale-[0.98] transition-all">
+                                        <Link to={`/signup?redirect_to=${encodeURIComponent(window.location.pathname)}`}>
+                                            Sign Up to View List
+                                        </Link>
+                                    </Button>
+                                )}
+
+                                {!user && (
+                                    <p className="mt-4 text-[11px] text-muted-foreground">
+                                        Already have an account? <Link to="/login" className="text-primary hover:underline font-medium">Log in</Link>
+                                    </p>
+                                )}
                             </div>
                         </div>
                     )}
 
-                    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 transition-all duration-700 h-full overflow-y-auto pb-4 pr-1 scrollbar-hide ${isGuest ? 'blur-md grayscale-[0.5] opacity-50 pointer-events-none' : ''}`}>
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 transition-all duration-700 h-full overflow-y-auto pb-4 pr-1 scrollbar-hide ${(!user || (!isFollowing && isPrivate)) ? 'blur-md grayscale-[0.5] opacity-50 pointer-events-none' : ''}`}>
                         {items.length === 0 && !isGuest ? (
                             <div className="col-span-full py-20 text-center">
                                 <p className="text-muted-foreground">No items in this category yet.</p>

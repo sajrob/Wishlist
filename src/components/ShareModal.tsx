@@ -134,7 +134,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md p-0 overflow-hidden gap-0">
+            <DialogContent className="w-[92vw] max-w-md p-0 overflow-hidden rounded-[32px] sm:rounded-3xl shadow-2xl border-none max-h-[95vh] flex flex-col">
                 <DialogHeader className="p-6 pb-2 bg-gradient-to-b from-blue-50/50 to-transparent">
                     <DialogTitle className="text-xl text-blue-900 flex items-center gap-2">
                         <Gift className="w-5 h-5 text-blue-600" />
@@ -165,7 +165,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                         </TabsList>
                     </div>
 
-                    <div className="h-[360px] w-full relative overflow-hidden">
+                    <div className="flex-1 min-h-[360px] w-full relative overflow-y-auto overflow-x-hidden custom-scrollbar">
                         <TabsContent value="friends" className="p-6 m-0 h-full flex flex-col data-[state=inactive]:hidden">
                             <div className="flex-1 overflow-hidden flex flex-col">
                                 <h3 className="text-sm font-medium mb-3 text-muted-foreground">Select mutual friends</h3>
