@@ -346,9 +346,9 @@ function Home() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-col">
                 <div className="flex items-center justify-between gap-4">
-                  <h1 className="text-base md:text-lg font-semibold leading-none flex items-center gap-2">
+                  <h1 className="text-base md:text-lg font-semibold leading-none flex items-center">
                     {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-muted text-muted-foreground rounded-full font-medium border border-border/50 tabular-nums">
+                    <span className="ml-2 px-1.5 py-0.5 text-[10px] bg-muted text-muted-foreground rounded-full font-medium border border-border/50 tabular-nums">
                       {wishlistItems.length}
                     </span>
                   </h1>
