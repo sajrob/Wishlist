@@ -336,7 +336,7 @@ function Home() {
         loading={loading}
       />
       <SidebarInset className="flex flex-col bg-background overflow-hidden border-l">
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
+        <header className="flex h-20 md:h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
           <div className="flex items-center gap-2">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -346,9 +346,11 @@ function Home() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-col">
                 <div className="flex items-center justify-between gap-4">
-                  <h1 className="text-lg font-semibold leading-none flex items-center gap-2">
+                  <h1 className="text-base md:text-lg font-semibold leading-none flex items-center gap-2">
                     {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                    <span className="tab-count">{wishlistItems.length}</span>
+                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-muted text-muted-foreground rounded-full font-medium border border-border/50 tabular-nums">
+                      {wishlistItems.length}
+                    </span>
                   </h1>
                 </div>
 
@@ -385,8 +387,8 @@ function Home() {
                                     variant="outline"
                                     size="sm"
                                     className={`h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-muted-foreground/10 transition-all ${cat.is_public
-                                        ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200/50"
-                                        : "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200/50"
+                                      ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200/50"
+                                      : "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200/50"
                                       }`}
                                     onClick={() => {
                                       handleToggleCategoryPrivacy(cat.id, cat.is_public);
