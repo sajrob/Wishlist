@@ -69,13 +69,15 @@ const SharePage = () => {
             const listIsPublic = settings?.is_public ?? false;
 
             // 5. Smart Redirect Logic
-            // If logged in AND (following OR category-is-public OR list-is-public)
-            if (user && (followingStatus || catData.is_public || listIsPublic)) {
+            // If logged in AND following, go to the full wishlist.
+            // Even if public, we now require following to see the full page per user request.
+            if (user && followingStatus) {
                 navigate(`/wishlist/${ownerId}?category=${categoryId}`, { replace: true });
                 return;
             }
 
             // 6. Privacy Check for rendering
+            // We show the "Private" UI if NOT (public OR following)
             const isTargetPrivate = !catData.is_public && !listIsPublic;
             setIsPrivate(isTargetPrivate);
 
@@ -274,7 +276,7 @@ const SharePage = () => {
                                             </>
                                         )}
                                         <div className="pt-1">
-                                            <Button variant="outline" size="xs" className="w-full h-7 text-[10px]" disabled>
+                                            <Button variant="outline" size="sm" className="w-full h-7 text-[10px]" disabled>
                                                 Claim Item
                                             </Button>
                                         </div>
