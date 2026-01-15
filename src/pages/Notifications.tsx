@@ -82,7 +82,13 @@ const Notifications = () => {
                 ) : (
                     notifications.map(notification => (
                         <Link
-                            to={notification.type === 'follow' ? `/wishlist/${notification.actor_id}` : '#'}
+                            to={
+                                notification.type === 'follow'
+                                    ? `/wishlist/${notification.actor_id}`
+                                    : notification.type === 'wishlist_share'
+                                        ? `/share/${notification.category_id}`
+                                        : '#'
+                            }
                             key={notification.id}
                             className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
                             onClick={() => {
@@ -92,7 +98,7 @@ const Notifications = () => {
                             }}
                         >
                             <div className="notification-icon">
-                                {notification.type === 'follow' ? '👤' : '🔔'}
+                                {notification.type === 'follow' ? '👤' : notification.type === 'wishlist_share' ? '🎁' : '🔔'}
                             </div>
                             <div className="notification-content">
                                 <p className="notification-message">{notification.message}</p>
