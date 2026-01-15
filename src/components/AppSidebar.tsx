@@ -162,30 +162,24 @@ export function AppSidebar({
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
-                      asChild
                       tooltip={title || getUserPossessiveTitle(
                         user,
                         "Wishlists",
                         "My Wishlists"
                       )}
+                      onClick={() => {
+                        onCategoryChange(null);
+                      }}
                     >
-                      <Link
-                        to="/dashboard"
-                        onClick={() => {
-                          onCategoryChange(null);
-                          handleNavClick();
-                        }}
-                      >
-                        <Home />
-                        <span className="group-data-[collapsible=icon]:hidden">
-                          {title || getUserPossessiveTitle(
-                            user,
-                            "Wishlists",
-                            "My Wishlists"
-                          )}
-                        </span>
-                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-                      </Link>
+                      <Home />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        {title || getUserPossessiveTitle(
+                          user,
+                          "Wishlists",
+                          "My Wishlists"
+                        )}
+                      </span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
