@@ -186,21 +186,19 @@ const SharePage = () => {
 
                 {/* Teaser or Content */}
                 <div className="relative flex-1 overflow-hidden min-h-0">
-                    {(!user || (!isFollowing && isPrivate)) && (
+                    {(!user || !isFollowing) && (
                         <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none p-4">
                             <div className="bg-background/90 backdrop-blur-xl p-6 rounded-2xl shadow-2xl border text-center max-w-sm mx-auto pointer-events-auto transform -translate-y-4">
                                 <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-4">
                                     {user ? <UserPlus className="size-6" /> : <Lock className="size-6" />}
                                 </div>
                                 <h2 className="text-xl font-bold mb-2">
-                                    {isPrivate ? 'This list is private' : 'See the full list'}
+                                    Access Restricted
                                 </h2>
                                 <p className="text-sm text-muted-foreground mb-6">
                                     {!user
-                                        ? (isPrivate
-                                            ? `Sign up to request access and see items in ${firstName}'s private wishlist.`
-                                            : `Sign up to see all ${items.length} items and start claiming!`)
-                                        : `Follow ${firstName} to see their private wishlists and celebrate together!`
+                                        ? `Sign up to see items in ${firstName}'s wishlist and start celebrating together!`
+                                        : `Follow ${firstName} to view their wishlist and celebrate together!`
                                     }
                                 </p>
 
@@ -234,7 +232,7 @@ const SharePage = () => {
                         </div>
                     )}
 
-                    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 transition-all duration-700 h-full overflow-y-auto pb-4 pr-1 scrollbar-hide ${(!user || (!isFollowing && isPrivate)) ? 'blur-md grayscale-[0.5] opacity-50 pointer-events-none' : ''}`}>
+                    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 transition-all duration-700 h-full overflow-y-auto pb-4 pr-1 scrollbar-hide ${(!user || !isFollowing) ? 'blur-md grayscale-[0.5] opacity-50 pointer-events-none' : ''}`}>
                         {items.length === 0 && !isGuest ? (
                             <div className="col-span-full py-20 text-center">
                                 <p className="text-muted-foreground">No items in this category yet.</p>
