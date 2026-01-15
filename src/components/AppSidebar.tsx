@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { getUserPossessiveTitle, getInitials } from "@/utils/nameUtils";
+import { supabase } from "@/supabaseClient";
 import type { Category } from "@/types";
 import {
   DropdownMenu,
@@ -77,6 +78,46 @@ export function AppSidebar({
   const navigate = useNavigate();
   const location = useLocation();
   const { setOpen, isMobile } = useSidebar();
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  React.useEffect(() => {
+    if (user) {
+      void fetchUnreadCount();
+
+      const subscription = supabase
+        .channel("sidebar_notifications_count")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            void fetchUnreadCount();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        void subscription.unsubscribe();
+      };
+    }
+  }, [user]);
+
+  const fetchUnreadCount = async () => {
+    if (!user) return;
+    const { count, error } = await supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("is_read", false);
+
+    if (!error) {
+      setUnreadCount(count || 0);
+    }
+  };
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -269,6 +310,12 @@ export function AppSidebar({
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
+                  {unreadCount > 0 && (
+                    <span className="absolute top-2 left-8 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                  )}
                   <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-semibold">{userName}</span>
                     <span className="truncate text-xs">{userEmail}</span>
@@ -303,9 +350,16 @@ export function AppSidebar({
                   <User />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/notifications")}>
-                  <Bell />
-                  Notifications
+                <DropdownMenuItem onClick={() => navigate("/notifications")} className="justify-between">
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-4" />
+                    <span>Notifications</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                      {unreadCount}
+                    </span>
+                  )}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />

@@ -3,7 +3,7 @@
  * Provides a read-only view of items and allows for social interaction.
  */
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import WishlistCard from "../components/WishlistCard";
 import LoadingSpinner from "../components/LoadingSpinner";
 import EmptyState from "../components/EmptyState";
@@ -27,11 +27,13 @@ import "../App.css";
 
 function SharedWishlist() {
     const { userId } = useParams<{ userId: string }>();
+    const [searchParams] = useSearchParams();
+    const initialCategoryId = searchParams.get('category');
 
     const { allItems, categories, loading } = useWishlistData(userId || null, { includeClaims: true });
     const { isPublic } = useWishlistSettingsReadOnly(userId || null);
 
-    const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const [activeCategory, setActiveCategory] = useState<string | null>(initialCategoryId);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
     const [profile, setProfile] = useState<Profile | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -55,13 +57,22 @@ function SharedWishlist() {
     }, [userId]);
 
     useEffect(() => {
+        // If we have an initial category ID from the URL, use it.
+        if (initialCategoryId && categories.length > 0) {
+            const exists = categories.some(cat => cat.id === initialCategoryId);
+            if (exists) {
+                setActiveCategory(initialCategoryId);
+                return;
+            }
+        }
+
         if (categories.length > 0 && activeCategory === null && !isPublic) {
             const firstPublicCategory = categories.find((cat) => cat.is_public);
             if (firstPublicCategory) {
                 setActiveCategory(firstPublicCategory.id);
             }
         }
-    }, [categories, activeCategory, isPublic]);
+    }, [categories, activeCategory, isPublic, initialCategoryId]);
 
     const wishlistItems = useFilteredItems(
         allItems as WishlistItem[],

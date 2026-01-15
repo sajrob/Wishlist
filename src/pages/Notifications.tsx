@@ -86,7 +86,7 @@ const Notifications = () => {
                                 notification.type === 'follow'
                                     ? `/wishlist/${notification.actor_id}`
                                     : notification.type === 'wishlist_share'
-                                        ? `/share/${notification.category_id}`
+                                        ? `/wishlist/${notification.actor_id}?category=${notification.category_id}`
                                         : '#'
                             }
                             key={notification.id}
