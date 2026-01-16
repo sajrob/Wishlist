@@ -153,15 +153,17 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                 <p className="item-description">{description || 'No description provided.'}</p>
 
                 {readOnly && claims.length > 0 && (
-                    <div className="avatar-stack-container">
-                        <div className="avatar-stack">
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
+                        <div className="flex -space-x-2">
                             {claims.slice(0, 5).map((claim) => (
                                 <TooltipProvider key={claim.id}>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                            <Avatar className="h-8 w-8 border-2 border-background">
-                                                <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${claim.user_id}`} />
-                                                <AvatarFallback>{claim.profiles?.first_name?.[0] || '?'}</AvatarFallback>
+                                            <Avatar className="h-8 w-8 border-2 border-background transition-transform hover:z-10 hover:scale-110">
+                                                <AvatarImage src={claim.profiles?.avatar_url || ''} alt={claim.profiles?.full_name || 'User'} />
+                                                <AvatarFallback className="text-[10px]">
+                                                    {((claim.profiles?.first_name?.[0] || '') + (claim.profiles?.last_name?.[0] || '')).toUpperCase() || '?'}
+                                                </AvatarFallback>
                                             </Avatar>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -171,13 +173,13 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                 </TooltipProvider>
                             ))}
                             {claims.length > 5 && (
-                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold border-2 border-background ml-[-12px] z-0">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium z-0 hover:z-10">
                                     +{claims.length - 5}
                                 </div>
                             )}
                         </div>
-                        <span className="claimed-text">
-                            {claims.length} {claims.length === 1 ? 'friend' : 'friends'} pledged
+                        <span className="text-xs text-muted-foreground font-medium">
+                            {claims.length} {claims.length === 1 ? 'friend' : 'friends'} claimed
                         </span>
                     </div>
                 )}
