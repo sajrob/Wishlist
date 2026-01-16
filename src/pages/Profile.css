@@ -19,7 +19,7 @@
 .profile-avatar {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -70,7 +70,7 @@
     display: block;
     font-size: 2rem;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--color-primary);
     margin-bottom: 0.5rem;
 }
 
@@ -94,7 +94,7 @@
 }
 
 .save-btn {
-    background: #2563eb;
+    background: var(--color-primary);
     color: white;
     padding: 0.75rem 1.5rem;
     border-radius: 0.5rem;
@@ -105,7 +105,7 @@
 }
 
 .save-btn:hover {
-    background: #1d4ed8;
+    background: var(--color-primary-hover);
 }
 
 .save-btn:disabled {

@@ -4,7 +4,7 @@
  */
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Share2, Pencil, Trash2, Globe, Lock } from "lucide-react";
+import { Plus, Share2, Pencil, Trash2, Globe, Lock, MoreHorizontal } from "lucide-react";
 import { confirmDelete } from "../utils/toastHelpers";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
@@ -41,6 +41,13 @@ import { useCategories } from "../hooks/useCategories";
 import { useWishlistSettings } from "../hooks/useWishlistSettings";
 import { createItem, updateItem, deleteItem } from "../utils/supabaseHelpers";
 import type { Category, WishlistItem, ItemFormData } from "../types";
+import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import "../App.css";
 import "./Home.css";
 
@@ -336,127 +343,141 @@ function Home() {
         loading={loading}
       />
       <SidebarInset className="flex flex-col bg-background overflow-hidden border-l">
-        <header className="flex h-20 md:h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b px-4 bg-background">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-col">
-                <div className="flex items-center justify-between gap-4">
-                  <h1 className="text-base md:text-lg font-semibold leading-none flex items-center">
+        <header className="sticky top-0 z-20 flex flex-col md:flex-row h-auto md:h-16 shrink-0 items-center border-b bg-white text-slate-900 px-6 py-4 md:py-0 shadow-sm transition-all duration-200">
+          <div className="flex items-center gap-4 w-full">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1 h-11 w-11 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" />
+              <Separator orientation="vertical" className="h-5 mx-1 bg-slate-200" />
+            </div>
+
+            <div className="flex flex-1 flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">
+              {/* Context Section */}
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex flex-col">
+                  <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 truncate flex items-center gap-2">
                     {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                    <span className="ml-2 px-2 py-0.5 text-[10px] bg-primary/10 text-primary rounded-full font-bold border border-primary/20 tabular-nums">
+                    <span className="flex items-center justify-center bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-[11px] font-bold border border-indigo-100 tabular-nums">
                       {wishlistItems.length}
                     </span>
                   </h1>
-                  {wishlistItems.length > 0 && (
-                    <Button onClick={handleOpenForm} size="sm" className="h-8 gap-1.5 px-3 sm:px-4 shadow-sm">
-                      <Plus className="size-4" />
-                      <span className="hidden sm:inline">Add Item</span>
-                    </Button>
-                  )}
                 </div>
+              </div>
 
-                <div className="flex items-center gap-2 mt-1">
+              {/* Actions Section */}
+              <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                <div className="flex items-center gap-3">
                   {!activeCategory ? (
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs text-muted-foreground whitespace-nowrap">
-                        {isPublic
-                          ? "Public - Visible to friends"
-                          : "Hidden - Only you can see it"}
-                      </p>
-                      <label className="flex items-center cursor-pointer scale-75 origin-left h-4">
-                        <div className="toggle-switch">
-                          <input
-                            type="checkbox"
-                            checked={isPublic}
-                            onChange={handleTogglePublic}
-                          />
-                          <span className="toggle-slider"></span>
-                        </div>
-                      </label>
+                    <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 h-11 rounded-xl">
+                      <div className="flex items-center gap-1.5 grayscale opacity-70">
+                        {isPublic ? <Globe className="size-3.5" /> : <Lock className="size-3.5" />}
+                        <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
+                          {isPublic ? "Public" : "Private"}
+                        </span>
+                      </div>
+                      <Switch
+                        checked={isPublic}
+                        onCheckedChange={handleTogglePublic}
+                        className="scale-90 data-[state=checked]:bg-indigo-700"
+                      />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                    <div className="flex items-center gap-2">
                       {(() => {
                         const cat = categories.find((c) => c.id === activeCategory);
                         if (!cat) return null;
                         return (
                           <>
-                            <TooltipProvider>
-                              <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className={`h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-muted-foreground/10 transition-all ${cat.is_public
-                                      ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border-emerald-200/50"
-                                      : "bg-amber-50 text-amber-600 hover:bg-amber-100 border-amber-200/50"
-                                      }`}
-                                    onClick={() => {
-                                      handleToggleCategoryPrivacy(cat.id, cat.is_public);
-                                      setIsTooltipOpen(false);
-                                    }}
-                                  >
-                                    {cat.is_public ? <Globe className="size-3" /> : <Lock className="size-3" />}
-                                    <span className="hidden sm:inline">{cat.is_public ? "Public" : "Private"}</span>
+                            {/* Privacy Button */}
+                            <button
+                              onClick={() => handleToggleCategoryPrivacy(cat.id, cat.is_public)}
+                              className={`flex items-center gap-2 px-3 h-11 rounded-xl border transition-all active:scale-95 ${cat.is_public
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                                }`}
+                            >
+                              {cat.is_public ? <Globe className="size-3.5" /> : <Lock className="size-3.5" />}
+                              <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
+                                {cat.is_public ? "Public" : "Private"}
+                              </span>
+                            </button>
+
+                            {/* Desktop Actions */}
+                            <div className="hidden lg:flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-11 px-4 gap-2 rounded-xl border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-[11px] uppercase tracking-wider"
+                                onClick={() => handleEditCategory(cat)}
+                              >
+                                <Pencil className="size-4" />
+                                <span>Edit</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-11 px-4 gap-2 rounded-xl border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-700 hover:text-white transition-all font-bold text-[11px] uppercase tracking-wider shadow-none"
+                                onClick={() => setIsShareModalOpen(true)}
+                              >
+                                <Share2 className="size-4" />
+                                <span>Share</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-11 w-11 rounded-xl border-red-100 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-none"
+                                onClick={() => handleDeleteCategory(cat.id)}
+                              >
+                                <Trash2 className="size-4" />
+                              </Button>
+                            </div>
+
+                            {/* Mobile/Tablet Actions */}
+                            <div className="lg:hidden">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200 bg-slate-50 transition-colors">
+                                    <MoreHorizontal className="size-4 text-slate-600" />
                                   </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom" className="max-w-[200px] p-3 bg-white border-2 border-blue-500 pb-4">
-                                  <p className="font-medium text-black mb-1">
-                                    {cat.is_public ? "List is Visible" : "List is Hidden"}
-                                  </p>
-                                  <p className="text-black/70 font-normal text-[11px] leading-relaxed">
-                                    {cat.is_public
-                                      ? "Anyone with the link can view these items."
-                                      : "Only you can see this list. Click to make it public."}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-muted-foreground/10 bg-muted/30 hover:bg-muted text-muted-foreground"
-                              onClick={() => handleEditCategory(cat)}
-                            >
-                              <Pencil className="size-3" />
-                              <span className="hidden sm:inline">Edit</span>
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-destructive/10 bg-destructive/5 hover:bg-destructive/10 text-destructive shadow-none"
-                              onClick={() => handleDeleteCategory(cat.id)}
-                            >
-                              <Trash2 className="size-3" />
-                              <span className="hidden sm:inline">Delete</span>
-                            </Button>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 px-2 sm:px-3 text-[10px] uppercase tracking-wider font-bold gap-1.5 rounded-lg border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-none"
-                              onClick={() => setIsShareModalOpen(true)}
-                            >
-                              <Share2 className="size-3" />
-                              <span className="hidden sm:inline">Share</span>
-                            </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-slate-200">
+                                  <DropdownMenuItem onClick={() => handleEditCategory(cat)} className="gap-3 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-700">
+                                    <Pencil className="size-4" />
+                                    <span>Edit Wishlist</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setIsShareModalOpen(true)} className="gap-3 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-indigo-700">
+                                    <Share2 className="size-4" />
+                                    <span>Share Link</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleDeleteCategory(cat.id)}
+                                    className="gap-3 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-red-600 focus:bg-red-600 focus:text-white transition-colors"
+                                  >
+                                    <Trash2 className="size-4" />
+                                    <span>Delete</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
                           </>
                         );
                       })()}
                     </div>
                   )}
                 </div>
+
+                {/* Main Action Button */}
+                {wishlistItems.length > 0 && (
+                  <Button
+                    onClick={handleOpenForm}
+                    className="h-11 px-5 md:px-6 gap-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase tracking-[0.05em] shadow-[0_4px_12px_-2px_rgba(67,56,202,0.3)] hover:shadow-[0_8px_16px_-4px_rgba(67,56,202,0.4)] transition-all active:scale-95"
+                  >
+                    <Plus className="size-4 stroke-[3]" />
+                    <span>Add Item</span>
+                  </Button>
+                )}
               </div>
             </div>
           </div>
-
         </header>
 
         <div className={`flex-1 overflow-y-auto ${isModalOpen ? "blur-sm pointer-events-none" : ""}`}>

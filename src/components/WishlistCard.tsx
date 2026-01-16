@@ -13,6 +13,7 @@ import { useAuth } from '../context/AuthContext';
 import { toggleClaim } from '../utils/supabaseHelpers';
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import { Pencil, Trash2 } from 'lucide-react';
 import './WishlistCard.css';
 
 const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: WishlistCardProps) => {
@@ -218,7 +219,8 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                         onClick={() => onEdit(item)}
                                         title="Edit Item"
                                     >
-                                        ✏️
+                                        <Pencil className="size-4" />
+
                                     </button>
                                 )}
                                 {onDelete && (
@@ -227,7 +229,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                         onClick={() => onDelete(item.id)}
                                         title="Delete Item"
                                     >
-                                        🗑️
+                                        <Trash2 className="size-4" />
                                     </button>
                                 )}
                             </div>

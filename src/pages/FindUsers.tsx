@@ -150,7 +150,7 @@ const FindUsers = () => {
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-background sticky top-0 z-10">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full">
                         <SidebarTrigger className="-ml-1" />
                         <Separator orientation="vertical" className="h-4" />
                         <div className="flex flex-col">

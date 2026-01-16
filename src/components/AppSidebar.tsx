@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SidebarCategorySkeleton } from "./SidebarCategorySkeleton";
+import { Globe } from "lucide-react";
 
 interface AppSidebarProps {
   activeCategory: string | null;
@@ -255,8 +256,8 @@ export function AppSidebar({
                               <Package className="size-4" />
                               <span>{category.name}</span>
                               {category.is_public && (
-                                <span className="ml-auto text-xs opacity-70">
-                                  🌍
+                                <span className="ml-auto text-xs opacity-70 text-emerald-700">
+                                  <Globe className="size-3.5" />
                                 </span>
                               )}
                             </SidebarMenuSubButton>
