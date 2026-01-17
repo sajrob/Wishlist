@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Bug,
   LayoutDashboard,
+  HelpCircle,
 } from "lucide-react";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -402,6 +403,10 @@ export function AppSidebar({
                       {unreadCount}
                     </span>
                   )}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/faq")}>
+                  <HelpCircle />
+                  FAQ
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />

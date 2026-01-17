@@ -75,9 +75,10 @@ const Navbar = () => {
           className="navbar-logo"
           onClick={closeMenu}
         >
-          Wishlist
+          Me Lists
         </Link>
 
+        {/*hamburger menu toggle button designed for mobile responsiveness*/}
         <div
           className={`navbar-toggle ${isMenuOpen ? "active" : ""}`}
           onClick={toggleMenu}
@@ -130,6 +131,7 @@ const Navbar = () => {
               </Link>
             </>
           )}
+          {/* code hidden until after beta launch
           <NavLink
             to="/contact"
             className={({ isActive }) =>
@@ -138,7 +140,18 @@ const Navbar = () => {
             onClick={closeMenu}
           >
             Contact
+          </NavLink> */}
+
+          <NavLink
+            to="/faq"
+            className={({ isActive }) =>
+              isActive ? "navbar-link active" : "navbar-link"
+            }
+            onClick={closeMenu}
+          >
+            FAQ
           </NavLink>
+
         </div>
       </div>
     </nav>

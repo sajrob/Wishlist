@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useLocation } from "react-router-dom";
 import { Plus, Share2, Pencil, Trash2, Globe, Lock, MoreHorizontal } from "lucide-react";
 import { confirmDelete } from "../utils/toastHelpers";
+import { WelcomeModal } from "../components/welcomeModal";
 import WishlistCard from "../components/WishlistCard";
 import WishlistForm from "../components/WishlistForm";
 import CreateCategoryModal from "../components/CreateCategoryModal";
@@ -338,6 +339,8 @@ function Home() {
     (c) => c.id === activeCategory
   )?.name;
 
+
+
   return (
     <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
       <AppSidebar
@@ -372,7 +375,7 @@ function Home() {
               <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
                 <div className="flex items-center gap-3">
                   {!activeCategory ? (
-                    <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 h-11 rounded-xl">
+                    <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 h-10 rounded-xl">
                       <div className="flex items-center gap-1.5 grayscale opacity-70">
                         {isPublic ? <Globe className="size-3.5" /> : <Lock className="size-3.5" />}
                         <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
@@ -580,6 +583,7 @@ function Home() {
           ownerName={user?.user_metadata?.first_name || 'My'}
         />
       )}
+      <WelcomeModal />
     </SidebarProvider>
   );
 }
