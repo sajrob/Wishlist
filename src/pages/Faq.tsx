@@ -84,7 +84,7 @@ function Faq() {
             {/* Header */}
             <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b bg-white/80 backdrop-blur-md px-6 shadow-sm">
                 <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-                    <h1 className="text-xl  mx-auto font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                    <h1 className="text-3xl mx-auto font-bold tracking-tight text-slate-900 flex items-center gap-2">
                         <span className="flex items-center justify-center size-8 rounded-lg bg-indigo-50 text-indigo-600">
                             <HelpCircle className="size-5" />
                         </span>
@@ -101,7 +101,7 @@ function Faq() {
                     <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 bg-purple-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
 
                     <div className="relative max-w-3xl mx-auto px-6 py-12 text-center">
-                        <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">
+                        <h2 className="text-3xl md:text-3xl font-extrabold tracking-tight text-slate-900 mb-4">
                             How can we help you?
                         </h2>
                         <p className="text-lg text-slate-600 max-w-xl mx-auto">

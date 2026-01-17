@@ -280,12 +280,12 @@ const FriendsWishlists = () => {
                                                 </AvatarFallback>
                                             </Avatar>
 
-                                            <div className="flex-1 min-w-0 pr-2">
+                                            <div className="flex-1 items-center justify-center ">
                                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                                    <h3 className="font-bold text-base tracking-tight group-hover:text-primary transition-colors truncate">
+                                                    <h3 className="font-bold text-base tracking-tight group-hover:text-primary transition-colors ">
                                                         {person.name}
                                                     </h3>
-                                                    {isMutual && <Badge className="h-4 px-1.5 bg-green-500/10 text-green-600 border-none text-[8px] font-bold uppercase tracking-wider">Mutual</Badge>}
+
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
                                                     <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
@@ -294,6 +294,7 @@ const FriendsWishlists = () => {
                                                     </p>
                                                     <ChevronRight className="size-2.5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
                                                 </div>
+                                                <div>  {isMutual && <Badge className="h-4 px-1.5 bg-green-500/10 text-green-600 border-none text-[8px] font-bold uppercase tracking-wider">Mutual</Badge>}</div>
                                             </div>
 
                                             <div className="shrink-0 flex gap-2">
