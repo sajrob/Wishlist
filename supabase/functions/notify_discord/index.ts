@@ -3,13 +3,28 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const DISCORD_WEBHOOK_URL = Deno.env.get('DISCORD_WEBHOOK_URL')
 
+interface FeedbackRecord {
+    id: string;
+    user_id: string | null;
+    username: string | null;
+    type: string;
+    message: string;
+    page_url: string;
+    status: string;
+}
+
 serve(async (req) => {
     try {
         const payload = await req.json()
         console.log('Received payload:', payload)
 
         // Check if the request is a database webhook payload
-        const { type, table, record, schema } = payload
+        const { type, table, record, schema } = payload as {
+            type: string;
+            table: string;
+            record: FeedbackRecord;
+            schema: string
+        }
 
         // Only process INSERT events on the feedback table
         if (type !== 'INSERT' || table !== 'feedback') {
@@ -41,8 +56,8 @@ serve(async (req) => {
                             inline: false
                         },
                         {
-                            name: "User ID",
-                            value: record.user_id || "Guest",
+                            name: "User",
+                            value: `${record.username || "Guest"} (${record.user_id || "Anon"})`,
                             inline: true
                         },
                         {

@@ -43,6 +43,13 @@ export function FeedbackDialog({ trigger, open, onOpenChange }: FeedbackDialogPr
     const show = open !== undefined ? open : isOpen;
     const setShow = onOpenChange || setIsOpen;
 
+    const userName =
+        (user?.user_metadata as any)?.full_name ||
+        `${(user?.user_metadata as any)?.first_name || ""} ${(user?.user_metadata as any)?.last_name || ""
+            }`.trim() ||
+        user?.email?.split("@")[0] ||
+        "Guest";
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!message.trim()) {
@@ -55,6 +62,7 @@ export function FeedbackDialog({ trigger, open, onOpenChange }: FeedbackDialogPr
         try {
             const { error } = await supabase.from("feedback").insert({
                 user_id: user?.id || null, // Allow guest feedback if configured, though RLS might block it without user_id if we didn't set a policy for anon
+                username: userName,
                 type,
                 message,
                 page_url: window.location.origin + location.pathname,
