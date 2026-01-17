@@ -24,6 +24,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -299,6 +300,7 @@ export function AppSidebar({
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+              <SidebarGroupLabel>Socials</SidebarGroupLabel>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
@@ -313,25 +315,27 @@ export function AppSidebar({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <FeedbackDialog
               trigger={
                 <SidebarMenuButton tooltip="Report a Bug">
-                  <Bug />
-                  <span className="group-data-[collapsible=icon]:hidden">
+                  <Bug className="text-red-600" />
+                  <span className="group-data-[collapsible=icon]:hidden text-red-600">
                     Report a Bug
                   </span>
                 </SidebarMenuButton>
               }
             />
+
           </SidebarMenuItem>
+
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

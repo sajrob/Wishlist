@@ -148,7 +148,7 @@ const Notifications = () => {
                 categories={[]}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
-                <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-6 bg-background sticky top-0 z-10">
+                <header className="flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b px-6 bg-background sticky top-0 z-10">
                     <div className="flex items-center gap-3">
                         <SidebarTrigger className="-ml-1" />
                         <Separator orientation="vertical" className="h-4" />
