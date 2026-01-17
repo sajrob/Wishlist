@@ -14,7 +14,9 @@ import {
   Plus,
   Package,
   ChevronRight,
+  Bug,
 } from "lucide-react";
+import { FeedbackDialog } from "./FeedbackDialog";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Collapsible,
@@ -290,6 +292,18 @@ export function AppSidebar({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <FeedbackDialog
+                  trigger={
+                    <SidebarMenuButton tooltip="Report a Bug">
+                      <Bug />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        Report a Bug
+                      </span>
+                    </SidebarMenuButton>
+                  }
+                />
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
