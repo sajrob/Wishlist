@@ -404,10 +404,7 @@ export function AppSidebar({
                     </span>
                   )}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/faq")}>
-                  <HelpCircle />
-                  FAQ
-                </DropdownMenuItem>
+
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut />
                   Log out
