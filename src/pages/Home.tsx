@@ -469,10 +469,10 @@ function Home() {
                 {wishlistItems.length > 0 && (
                   <Button
                     onClick={handleOpenForm}
-                    className="h-11 px-5 md:px-6 gap-2.5 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase tracking-[0.05em] shadow-[0_4px_12px_-2px_rgba(67,56,202,0.3)] hover:shadow-[0_8px_16px_-4px_rgba(67,56,202,0.4)] transition-all active:scale-95"
+                    className="h-11 px-5 md:px-4 gap-1 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase tracking-[0.05em] shadow-[0_4px_12px_-2px_rgba(67,56,202,0.3)] hover:shadow-[0_8px_16px_-4px_rgba(67,56,202,0.4)] transition-all active:scale-95"
                   >
                     <Plus className="size-4 stroke-[3]" />
-                    {/* <span>Add Item</span> */}
+                    <span>Add</span>
                   </Button>
                 )}
               </div>
