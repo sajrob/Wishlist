@@ -171,8 +171,8 @@ const ShareModal: React.FC<ShareModalProps> = ({
                                 value="external"
                                 className="flex-1 rounded-lg py-2 gap-2 text-xs font-semibold transition-all data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-md"
                             >
-                                <Globe className="w-3.5 h-3.5" />
-                                External
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Share to App
                             </TabsTrigger>
                         </TabsList>
                     </div>
