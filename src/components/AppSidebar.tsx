@@ -313,24 +313,25 @@ export function AppSidebar({
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              <SidebarMenuItem>
-                <FeedbackDialog
-                  trigger={
-                    <SidebarMenuButton tooltip="Report a Bug">
-                      <Bug />
-                      <span className="group-data-[collapsible=icon]:hidden">
-                        Report a Bug
-                      </span>
-                    </SidebarMenuButton>
-                  }
-                />
-              </SidebarMenuItem>
+
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <FeedbackDialog
+              trigger={
+                <SidebarMenuButton tooltip="Report a Bug">
+                  <Bug />
+                  <span className="group-data-[collapsible=icon]:hidden">
+                    Report a Bug
+                  </span>
+                </SidebarMenuButton>
+              }
+            />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
