@@ -4,6 +4,7 @@
  */
 import React, { useState } from "react";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 import { Plus, Share2, Pencil, Trash2, Globe, Lock, MoreHorizontal } from "lucide-react";
 import { confirmDelete } from "../utils/toastHelpers";
 import WishlistCard from "../components/WishlistCard";
@@ -36,7 +37,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "../context/AuthContext";
-import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
+import { useFilteredItems } from "../hooks/useWishlistData";
+import { useWishlistContext } from "../context/WishlistContext";
 import { useCategories } from "../hooks/useCategories";
 import { useWishlistSettings } from "../hooks/useWishlistSettings";
 import { createItem, updateItem, deleteItem } from "../utils/supabaseHelpers";
@@ -53,9 +55,10 @@ import "./Home.css";
 
 function Home() {
   const { user } = useAuth();
+  const location = useLocation();
 
-  const { allItems, categories, loading, setAllItems, setCategories, refetch } =
-    useWishlistData(user?.id || null);
+  const { allItems, categories, loading, setAllItems, setCategories, refresh: refetch } =
+    useWishlistContext();
   const { isPublic, togglePublic } = useWishlistSettings(user?.id || null);
   const {
     createCategory,
@@ -64,7 +67,9 @@ function Home() {
     toggleCategoryPrivacy,
   } = useCategories(user?.id || "");
 
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(
+    location.state?.categoryId || null
+  );
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -347,7 +352,7 @@ function Home() {
           <div className="flex items-center gap-4 w-full">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1 h-11 w-11 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" />
-              <Separator orientation="vertical" className="h-5 mx-1 bg-slate-200" />
+              <Separator orientation="vertical" className="h-5 mx-1 bg-slate-600" />
             </div>
 
             <div className="flex flex-1 flex-col md:flex-row md:items-center justify-between gap-4 min-w-0">

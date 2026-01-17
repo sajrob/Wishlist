@@ -15,6 +15,7 @@ import {
   Package,
   ChevronRight,
   Bug,
+  LayoutDashboard,
 } from "lucide-react";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -198,11 +199,31 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="mt-4">
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname === "/dashboard" && activeCategory === null}
+                  tooltip="Dashboard"
+                >
+                  <Link
+                    to="/dashboard"
+                    onClick={() => {
+                      onCategoryChange(null);
+                      handleNavClick();
+                    }}
+                  >
+                    <LayoutDashboard />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      Dashboard
+                    </span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <Collapsible asChild defaultOpen className="group/collapsible">
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>

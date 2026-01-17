@@ -6,7 +6,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { toast } from "sonner";
 import { confirmDelete } from '../utils/toastHelpers';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useWishlistContext } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -62,6 +63,8 @@ try {
 
 const FriendsWishlists = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+    const { categories, loading: wishlistLoading } = useWishlistContext();
     const [following, setFollowing] = useState<FriendWishlistSummary[]>(cachedFollowing || []);
     const [followers, setFollowers] = useState<FriendWishlistSummary[]>(cachedFollowers || []);
     const [activeTab, setActiveTab] = useState<ConnectionTab>(cachedActiveTab);
@@ -329,8 +332,9 @@ const FriendsWishlists = () => {
         <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
             <AppSidebar
                 activeCategory={null}
-                onCategoryChange={() => { }}
-                categories={[]}
+                onCategoryChange={(categoryId) => navigate('/dashboard', { state: { categoryId } })}
+                categories={categories}
+                loading={wishlistLoading}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-background sticky top-0 z-20">

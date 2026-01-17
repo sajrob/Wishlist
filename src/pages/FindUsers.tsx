@@ -8,6 +8,7 @@ import { confirmDelete } from '../utils/toastHelpers';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { useWishlistContext } from '../context/WishlistContext';
 import { AppSidebar } from "../components/AppSidebar";
 import {
     SidebarProvider,
@@ -29,6 +30,7 @@ type ProfileRecord = {
 
 const FindUsers = () => {
     const { user } = useAuth();
+    const { categories, loading: wishlistLoading } = useWishlistContext();
     const [query, setQuery] = useState('');
     const [users, setUsers] = useState<ProfileRecord[]>([]);
     const [friends, setFriends] = useState<Set<string>>(new Set());
@@ -145,8 +147,9 @@ const FindUsers = () => {
         <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
             <AppSidebar
                 activeCategory={null}
-                onCategoryChange={() => { }}
-                categories={[]}
+                onCategoryChange={(categoryId) => navigate('/dashboard', { state: { categoryId } })}
+                categories={categories}
+                loading={wishlistLoading}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6 bg-background sticky top-0 z-10">

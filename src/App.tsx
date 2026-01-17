@@ -19,6 +19,7 @@ import Notifications from './pages/Notifications';
 import ContactUs from './pages/ContactUs';
 import SharePage from './pages/SharePage';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
 import './App.css';
 
@@ -36,66 +37,68 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/update-password" element={<UpdatePassword />} />
-          <Route
-            path="/dashboard"
-            element={
+        <WishlistProvider>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/find-users"
+              element={
+                <PrivateRoute>
+                  <FindUsers />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/friends"
+              element={
+                <PrivateRoute>
+                  <FriendsWishlists />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/wishlist/:userId"
+              element={
+                <PrivateRoute>
+                  <SharedWishlist />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/share/:categoryId" element={<SharePage />} />
+            <Route path="/notifications" element={
               <PrivateRoute>
-                <Home />
+                <Notifications />
               </PrivateRoute>
             }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/find-users"
-            element={
-              <PrivateRoute>
-                <FindUsers />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/friends"
-            element={
-              <PrivateRoute>
-                <FriendsWishlists />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/wishlist/:userId"
-            element={
-              <PrivateRoute>
-                <SharedWishlist />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/share/:categoryId" element={<SharePage />} />
-          <Route path="/notifications" element={
-            <PrivateRoute>
-              <Notifications />
-            </PrivateRoute>
-          }
-          />
-          <Route path="/contact" element={<ContactUs />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </WishlistProvider>
       </AuthProvider>
       <Toaster position="top-center" />
-    </Router>
+    </Router >
   );
 }
 
