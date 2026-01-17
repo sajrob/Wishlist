@@ -41,11 +41,17 @@ function App() {
         <WishlistProvider>
           <Navbar />
           <Routes>
+            {/* Public Routes - Accessible to everyone */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/update-password" element={<UpdatePassword />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/share/:categoryId" element={<SharePage />} />
+
+            {/* Private Routes - Require Authentication */}
             <Route
               path="/dashboard"
               element={
@@ -86,29 +92,23 @@ function App() {
                 </PrivateRoute>
               }
             />
-            <Route path="/share/:categoryId" element={<SharePage />} />
-            <Route path="/notifications" element={
-              <PrivateRoute>
-                <Notifications />
-              </PrivateRoute>
-            }
+            <Route
+              path="/notifications"
+              element={
+                <PrivateRoute>
+                  <Notifications />
+                </PrivateRoute>
+              }
             />
-            <Route path="/faq" element={
-              <PrivateRoute>
-                <Faq />
-              </PrivateRoute>
-            }
-            />
-            <Route path="/contact" element={<ContactUs />} />
+
+            {/* Catch-all redirect */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </WishlistProvider>
       </AuthProvider>
       <Toaster position="top-center" />
-    </Router >
+    </Router>
   );
 }
 
 export default App;
-
-
