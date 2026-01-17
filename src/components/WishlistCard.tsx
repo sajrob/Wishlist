@@ -83,7 +83,9 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                         first_name: user.user_metadata.first_name || '',
                         last_name: user.user_metadata.last_name || '',
                         email: user.email || '',
-                        created_at: ''
+                        created_at: '',
+                        avatar_url: user.user_metadata?.avatar_url,
+                        user_metadata: user.user_metadata
                     }
                 };
                 setClaims(prev => [...prev, newClaim]);
@@ -160,9 +162,14 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                     <Tooltip>
                                         <TooltipTrigger asChild>
                                             <Avatar className="h-8 w-8 border-2 border-background transition-transform hover:z-10 hover:scale-110">
-                                                <AvatarImage src={claim.profiles?.avatar_url || ''} alt={claim.profiles?.full_name || 'User'} />
+                                                <AvatarImage
+                                                    src={claim.profiles?.avatar_url || (claim.profiles?.user_metadata as any)?.avatar_url}
+                                                    alt={claim.profiles?.full_name || 'User'}
+                                                />
                                                 <AvatarFallback className="text-[10px]">
-                                                    {((claim.profiles?.first_name?.[0] || '') + (claim.profiles?.last_name?.[0] || '')).toUpperCase() || '?'}
+                                                    {claim.profiles?.first_name && claim.profiles?.last_name
+                                                        ? `${claim.profiles.first_name[0]}${claim.profiles.last_name[0]}`.toUpperCase()
+                                                        : claim.profiles?.full_name?.slice(0, 2).toUpperCase() || '?'}
                                                 </AvatarFallback>
                                             </Avatar>
                                         </TooltipTrigger>
