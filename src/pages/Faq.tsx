@@ -79,11 +79,6 @@ function Faq() {
             question: "How do I see what my friends want?",
             answer: "Life is better together. Search for your friends to follow them. Once connected, you can browse their public lists and claim items to ensure you're giving them exactly what they desire.",
             icon: Gift
-        },
-        {
-            question: "Found a bug or have an idea?",
-            answer: "We're in Beta! If something isn't working or you have an idea to make the community better, use the 'Report a Bug' button. It pings Solomon directly on his phone!",
-            icon: Bug
         }
     ];
 
@@ -182,6 +177,26 @@ function Faq() {
                                     </div>
                                 );
                             })}
+
+                            <div className="mt-8 relative overflow-hidden rounded-xl border border-indigo-100 bg-gradient-to-br from-indigo-50/50 via-white to-purple-50/50 p-6 sm:p-8">
+                                <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-indigo-100/50 rounded-full blur-2xl pointer-events-none"></div>
+
+                                <div className="relative flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white text-indigo-600 shadow-sm ring-1 ring-indigo-100">
+                                        <Bug className="h-7 w-7" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-lg font-bold text-slate-900">
+                                            Found a bug or have an idea?
+                                        </h3>
+                                        <p className="text-slate-600 leading-relaxed max-w-2xl">
+                                            We're in Beta! If something isn't working or you have an idea to make the community better,
+                                            please use the 'Report a Bug' button in the sidebar. It pings Solomon directly on his phone!
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>
