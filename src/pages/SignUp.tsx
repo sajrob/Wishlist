@@ -3,8 +3,9 @@
  * Collects user details and facilitates account creation via email/password or Google.
  */
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { supabase } from "../supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -38,11 +40,25 @@ const SignUp = () => {
       setError("");
       setMessage("");
       setLoading(true);
+
+      // Check username availability
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (existingUser) {
+        setLoading(false);
+        return setError("Username is already taken");
+      }
+
       const fullName = `${firstName} ${lastName}`.trim();
       const { error, data } = await signUp(email, password, {
         first_name: firstName,
         last_name: lastName,
         full_name: fullName,
+        username: username,
       });
       if (error) throw error;
 
@@ -119,6 +135,19 @@ const SignUp = () => {
                   className="h-10"
                 />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                required
+                placeholder="username"
+                className="h-10"
+              />
+              <p className="text-xs text-muted-foreground">Only letters, numbers, and underscores.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

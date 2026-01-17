@@ -86,8 +86,30 @@ export function AppSidebar({
   const { setOpen, isMobile } = useSidebar();
   const [unreadCount, setUnreadCount] = React.useState(0);
 
+  const [username, setUsername] = React.useState<string>("");
+
   React.useEffect(() => {
     if (user) {
+      // Set initial username from metadata if available
+      const meta = user.user_metadata || {};
+      if (meta.username) {
+        setUsername(meta.username);
+      }
+
+      // Fetch latest username from profiles to be sure
+      const fetchProfile = async () => {
+        const { data } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", user.id)
+          .single();
+
+        if (data?.username) {
+          setUsername(data.username);
+        }
+      };
+
+      void fetchProfile();
       void fetchUnreadCount();
 
       const subscription = supabase
@@ -158,7 +180,7 @@ export function AppSidebar({
     );
   }, [user]);
 
-  const userEmail = user?.email || "";
+  const displayHandle = username ? `@${username}` : user?.email || "";
 
   const navItems = [
     {
@@ -361,7 +383,7 @@ export function AppSidebar({
                   )}
                   <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                     <span className="truncate font-semibold">{userName}</span>
-                    <span className="truncate text-xs">{userEmail}</span>
+                    <span className="truncate text-xs">{displayHandle}</span>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
@@ -384,7 +406,7 @@ export function AppSidebar({
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">{userName}</span>
-                      <span className="truncate text-xs">{userEmail}</span>
+                      <span className="truncate text-xs">{displayHandle}</span>
                     </div>
                   </div>
                 </DropdownMenuLabel>

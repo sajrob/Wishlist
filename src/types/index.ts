@@ -40,6 +40,7 @@ export interface Category {
 
 export interface Profile {
     id: string;
+    username?: string;
     full_name: string;
     first_name: string;
     last_name: string;
@@ -50,6 +51,7 @@ export interface Profile {
         first_name?: string;
         last_name?: string;
         full_name?: string;
+        username?: string;
     };
 }
 

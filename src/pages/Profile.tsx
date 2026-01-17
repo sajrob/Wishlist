@@ -15,6 +15,7 @@ import './Profile.css';
 type Stats = { items: number; categories: number };
 
 type ProfileForm = {
+    username: string;
     first_name: string;
     last_name: string;
     full_name: string;
@@ -26,6 +27,7 @@ const Profile = () => {
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState<Stats>({ items: 0, categories: 0 });
     const [formData, setFormData] = useState<ProfileForm>({
+        username: '',
         first_name: '',
         last_name: '',
         full_name: '',
@@ -33,7 +35,9 @@ const Profile = () => {
     });
 
     useEffect(() => {
-        if (user) {
+        const fetchProfileData = async () => {
+            if (!user) return;
+
             const meta = user.user_metadata || {};
             let firstName = (meta as any).first_name || '';
             let lastName = (meta as any).last_name || '';
@@ -44,14 +48,24 @@ const Profile = () => {
                 lastName = names.slice(1).join(' ');
             }
 
+            // Fetch specific profile data from DB
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('username')
+                .eq('id', user.id)
+                .single();
+
             setFormData({
                 first_name: firstName,
                 last_name: lastName,
                 full_name: (meta as any).full_name || '',
                 email: user.email || '',
+                username: profile?.username || (meta as any).username || '',
             });
             void fetchStats();
-        }
+        };
+
+        fetchProfileData();
     }, [user]);
 
     const fetchStats = async () => {
@@ -82,12 +96,25 @@ const Profile = () => {
         setLoading(true);
 
         try {
+            // Check username availability if changed
+            if (formData.username) {
+                const { data: existing } = await supabase
+                    .from('profiles')
+                    .select('username')
+                    .eq('username', formData.username)
+                    .neq('id', user?.id)
+                    .maybeSingle();
+
+                if (existing) throw new Error("Username is already taken");
+            }
+
             const fullName = `${formData.first_name} ${formData.last_name}`.trim();
             const { error } = await supabase.auth.updateUser({
                 data: {
                     first_name: formData.first_name,
                     last_name: formData.last_name,
                     full_name: fullName,
+                    username: formData.username,
                 },
             });
 
@@ -99,16 +126,21 @@ const Profile = () => {
                 first_name: formData.first_name,
                 last_name: formData.last_name,
                 full_name: fullName,
+                username: formData.username,
                 updated_at: new Date(),
             });
 
             if (profileError) {
                 console.error('Error updating public profile:', profileError);
+                if (profileError.message.includes('unique constraint')) {
+                    throw new Error("Username is likely taken");
+                }
+                throw profileError;
             }
             setFormData(prev => ({ ...prev, full_name: fullName }));
             toast.success('Profile updated successfully!');
         } catch (error: any) {
-            toast.error('Error updating profile: ' + error.message);
+            toast.error(error.message);
         } finally {
             setLoading(false);
         }
@@ -158,24 +190,37 @@ const Profile = () => {
                     <Card>
                         <form onSubmit={handleUpdateProfile}>
                             <CardContent className="p-6 space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="first_name">First Name</Label>
+                                        <Label htmlFor="username">Username</Label>
                                         <Input
-                                            id="first_name"
-                                            value={formData.first_name}
-                                            onChange={e => setFormData({ ...formData, first_name: e.target.value })}
-                                            placeholder="First Name"
+                                            id="username"
+                                            value={formData.username}
+                                            onChange={e => setFormData({ ...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '') })}
+                                            placeholder="username"
+                                            className="font-mono bg-muted/30"
                                         />
+                                        <p className="text-xs text-muted-foreground">This will be your unique handle.</p>
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="last_name">Last Name</Label>
-                                        <Input
-                                            id="last_name"
-                                            value={formData.last_name}
-                                            onChange={e => setFormData({ ...formData, last_name: e.target.value })}
-                                            placeholder="Last Name"
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="first_name">First Name</Label>
+                                            <Input
+                                                id="first_name"
+                                                value={formData.first_name}
+                                                onChange={e => setFormData({ ...formData, first_name: e.target.value })}
+                                                placeholder="First Name"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="last_name">Last Name</Label>
+                                            <Input
+                                                id="last_name"
+                                                value={formData.last_name}
+                                                onChange={e => setFormData({ ...formData, last_name: e.target.value })}
+                                                placeholder="Last Name"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="space-y-2">
