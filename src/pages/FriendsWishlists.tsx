@@ -347,7 +347,7 @@ const FriendsWishlists = () => {
                                 <TabsList className="h-11 bg-muted/50 p-1 rounded-xl border-none w-full md:w-auto flex overflow-x-auto no-scrollbar justify-start sm:justify-center md:justify-start">
                                     <TabsTrigger
                                         value="friends"
-                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
+                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
                                     >
                                         <Handshake className="size-3.5 shrink-0" />
                                         <span>Friends</span>
@@ -357,7 +357,7 @@ const FriendsWishlists = () => {
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="following"
-                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
+                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
                                     >
                                         <Heart className="size-3.5 shrink-0" />
                                         <span>Following</span>
@@ -367,7 +367,7 @@ const FriendsWishlists = () => {
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="followers"
-                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
+                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
                                     >
                                         <Users className="size-3.5 shrink-0" />
                                         <span>Followers</span>
