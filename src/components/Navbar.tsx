@@ -75,7 +75,7 @@ const Navbar = () => {
           className="navbar-logo"
           onClick={closeMenu}
         >
-          Me Lists
+          Me List
         </Link>
 
         {/*hamburger menu toggle button designed for mobile responsiveness*/}
