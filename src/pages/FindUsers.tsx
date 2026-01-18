@@ -253,13 +253,13 @@ const FindUsers = () => {
                                                             </div>
                                                         </div>
 
-                                                        <div className="flex-1 gap-2 items-center w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-none border-dashed">
+                                                        <div className="flex-1 gap-2 items-center w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0">
                                                             {isFollowing ? (
                                                                 <>
                                                                     <Button
                                                                         size="sm"
                                                                         onClick={() => handleFollow(profile.id, profile.full_name)}
-                                                                        className="absolute top-6 right-8 h-9 sm:h-8 w-auto sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                                                                        className="absolute top-6 right-1 h-9 sm:h-8 w-auto sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
                                                                     >
                                                                         <UserMinus className="size-4" />
                                                                         Unfollow
@@ -269,12 +269,14 @@ const FindUsers = () => {
                                                                 <Button
                                                                     size="sm"
                                                                     onClick={() => handleFollow(profile.id, profile.full_name)}
-                                                                    className="h-9 absolute top-6 right-8 sm:h-8 w-auto sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                                                                    className="h-9 absolute top-6 right-1 sm:h-8 w-auto sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
                                                                 >
                                                                     <UserPlus className="size-4" />
                                                                     Follow
                                                                 </Button>
+
                                                             )}
+
                                                         </div>
                                                     </CardContent>
                                                 </Card>
