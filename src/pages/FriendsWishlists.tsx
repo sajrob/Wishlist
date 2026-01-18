@@ -40,16 +40,19 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from '@/lib/utils';
-// import './FriendsWishlists.css'; // Removing dependency on old CSS
+
+// Extending the type locally in case the global type isn't updated yet
+interface ExtendedFriendSummary extends FriendWishlistSummary {
+    username?: string;
+}
 
 type ConnectionTab = 'friends' | 'following' | 'followers';
 
-// Module-level cache to persist data across route changes within the same session
-let cachedFollowing: FriendWishlistSummary[] | null = null;
-let cachedFollowers: FriendWishlistSummary[] | null = null;
+// Module-level cache to persist data across route changes
+let cachedFollowing: ExtendedFriendSummary[] | null = null;
+let cachedFollowers: ExtendedFriendSummary[] | null = null;
 let cachedActiveTab: ConnectionTab = 'friends';
 
-// Try to initialize from sessionStorage if available
 try {
     const storedFollowing = sessionStorage.getItem('wishlist_cachedFollowing');
     const storedFollowers = sessionStorage.getItem('wishlist_cachedFollowers');
@@ -65,8 +68,8 @@ const FriendsWishlists = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const { categories, loading: wishlistLoading } = useWishlistContext();
-    const [following, setFollowing] = useState<FriendWishlistSummary[]>(cachedFollowing || []);
-    const [followers, setFollowers] = useState<FriendWishlistSummary[]>(cachedFollowers || []);
+    const [following, setFollowing] = useState<ExtendedFriendSummary[]>(cachedFollowing || []);
+    const [followers, setFollowers] = useState<ExtendedFriendSummary[]>(cachedFollowers || []);
     const [activeTab, setActiveTab] = useState<ConnectionTab>(cachedActiveTab);
     const [loading, setLoading] = useState(!cachedFollowing);
     const [searchQuery, setSearchQuery] = useState('');
@@ -79,23 +82,19 @@ const FriendsWishlists = () => {
 
     const fetchConnections = async () => {
         if (!user) return;
-        // Only show loading skeletons if we don't have any data yet
         if (!cachedFollowing || cachedFollowing.length === 0) {
             setLoading(true);
         }
         try {
-            // Fetch people YOU follow
             const { data: followingData, error: fError } = await fetchFriends(user.id);
             if (fError) throw fError;
 
-            // Fetch people who follow YOU
             const { data: followersData, error: folError } = await fetchFollowers(user.id);
             if (folError) throw folError;
 
             const followingIds = (followingData || []).map(f => f.friend_id);
             const followersIds = (followersData || []).map(f => f.user_id);
 
-            // Fetch profiles for everyone involved
             const allIds = Array.from(new Set([...followingIds, ...followersIds]));
             if (allIds.length === 0) {
                 setFollowing([]);
@@ -109,20 +108,22 @@ const FriendsWishlists = () => {
 
             const profilesMap = new Map((profilesData as Profile[] || []).map(p => [p.id, p]));
 
-            const followingList: FriendWishlistSummary[] = followingIds.map(id => {
+            const followingList: ExtendedFriendSummary[] = followingIds.map(id => {
                 const profile = profilesMap.get(id);
                 return {
                     id,
                     name: profile?.full_name || 'Unknown User',
+                    username: profile?.username || 'user' + getInitials(profile?.full_name), // Added username mapping
                     firstName: profile ? getFirstName(profile, 'Friend') : 'Friend',
                 };
             });
 
-            const followersList: FriendWishlistSummary[] = followersIds.map(id => {
+            const followersList: ExtendedFriendSummary[] = followersIds.map(id => {
                 const profile = profilesMap.get(id);
                 return {
                     id,
                     name: profile?.full_name || 'Unknown User',
+                    username: profile?.username || 'user' + getInitials(profile?.full_name), // Added username mapping
                     firstName: profile ? getFirstName(profile, 'User') : 'Friend',
                 };
             });
@@ -132,7 +133,6 @@ const FriendsWishlists = () => {
             cachedFollowing = followingList;
             cachedFollowers = followersList;
 
-            // Update sessionStorage
             try {
                 sessionStorage.setItem('wishlist_cachedFollowing', JSON.stringify(followingList));
                 sessionStorage.setItem('wishlist_cachedFollowers', JSON.stringify(followersList));
@@ -198,7 +198,6 @@ const FriendsWishlists = () => {
 
             if (error) throw error;
 
-            // Refetch or update state
             void fetchConnections();
             toast.success('Following back!');
         } catch (error) {
@@ -207,9 +206,10 @@ const FriendsWishlists = () => {
         }
     };
 
-    const renderList = (list: FriendWishlistSummary[], type: ConnectionTab) => {
+    const renderList = (list: ExtendedFriendSummary[], type: ConnectionTab) => {
         const filteredList = list.filter(person =>
-            person.name.toLowerCase().includes(searchQuery.toLowerCase())
+            person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            person.username?.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
         if (loading) {
@@ -238,25 +238,10 @@ const FriendsWishlists = () => {
                     </h2>
                     <p className="text-muted-foreground mt-3 max-w-sm mx-auto leading-relaxed">
                         {searchQuery ? `We couldn't find anyone matching "${searchQuery}" in your ${type}.` :
-                            type === 'friends' ? 'Connect with others to see mutual friends here. When you follow someone and they follow you back, they appear here!' :
-                                type === 'following' ? "You haven't followed any users to see their wishlists yet. Start discovering people to celebrate with!" :
-                                    'No one has followed you yet. Share your profile with friends to start building your network!'}
+                            type === 'friends' ? 'Connect with others to see mutual friends here.' :
+                                type === 'following' ? "You haven't followed any users yet." :
+                                    'No one has followed you yet.'}
                     </p>
-                    {(type !== 'followers' || searchQuery) && (
-                        <div className="mt-8 flex gap-3">
-                            {searchQuery && (
-                                <Button variant="outline" onClick={() => setSearchQuery('')} className="rounded-xl px-6">
-                                    Clear Search
-                                </Button>
-                            )}
-                            <Button asChild className="rounded-xl px-8 shadow-lg shadow-primary/20 hover:shadow-xl transition-all">
-                                <Link to="/find-users">
-                                    <Sparkles className="size-4 mr-2" />
-                                    Find People
-                                </Link>
-                            </Button>
-                        </div>
-                    )}
                 </div>
             );
         }
@@ -273,28 +258,30 @@ const FriendsWishlists = () => {
                                 <Card className="overflow-hidden border-muted-foreground/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-card/50 backdrop-blur-sm rounded-[24px]">
                                     <CardContent className="p-3">
                                         <div className="flex items-center gap-4">
-                                            <Avatar className="size-14 border-2 border-background shadow-md group-hover:scale-105 transition-transform duration-300 shrink-0">
-                                                <AvatarImage src={undefined} />
-                                                <AvatarFallback className="text-lg bg-primary/10 text-primary font-bold lowercase">
-                                                    {getInitials(person.name)}
-                                                </AvatarFallback>
-                                            </Avatar>
+                                            <div className="relative shrink-0">
+                                                <Avatar className="size-14 border-2 border-background shadow-md group-hover:scale-105 transition-transform duration-300">
+                                                    <AvatarImage src={undefined} />
+                                                    <AvatarFallback className="text-lg bg-primary/10 text-primary font-bold uppercase">
+                                                        {getInitials(person.name)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                {isMutual && (
+                                                    <Badge className="absolute bottom-0 left-1 h-4 px-1.5 bg-green-800 text-green-100 border-none text-[8px] font-bold uppercase tracking-wider">
+                                                        Mutual
+                                                    </Badge>
+                                                )}
+                                            </div>
 
-                                            <div className="flex-1 items-center justify-center ">
+                                            <div className="flex-1 min-w-0 pr-2">
                                                 <div className="flex items-center gap-1.5 mb-0.5">
-                                                    <h3 className="font-bold text-base tracking-tight group-hover:text-primary transition-colors ">
+                                                    <h3 className="font-bold text-base tracking-tight group-hover:text-primary transition-colors truncate">
                                                         {person.name}
                                                     </h3>
-
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
-                                                        <Gift className="size-2.5" />
-                                                        View wishlist
-                                                    </p>
-                                                    <ChevronRight className="size-2.5 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                                                    {/* Displaying the username here */}
+                                                    <span className="truncate text-xs text-muted-foreground">@{person.username}</span>
                                                 </div>
-                                                <div>  {isMutual && <Badge className="h-4 px-1.5 bg-green-500/10 text-green-600 border-none text-[8px] font-bold uppercase tracking-wider">Mutual</Badge>}</div>
                                             </div>
 
                                             <div className="shrink-0 flex gap-2">
@@ -360,7 +347,7 @@ const FriendsWishlists = () => {
                                 <TabsList className="h-11 bg-muted/50 p-1 rounded-xl border-none w-full md:w-auto flex overflow-x-auto no-scrollbar justify-start sm:justify-center md:justify-start">
                                     <TabsTrigger
                                         value="friends"
-                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg active:scale-95 whitespace-nowrap"
+                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
                                     >
                                         <Handshake className="size-3.5 shrink-0" />
                                         <span>Friends</span>
@@ -370,7 +357,7 @@ const FriendsWishlists = () => {
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="following"
-                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg active:scale-95 whitespace-nowrap"
+                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
                                     >
                                         <Heart className="size-3.5 shrink-0" />
                                         <span>Following</span>
@@ -380,7 +367,7 @@ const FriendsWishlists = () => {
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="followers"
-                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-lg active:scale-95 whitespace-nowrap"
+                                        className="flex-1 md:flex-none h-9 rounded-lg px-2 sm:px-6 gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-bold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"
                                     >
                                         <Users className="size-3.5 shrink-0" />
                                         <span>Followers</span>
@@ -390,7 +377,7 @@ const FriendsWishlists = () => {
                                     </TabsTrigger>
                                 </TabsList>
 
-                                <div className="relative group w-full md:max-w-[240px] transition-all duration-300">
+                                <div className="relative group w-full md:max-w-[240px]">
                                     <Input
                                         placeholder="Search connections..."
                                         className="h-10 pl-10 pr-4 text-xs rounded-xl bg-card border-muted-foreground/10 focus-visible:ring-primary/20 transition-all font-medium shadow-sm"
