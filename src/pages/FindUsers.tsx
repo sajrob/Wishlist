@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Search, UserPlus, UserMinus, User, Sparkles, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from '../utils/nameUtils';
+import { Card, CardContent } from '@/components/ui/card';
 
 type ProfileRecord = {
     id: string;
@@ -230,58 +231,53 @@ const FindUsers = () => {
                                         return (
                                             <div
                                                 key={profile.id}
-                                                className="group relative flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border bg-card hover:shadow-xl hover:border-primary/20 transition-all duration-300"
+                                                className="group relative"
                                             >
-                                                <div className="flex items-center gap-4 flex-1 min-w-0">
-                                                    <Avatar className="size-12 sm:size-14 border shadow-sm group-hover:scale-105 transition-transform shrink-0">
-                                                        <AvatarImage src={profile.avatar_url} />
-                                                        <AvatarFallback className="text-base sm:text-lg bg-primary/5 text-primary font-bold">
-                                                            {getInitials(profile.full_name)}
-                                                        </AvatarFallback>
-                                                    </Avatar>
+                                                <Card className="overflow-hidden border-muted-foreground/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 bg-card/50 backdrop-blur-sm rounded-[24px]">
+                                                    <CardContent className="p-3">
+                                                        <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                            <Avatar className="size-12 sm:size-14 border shadow-sm group-hover:scale-105 transition-transform duration-300 shrink-0">
+                                                                <AvatarImage src={profile.avatar_url} />
+                                                                <AvatarFallback className="text-base sm:text-lg bg-primary/5 text-primary font-bold">
+                                                                    {getInitials(profile.full_name)}
+                                                                </AvatarFallback>
+                                                            </Avatar>
 
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors text-sm sm:text-base">
-                                                            {profile.full_name}
-                                                        </h3>
-                                                        <p className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight">
-                                                            {isFollowing ? "Following" : "Discovering"}
-                                                        </p>
-                                                    </div>
-                                                </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors text-sm sm:text-base">
+                                                                    {profile.full_name}
+                                                                </h3>
+                                                                <p className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-tight">
+                                                                    {isFollowing ? "Following" : "Discovering"}
+                                                                </p>
+                                                            </div>
+                                                        </div>
 
-                                                <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-none border-dashed">
-                                                    {isFollowing ? (
-                                                        <>
-                                                            <Button
-                                                                variant="outline"
-                                                                size="sm"
-                                                                asChild
-                                                                className="h-8 flex-1 sm:flex-none rounded-xl px-4 text-[11px] font-bold border-primary/20 bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-none"
-                                                            >
-                                                                <Link to={`/wishlist/${profile.id}`}>View</Link>
-                                                            </Button>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="icon"
-                                                                onClick={() => handleUnfollow(profile.id, profile.full_name)}
-                                                                className="h-8 w-8 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                                                title="Unfollow"
-                                                            >
-                                                                <UserMinus className="size-4" />
-                                                            </Button>
-                                                        </>
-                                                    ) : (
-                                                        <Button
-                                                            size="sm"
-                                                            onClick={() => handleFollow(profile.id, profile.full_name)}
-                                                            className="h-9 sm:h-8 w-full sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
-                                                        >
-                                                            <UserPlus className="size-4" />
-                                                            Follow
-                                                        </Button>
-                                                    )}
-                                                </div>
+                                                        <div className="flex-1 gap-2 items-center w-full sm:w-auto mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-none border-dashed">
+                                                            {isFollowing ? (
+                                                                <>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        onClick={() => handleFollow(profile.id, profile.full_name)}
+                                                                        className="h-9 absolute top-6 right-8 sm:h-8 w-auto sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                                                                    >
+                                                                        <UserMinus className="size-4" />
+                                                                        Unfollow
+                                                                    </Button>
+                                                                </>
+                                                            ) : (
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => handleFollow(profile.id, profile.full_name)}
+                                                                    className="h-9 absolute top-6 right-8 sm:h-8 w-auto sm:w-auto rounded-xl px-5 text-[11px] font-bold gap-2 shadow-md hover:shadow-lg active:scale-95 transition-all"
+                                                                >
+                                                                    <UserPlus className="size-4" />
+                                                                    Follow
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
                                         );
                                     })}
