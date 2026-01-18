@@ -289,7 +289,7 @@ const FriendsWishlists = () => {
                                                     <Button
                                                         variant="secondary"
                                                         size="sm"
-                                                        className="h-8 rounded-full px-3 text-[10px] font-bold bg-muted/50 hover:bg-destructive/10 hover:text-destructive transition-colors border-none shadow-none"
+                                                        className="h-8 rounded-full px-3 text-[10px] font-bold bg-muted/70 hover:bg-destructive/10 hover:text-destructive transition-colors border border-red-400/30 shadow-none"
                                                         onClick={(e) => handleUnfollow(e, person.id)}
                                                     >
                                                         Unfollow
