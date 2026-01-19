@@ -103,19 +103,19 @@ export function FeedbackDialog({ trigger, open, onOpenChange }: FeedbackDialogPr
                             <SelectContent>
                                 <SelectItem value="Bug">
                                     <div className="flex items-center gap-2">
-                                        <Bug className="h-4 w-4" />
+                                        <Bug className="h-4 w-4 text-[#ef4444]" />
                                         <span>Bug</span>
                                     </div>
                                 </SelectItem>
                                 <SelectItem value="Feature Request">
                                     <div className="flex items-center gap-2">
-                                        <Lightbulb className="h-4 w-4" />
+                                        <Lightbulb className="h-4 w-4 text-[#10b981]" />
                                         <span>Feature Request</span>
                                     </div>
                                 </SelectItem>
                                 <SelectItem value="UX Issue">
                                     <div className="flex items-center gap-2">
-                                        <MessageSquare className="h-4 w-4" />
+                                        <MessageSquare className="h-4 w-4 text-[#f59e0b]" />
                                         <span>UX Issue</span>
                                     </div>
                                 </SelectItem>

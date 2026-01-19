@@ -349,8 +349,8 @@ export function AppSidebar({
             <FeedbackDialog
               trigger={
                 <SidebarMenuButton tooltip="Report a Bug">
-                  <Bug className="text-red-600" />
-                  <span className="group-data-[collapsible=icon]:hidden text-red-600">
+                  <Bug className="text-indigo-600" />
+                  <span className="group-data-[collapsible=icon]:hidden">
                     Report a Bug
                   </span>
                 </SidebarMenuButton>

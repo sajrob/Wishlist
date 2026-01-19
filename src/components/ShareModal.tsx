@@ -159,17 +159,17 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
                 <Tabs defaultValue="friends" className="w-full flex flex-col">
                     <div className="px-6 py-2 bg-blue-50/30 border-y">
-                        <TabsList className="w-full h-11 bg-muted/50 p-1.5 rounded-xl border-none">
+                        <TabsList className="w-full h-11 bg-blue-50/30 p-1.5 rounded-xl border-none">
                             <TabsTrigger
                                 value="friends"
-                                className="flex-1 rounded-lg py-2 gap-2 text-xs font-semibold transition-all data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-md"
+                                className="flex-1 py-2 gap-2 text-xs font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
                             >
                                 <Users className="w-3.5 h-3.5" />
                                 Friends
                             </TabsTrigger>
                             <TabsTrigger
                                 value="external"
-                                className="flex-1 rounded-lg py-2 gap-2 text-xs font-semibold transition-all data-[state=active]:bg-[#2563eb] data-[state=active]:text-white data-[state=active]:shadow-md"
+                                className="flex-1 rounded-lg py-2 gap-2 text-xs font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md"
                             >
                                 <ExternalLink className="w-3.5 h-3.5" />
                                 Share to App
@@ -249,7 +249,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                                                             >
                                                                 <Avatar className="size-9 border-2 border-background shadow-sm group-hover:scale-105 transition-transform duration-300">
                                                                     <AvatarImage src={friend.avatar_url} />
-                                                                    <AvatarFallback className="bg-primary/5 text-primary font-bold text-[10px] lowercase">
+                                                                    <AvatarFallback className="bg-primary/5 text-primary font-bold text-[10px] uppercase">
                                                                         {getInitials(friend.full_name || "")}
                                                                     </AvatarFallback>
                                                                 </Avatar>
@@ -314,7 +314,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
                                         <Gift className="w-5 h-5" />
                                     </div>
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-[9px] uppercase tracking-wider font-bold text-primary/60">Public Link</p>
+                                        <p className="text-[9px] uppercase tracking-wider font-bold text-primary/80">Public Link</p>
                                         <p className="font-semibold truncate text-[13px] leading-tight">{displayOwnerName} {categoryName}</p>
                                     </div>
                                 </div>

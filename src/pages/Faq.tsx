@@ -45,7 +45,7 @@ function Faq() {
         },
         {
             question: "What's the difference between public and private wishlists?",
-            answer: "Public wishlists are visible to anyone with the link or who views your profile. Private wishlists are for your eyes only—perfect for secret gift planning or personal tracking.",
+            answer: "Public wishlists are visible to anyone with the link or who views your profile. Private wishlists are for your eyes only, perfect for secret gift planning or personal tracking.",
             icon: BookKey
         },
         {
@@ -168,7 +168,7 @@ function Faq() {
                                     <Bug className="h-7 w-7" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-slate-900">
+                                    <h3 className="text-lg font-bold text-indigo-600">
                                         Found a bug or have an idea?
                                     </h3>
                                     <p className="text-slate-600 leading-relaxed max-w-2xl">

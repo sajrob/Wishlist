@@ -205,7 +205,8 @@ const FindUsers = () => {
                                                                 className="h-8 rounded-full text-[10px] font-bold bg-red-500/10"
                                                                 onClick={(e) => { e.preventDefault(); handleUnfollow(profile.id, profile.full_name); }}
                                                             >
-                                                                <UserMinus className="size-3 mr-1 text-red-500" /> Unfollow
+                                                                <UserMinus className="size-3 mr-1 text-red-500" />
+                                                                <span className="hidden min-[340px]:inline">Unfollow</span>
                                                             </Button>
                                                         ) : (
                                                             <Button
@@ -213,7 +214,8 @@ const FindUsers = () => {
                                                                 className="h-8 rounded-full text-[10px] font-bold"
                                                                 onClick={(e) => { e.preventDefault(); handleFollow(profile.id, profile.full_name); }}
                                                             >
-                                                                <UserPlus className="size-3 mr-1" /> Follow
+                                                                <UserPlus className="size-3 mr-1" />
+                                                                <span className="hidden min-[340px]:inline">Follow</span>
                                                             </Button>
                                                         )}
                                                     </div>
