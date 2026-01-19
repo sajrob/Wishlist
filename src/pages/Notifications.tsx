@@ -154,7 +154,7 @@ const Notifications = () => {
                         <Separator orientation="vertical" className="h-4" />
                         <div className="flex flex-col">
                             <h1 className="text-lg font-bold tracking-tight">Notifications</h1>
-                            <p className="text-xs text-muted-foreground">Stay updated with your wishlist activity</p>
+                            <p className="text-xs text-muted-foreground hidden sm:block">Stay updated with your wishlist activity</p>
                         </div>
                     </div>
                     {unreadCount > 0 && (
