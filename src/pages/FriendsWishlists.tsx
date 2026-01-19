@@ -280,7 +280,7 @@ const FriendsWishlists = () => {
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
                                                     {/* Displaying the username here */}
-                                                    <span className="truncate text-xs text-muted-foreground">@{person.username}</span>
+                                                    <span className="truncate text-xs text-muted-foreground">@{person.username.toLowerCase()}</span>
                                                 </div>
                                             </div>
 
