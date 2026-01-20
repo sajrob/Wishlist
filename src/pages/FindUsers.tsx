@@ -1,130 +1,45 @@
 /**
  * Find Users page component that allows users to search for and follow other users.
  */
-import React, { useState, useEffect } from 'react';
-import { toast } from "sonner";
-import { confirmDelete } from '../utils/toastHelpers';
-import { supabase } from '../supabaseClient';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlistContext } from '../context/WishlistContext';
 import { AppSidebar } from "../components/AppSidebar";
+import { PageHeader } from "../components/PageHeader";
 import {
     SidebarProvider,
     SidebarInset,
-    SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, UserMinus, Sparkles, Loader2 } from "lucide-react";
+import { Search, UserPlus, UserMinus, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { getInitials } from '../utils/nameUtils';
-
-// Updated local type to match the structure in your FriendsWishlists file
-type ProfileRecord = {
-    id: string;
-    full_name: string;
-    username?: string;
-    avatar_url?: string;
-};
+import { useUserSearch } from '../hooks/useUserSearch';
 
 const FindUsers = () => {
     const { user } = useAuth();
     const { categories, loading: wishlistLoading } = useWishlistContext();
-    const [query, setQuery] = useState('');
-    const [users, setUsers] = useState<ProfileRecord[]>([]);
-    const [friends, setFriends] = useState<Set<string>>(new Set());
-    const [searching, setSearching] = useState(false);
-    const [hasSearched, setHasSearched] = useState(false);
     const navigate = useNavigate();
 
-    useEffect(() => {
-        if (user) {
-            void fetchFriends();
-        }
-    }, [user]);
-
-    const fetchFriends = async () => {
-        if (!user) return;
-        try {
-            const { data, error } = await supabase.from('friends').select('friend_id').eq('user_id', user.id);
-            if (error) throw error;
-            const friendPars = new Set((data || []).map(f => f.friend_id));
-            setFriends(friendPars);
-        } catch (error) {
-            console.error('Error fetching friends:', error);
-        }
-    };
-
-    const searchUsers = async (searchQuery: string) => {
-        if (!user || !searchQuery.trim()) {
-            setUsers([]);
-            return;
-        }
-
-        setSearching(true);
-        try {
-            // We select 'username' explicitly.
-            // If the query still doesn't show usernames, check if your RLS policies 
-            // allow reading the 'username' column in the 'profiles' table.
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, full_name, username, avatar_url')
-                .neq('id', user.id)
-                .or(`full_name.ilike.%${searchQuery}%,username.ilike.%${searchQuery}%`)
-                .limit(20);
-
-            if (error) throw error;
-            setUsers((data || []) as ProfileRecord[]);
-            setHasSearched(true);
-        } catch (error) {
-            console.error('Error searching users:', error);
-            toast.error("Search failed.");
-        } finally {
-            setSearching(false);
-        }
-    };
+    const {
+        query,
+        setQuery,
+        users,
+        friends,
+        searching,
+        hasSearched,
+        setHasSearched,
+        searchUsers,
+        handleFollow,
+        handleUnfollow,
+    } = useUserSearch(user?.id);
 
     const handleSearchSubmit = (e?: React.FormEvent) => {
         e?.preventDefault();
         void searchUsers(query);
-    };
-
-    const handleFollow = async (friendId: string, name: string) => {
-        if (!user) return;
-        try {
-            const { error } = await supabase.from('friends').insert([{ user_id: user.id, friend_id: friendId }]);
-            if (error) throw error;
-            setFriends(prev => new Set(prev).add(friendId));
-            toast.success(`Following ${name}`);
-        } catch (error) {
-            toast.error('Could not follow user.');
-        }
-    };
-
-    const handleUnfollow = async (friendId: string, name: string) => {
-        if (!user) return;
-        confirmDelete({
-            title: `Unfollow ${name}?`,
-            description: "You won't be able to see their private wishlists anymore.",
-            deleteLabel: "Unfollow",
-            onDelete: async () => {
-                try {
-                    const { error } = await supabase.from('friends').delete().eq('user_id', user.id).eq('friend_id', friendId);
-                    if (error) throw error;
-                    setFriends(prev => {
-                        const next = new Set(prev);
-                        next.delete(friendId);
-                        return next;
-                    });
-                    toast.success(`Unfollowed ${name}`);
-                } catch (error) {
-                    toast.error('Could not unfollow user.');
-                }
-            }
-        });
     };
 
     return (
@@ -136,15 +51,9 @@ const FindUsers = () => {
                 loading={wishlistLoading}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden">
-                <header className="flex h-14 md:h-16 shrink-0 items-center gap-2 border-b px-6 bg-background sticky top-0 z-10">
-                    <div className="flex items-center gap-3 w-full">
-                        <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="h-4" />
-                        <div className="flex flex-col">
-                            <h1 className="text-lg font-bold tracking-tight">Find Friends</h1>
-                        </div>
-                    </div>
-                </header>
+                <PageHeader
+                    title="Find Friends"
+                />
 
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
                     <div className="max-w-4xl mx-auto flex flex-col gap-8">

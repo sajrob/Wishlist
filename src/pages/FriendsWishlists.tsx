@@ -3,35 +3,25 @@
  * Displays mutual friends, people the user follows, and the user's followers,
  * providing links to view their respective wishlists.
  */
-import React, { useState, useEffect, useMemo } from 'react';
-import { toast } from "sonner";
-import { confirmDelete } from '../utils/toastHelpers';
+import React, { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useWishlistContext } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../supabaseClient';
-import LoadingSpinner from '../components/LoadingSpinner';
 import { FriendCardSkeleton } from '../components/FriendCardSkeleton';
 import { AppSidebar } from "../components/AppSidebar";
+import { PageHeader } from "../components/PageHeader";
 import {
     SidebarProvider,
     SidebarInset,
-    SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { fetchFriends, fetchFollowers, fetchProfiles } from '../utils/supabaseHelpers';
-import { getInitials, getFirstName } from '../utils/nameUtils';
-import type { FriendWishlistSummary, Profile } from '../types';
+import { getInitials } from '../utils/nameUtils';
+import { useFriends } from '../hooks/useFriends';
 import {
     Users,
     UserPlus,
-    UserMinus,
     Heart,
     Handshake,
-    Sparkles,
     Search,
-    ChevronRight,
-    Gift
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -39,176 +29,32 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { cn } from '@/lib/utils';
-
-// Extending the type locally in case the global type isn't updated yet
-interface ExtendedFriendSummary extends FriendWishlistSummary {
-    username?: string;
-}
 
 type ConnectionTab = 'friends' | 'following' | 'followers';
-
-// Module-level cache to persist data across route changes
-let cachedFollowing: ExtendedFriendSummary[] | null = null;
-let cachedFollowers: ExtendedFriendSummary[] | null = null;
-let cachedActiveTab: ConnectionTab = 'friends';
-
-try {
-    const storedFollowing = sessionStorage.getItem('wishlist_cachedFollowing');
-    const storedFollowers = sessionStorage.getItem('wishlist_cachedFollowers');
-    const storedTab = sessionStorage.getItem('wishlist_activeTab');
-    if (storedFollowing && !cachedFollowing) cachedFollowing = JSON.parse(storedFollowing);
-    if (storedFollowers && !cachedFollowers) cachedFollowers = JSON.parse(storedFollowers);
-    if (storedTab) cachedActiveTab = storedTab as ConnectionTab;
-} catch (e) {
-    console.error('Error loading cache from sessionStorage:', e);
-}
 
 const FriendsWishlists = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const { categories, loading: wishlistLoading } = useWishlistContext();
-    const [following, setFollowing] = useState<ExtendedFriendSummary[]>(cachedFollowing || []);
-    const [followers, setFollowers] = useState<ExtendedFriendSummary[]>(cachedFollowers || []);
-    const [activeTab, setActiveTab] = useState<ConnectionTab>(cachedActiveTab);
-    const [loading, setLoading] = useState(!cachedFollowing);
+    const [activeTab, setActiveTab] = useState<ConnectionTab>('friends');
     const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        if (user) {
-            void fetchConnections();
-        }
-    }, [user]);
-
-    const fetchConnections = async () => {
-        if (!user) return;
-        if (!cachedFollowing || cachedFollowing.length === 0) {
-            setLoading(true);
-        }
-        try {
-            const { data: followingData, error: fError } = await fetchFriends(user.id);
-            if (fError) throw fError;
-
-            const { data: followersData, error: folError } = await fetchFollowers(user.id);
-            if (folError) throw folError;
-
-            const followingIds = (followingData || []).map(f => f.friend_id);
-            const followersIds = (followersData || []).map(f => f.user_id);
-
-            const allIds = Array.from(new Set([...followingIds, ...followersIds]));
-            if (allIds.length === 0) {
-                setFollowing([]);
-                setFollowers([]);
-                setLoading(false);
-                return;
-            }
-
-            const { data: profilesData, error: pError } = await fetchProfiles(allIds);
-            if (pError) throw pError;
-
-            const profilesMap = new Map((profilesData as Profile[] || []).map(p => [p.id, p]));
-
-            const followingList: ExtendedFriendSummary[] = followingIds.map(id => {
-                const profile = profilesMap.get(id);
-                return {
-                    id,
-                    name: profile?.full_name || 'Unknown User',
-                    username: profile?.username || 'user' + getInitials(profile?.full_name), // Added username mapping
-                    firstName: profile ? getFirstName(profile, 'Friend') : 'Friend',
-                };
-            });
-
-            const followersList: ExtendedFriendSummary[] = followersIds.map(id => {
-                const profile = profilesMap.get(id);
-                return {
-                    id,
-                    name: profile?.full_name || 'Unknown User',
-                    username: profile?.username || 'user' + getInitials(profile?.full_name), // Added username mapping
-                    firstName: profile ? getFirstName(profile, 'User') : 'Friend',
-                };
-            });
-
-            setFollowing(followingList);
-            setFollowers(followersList);
-            cachedFollowing = followingList;
-            cachedFollowers = followersList;
-
-            try {
-                sessionStorage.setItem('wishlist_cachedFollowing', JSON.stringify(followingList));
-                sessionStorage.setItem('wishlist_cachedFollowers', JSON.stringify(followersList));
-            } catch (e) {
-                console.error('Error saving cache to sessionStorage:', e);
-            }
-        } catch (error) {
-            console.error('Error fetching connections:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {
+        following,
+        followers,
+        mutualFriends,
+        loading,
+        handleUnfollow,
+        handleFollowBack,
+    } = useFriends(user?.id);
 
     const handleTabChange = (tab: ConnectionTab) => {
         setActiveTab(tab);
-        cachedActiveTab = tab;
-        sessionStorage.setItem('wishlist_activeTab', tab);
     };
 
-    const mutualFriends = useMemo(() => {
-        const followingSet = new Set(following.map(f => f.id));
-        return followers.filter(f => followingSet.has(f.id));
-    }, [following, followers]);
-
-    const handleUnfollow = async (e: React.MouseEvent, friendId: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!user) return;
-
-        confirmDelete({
-            title: "Unfollow user?",
-            description: "You won't be able to see their private wishlists anymore.",
-            deleteLabel: "Unfollow",
-            onDelete: async () => {
-                try {
-                    const { error } = await supabase
-                        .from('friends')
-                        .delete()
-                        .eq('user_id', user.id)
-                        .eq('friend_id', friendId);
-
-                    if (error) throw error;
-
-                    setFollowing(prev => prev.filter(f => f.id !== friendId));
-                    toast.success('Unfollowed successfully');
-                } catch (error) {
-                    console.error('Error unfollowing user:', error);
-                    toast.error('Failed to unfollow user.');
-                }
-            }
-        });
-    };
-
-    const handleFollowBack = async (e: React.MouseEvent, userId: string) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!user) return;
-
-        try {
-            const { error } = await supabase
-                .from('friends')
-                .insert([{ user_id: user.id, friend_id: userId }]);
-
-            if (error) throw error;
-
-            void fetchConnections();
-            toast.success('Following back!');
-        } catch (error) {
-            console.error('Error following user:', error);
-            toast.error('Failed to follow back.');
-        }
-    };
-
-    const renderList = (list: ExtendedFriendSummary[], type: ConnectionTab) => {
+    const renderList = (list: typeof following, type: ConnectionTab) => {
         const filteredList = list.filter(person =>
-            person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            person.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             person.username?.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
@@ -260,9 +106,9 @@ const FriendsWishlists = () => {
                                         <div className="flex items-center gap-4">
                                             <div className="relative shrink-0">
                                                 <Avatar className="size-14 border-2 border-background shadow-md group-hover:scale-105 transition-transform duration-300">
-                                                    <AvatarImage src={undefined} />
+                                                    <AvatarImage src={person.avatar_url} />
                                                     <AvatarFallback className="text-lg bg-primary/10 text-primary font-bold uppercase">
-                                                        {getInitials(person.name)}
+                                                        {getInitials(person.full_name)}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 {isMutual && (
@@ -275,12 +121,13 @@ const FriendsWishlists = () => {
                                             <div className="flex-1 min-w-0 pr-2">
                                                 <div className="flex items-center gap-1.5 mb-0.5">
                                                     <h3 className="font-bold text-base tracking-tight group-hover:text-primary transition-colors truncate">
-                                                        {person.name}
+                                                        {person.full_name}
                                                     </h3>
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    {/* Displaying the username here */}
-                                                    <span className="truncate text-xs text-muted-foreground">@{person.username.toLowerCase()}</span>
+                                                    <span className="truncate text-xs text-muted-foreground">
+                                                        @{person.username || `user${getInitials(person.full_name).toLowerCase()}`}
+                                                    </span>
                                                 </div>
                                             </div>
 
@@ -290,7 +137,7 @@ const FriendsWishlists = () => {
                                                         variant="secondary"
                                                         size="sm"
                                                         className="h-8 rounded-full px-3 text-[10px] font-bold bg-muted/70 hover:bg-destructive/10 hover:text-destructive transition-colors border border-red-400/30 shadow-none"
-                                                        onClick={(e) => handleUnfollow(e, person.id)}
+                                                        onClick={(e) => handleUnfollow(person.id, person.full_name, e)}
                                                     >
                                                         Unfollow
                                                     </Button>
@@ -298,7 +145,7 @@ const FriendsWishlists = () => {
                                                     <Button
                                                         size="sm"
                                                         className="h-8 rounded-full px-3 text-[10px] font-bold gap-1.5 shadow-md hover:shadow-lg active:scale-95 transition-all"
-                                                        onClick={(e) => handleFollowBack(e, person.id)}
+                                                        onClick={(e) => handleFollowBack(person.id, person.full_name, e)}
                                                     >
                                                         <UserPlus className="size-3" />
                                                         Follow
@@ -325,16 +172,10 @@ const FriendsWishlists = () => {
                 loading={wishlistLoading}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
-                <header className="flex h-14 md:h-16 shrink-0 items-center gap-2 border-b px-6 bg-background sticky top-0 z-20">
-                    <div className="flex items-center gap-3 w-full">
-                        <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="h-4" />
-                        <div className="flex flex-col">
-                            <h1 className="text-lg font-bold tracking-tight">Social Network</h1>
-                            <p className="text-xs text-muted-foreground font-medium uppercase tracking-tight opacity-70">Connections & Friends</p>
-                        </div>
-                    </div>
-                </header>
+                <PageHeader
+                    title="Social Network"
+                    subtitle="Connections & Friends"
+                />
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     <div className="max-w-6xl mx-auto flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 lg:p-10">

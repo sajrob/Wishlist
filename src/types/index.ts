@@ -76,6 +76,11 @@ export interface Notification {
     category_id?: string;
     is_read: boolean;
     created_at: string;
+    actor?: {
+        id: string;
+        full_name: string;
+        username?: string;
+    };
 }
 
 export interface SharedLink {

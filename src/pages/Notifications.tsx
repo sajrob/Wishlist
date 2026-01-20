@@ -2,113 +2,31 @@
  * Notifications page component that displays user-specific alerts and updates with a modern, premium UI.
  * Shows activity such as new followers and wishlist shares using Tailwind CSS.
  */
-import React, { useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Notification } from '../types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { AppSidebar } from "../components/AppSidebar";
+import { PageHeader } from "../components/PageHeader";
 import {
     SidebarProvider,
     SidebarInset,
-    SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bell, UserPlus, Gift, CheckCheck, Trash2, ArrowRight, Circle } from "lucide-react";
-import { toast } from "sonner";
+import { Bell, UserPlus, Gift, CheckCheck, Trash2, ArrowRight } from "lucide-react";
+import { useNotifications } from "../hooks/useNotifications";
 
 const Notifications = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
-    const [notifications, setNotifications] = useState<Notification[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [markingAllRead, setMarkingAllRead] = useState(false);
-
-    useEffect(() => {
-        if (user) {
-            void fetchNotifications();
-        }
-    }, [user]);
-
-    const fetchNotifications = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('notifications')
-                .select('*')
-                .eq('user_id', user!.id)
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-            setNotifications(data || []);
-        } catch (error) {
-            console.error('Error fetching notifications:', error);
-            toast.error('Could not load notifications');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const markAsRead = async (id: string, e?: React.MouseEvent) => {
-        try {
-            // Optimistically update UI
-            setNotifications(prev =>
-                prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
-            );
-
-            const { error } = await supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('id', id);
-
-            if (error) throw error;
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-        }
-    };
-
-    const markAllAsRead = async () => {
-        if (notifications.every(n => n.is_read)) return;
-
-        setMarkingAllRead(true);
-        try {
-            const { error } = await supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('user_id', user!.id)
-                .eq('is_read', false);
-
-            if (error) throw error;
-
-            setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-            toast.success('All notifications marked as read');
-        } catch (error) {
-            console.error('Error marking all as read:', error);
-            toast.error('Could not mark all as read');
-        } finally {
-            setMarkingAllRead(false);
-        }
-    };
-
-    const deleteNotification = async (id: string, e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-            const { error } = await supabase
-                .from('notifications')
-                .delete()
-                .eq('id', id);
-
-            if (error) throw error;
-            setNotifications(prev => prev.filter(n => n.id !== id));
-            toast.success('Notification removed');
-        } catch (error) {
-            console.error('Error deleting notification:', error);
-            toast.error('Could not delete notification');
-        }
-    };
+    const {
+        notifications,
+        loading,
+        markingAllRead,
+        unreadCount,
+        markAsRead,
+        markAllAsRead,
+        deleteNotification,
+    } = useNotifications(user?.id);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -138,8 +56,6 @@ const Notifications = () => {
         }
     };
 
-    const unreadCount = notifications.filter(n => !n.is_read).length;
-
     return (
         <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
             <AppSidebar
@@ -148,28 +64,24 @@ const Notifications = () => {
                 categories={[]}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
-                <header className="flex h-14 md:h-16 shrink-0 items-center justify-between gap-2 border-b px-6 bg-background sticky top-0 z-10">
-                    <div className="flex items-center gap-3">
-                        <SidebarTrigger className="-ml-1" />
-                        <Separator orientation="vertical" className="h-4" />
-                        <div className="flex flex-col">
-                            <h1 className="text-lg font-bold tracking-tight">Notifications</h1>
-                            <p className="text-xs text-muted-foreground hidden sm:block">Stay updated with your wishlist activity</p>
-                        </div>
-                    </div>
-                    {unreadCount > 0 && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={markAllAsRead}
-                            disabled={markingAllRead}
-                            className="text-xs font-semibold gap-2 hover:bg-primary/5 hover:text-primary transition-colors h-8 px-3 rounded-full"
-                        >
-                            <CheckCheck className="size-3.5" />
-                            Mark all as read
-                        </Button>
-                    )}
-                </header>
+                <PageHeader
+                    title="Notifications"
+                    subtitle="Stay updated with your wishlist activity"
+                    actions={
+                        unreadCount > 0 && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={markAllAsRead}
+                                disabled={markingAllRead}
+                                className="text-xs font-semibold gap-2 hover:bg-primary/5 hover:text-primary transition-colors h-8 px-3 rounded-full"
+                            >
+                                <CheckCheck className="size-3.5" />
+                                Mark all as read
+                            </Button>
+                        )
+                    }
+                />
 
                 <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
                     <div className="max-w-2xl mx-auto space-y-3">
@@ -226,7 +138,16 @@ const Notifications = () => {
 
                                     <div className="flex-1 min-w-0 pr-8">
                                         <p className={`text-sm md:text-base mb-1 ${!notification.is_read ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
-                                            {notification.message}
+                                            {notification.actor?.full_name && (
+                                                <span className="font-bold text-foreground">
+                                                    {notification.actor.full_name}{' '}
+                                                </span>
+                                            )}
+                                            {notification.type === 'follow'
+                                                ? 'started following you.'
+                                                : notification.type === 'wishlist_share'
+                                                    ? 'shared a wishlist category with you.'
+                                                    : notification.message}
                                         </p>
                                         <span className="text-[11px] font-medium text-muted-foreground/70 uppercase tracking-wider flex items-center gap-2">
                                             {formatDate(notification.created_at)}
@@ -244,7 +165,11 @@ const Notifications = () => {
                                             variant="ghost"
                                             size="icon"
                                             className="size-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                            onClick={(e) => deleteNotification(notification.id, e)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                void deleteNotification(notification.id);
+                                            }}
                                         >
                                             <Trash2 className="size-4" />
                                         </Button>

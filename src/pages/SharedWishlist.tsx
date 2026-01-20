@@ -172,17 +172,21 @@ function SharedWishlist() {
                                 ) : (
                                     <>
                                         <h1 className="text-lg font-semibold leading-none">
-                                            {activeCategory
-                                                ? `${activeCategoryName} Wishlist`
-                                                : title}
+                                            {!isFollowing
+                                                ? title // Generic title when not following
+                                                : activeCategory
+                                                    ? `${activeCategoryName} Wishlist`
+                                                    : title}
                                         </h1>
                                         <div className="flex items-center gap-2 mt-1">
                                             <p className="text-xs text-muted-foreground whitespace-nowrap">
-                                                {activeCategory
-                                                    ? `Viewing items in ${activeCategoryName}`
-                                                    : "All Public Items"}
+                                                {!isFollowing
+                                                    ? "Follow to view wishlist"
+                                                    : activeCategory
+                                                        ? `Viewing items in ${activeCategoryName}`
+                                                        : "All Public Items"}
                                             </p>
-                                            {activeCategory && (
+                                            {activeCategory && isFollowing && (
                                                 <Button
                                                     variant="secondary"
                                                     size="sm"
