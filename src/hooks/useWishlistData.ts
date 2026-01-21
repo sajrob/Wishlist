@@ -1,73 +1,45 @@
 /**
- * Custom hook for managing wishlist data (items and categories)
- * Provides a unified interface for fetching and managing wishlist state
+ * Custom hook for managing wishlist data (items and categories) using React Query
  */
-
-import { useState, useEffect, useCallback } from 'react';
-import { fetchUserItems, fetchUserCategories } from '../utils/supabaseHelpers';
-import type { Category, CategoryStats, UseWishlistDataReturn, WishlistItem } from '../types';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchUserItems, fetchUserCategories } from '@/api';
+import { queryKeys } from '@/lib/queryClient';
+import type { Category, CategoryStats, WishlistItem } from '../types';
 
 type Options = {
-    autoFetch?: boolean;
     includeClaims?: boolean;
 };
 
-export function useWishlistData(userId: string | null, options: Options = {}): UseWishlistDataReturn {
-    const { autoFetch = true, includeClaims = false } = options;
+export function useWishlistData(userId: string | null, options: Options = {}) {
+    const { includeClaims = false } = options;
+    const queryClient = useQueryClient();
 
-    const [allItems, setAllItems] = useState<WishlistItem[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    const { data: itemsResponse, isLoading: itemsLoading, error: itemsError } = useQuery({
+        queryKey: includeClaims ? queryKeys.itemsWithClaims(userId || '') : queryKeys.items(userId || ''),
+        queryFn: () => fetchUserItems(userId!, includeClaims),
+        enabled: !!userId,
+    });
 
-    const fetchData = useCallback(async () => {
-        if (!userId) {
-            setLoading(false);
-            return;
-        }
+    const { data: categoriesResponse, isLoading: categoriesLoading, error: categoriesError } = useQuery({
+        queryKey: queryKeys.categories(userId || ''),
+        queryFn: () => fetchUserCategories(userId!),
+        enabled: !!userId,
+    });
 
-        setLoading(true);
-        setError(null);
-
-        try {
-            const [itemsResponse, categoriesResponse] = await Promise.all([
-                fetchUserItems(userId, includeClaims),
-                fetchUserCategories(userId),
-            ]);
-
-            if (itemsResponse.error) {
-                throw itemsResponse.error;
-            }
-            if (categoriesResponse.error) {
-                throw categoriesResponse.error;
-            }
-
-            setAllItems(itemsResponse.data || []);
-            setCategories(categoriesResponse.data || []);
-        } catch (err) {
-            console.error('Error fetching wishlist data:', err);
-            setError(err as Error);
-            setAllItems([]);
-            setCategories([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [userId, includeClaims]);
-
-    useEffect(() => {
-        if (autoFetch && userId) {
-            void fetchData();
-        }
-    }, [userId, autoFetch, fetchData]);
+    const allItems = itemsResponse?.data || [];
+    const categories = categoriesResponse?.data || [];
+    const loading = itemsLoading || categoriesLoading;
+    const error = itemsError || categoriesError;
 
     return {
         allItems,
         categories,
         loading,
         error,
-        refetch: fetchData,
-        setAllItems,
-        setCategories,
+        refetch: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.items(userId || '') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId || '') });
+        },
     };
 }
 
@@ -114,5 +86,3 @@ export function useCategoryStats(allItems: WishlistItem[], categories: Category[
 
     return stats;
 }
-
-

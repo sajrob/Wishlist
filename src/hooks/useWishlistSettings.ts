@@ -1,130 +1,59 @@
 /**
- * Custom hook for managing wishlist public/private settings
- * Handles fetching and updating wishlist visibility status
+ * Custom hook for managing wishlist public/private settings using React Query
  */
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchWishlistSettings, updateWishlistSettings } from '@/api';
+import { queryKeys } from '@/lib/queryClient';
 
-import { useState, useEffect, useCallback } from 'react';
-import { fetchWishlistSettings, updateWishlistSettings } from '../utils/supabaseHelpers';
-import type { UseWishlistSettingsReturn, WishlistSettings } from '../types';
+export function useWishlistSettings(userId: string | null) {
+    const queryClient = useQueryClient();
 
-type Options = {
-    autoFetch?: boolean;
-};
+    const { data: response, isLoading: loading, error } = useQuery({
+        queryKey: queryKeys.settings(userId || ''),
+        queryFn: () => fetchWishlistSettings(userId!),
+        enabled: !!userId,
+    });
 
-export function useWishlistSettings(userId: string | null, options: Options = {}): UseWishlistSettingsReturn {
-    const { autoFetch = true } = options;
+    const isPublic = response?.data?.is_public || false;
 
-    const [isPublic, setIsPublic] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
-
-    const fetchSettings = useCallback(async () => {
-        if (!userId) {
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-            const { data, error: fetchError } = await fetchWishlistSettings(userId);
-
-            if (fetchError) throw fetchError;
-
-            if (data) {
-                setIsPublic(data.is_public || false);
-            }
-        } catch (err) {
-            console.error('Error fetching wishlist settings:', err);
-            setError(err as Error);
-            setIsPublic(false);
-        } finally {
-            setLoading(false);
-        }
-    }, [userId]);
-
-    const updatePublicStatus = useCallback(
-        async (newIsPublic: boolean) => {
-            if (!userId) return false;
-
-            const previousValue = isPublic;
-            setIsPublic(newIsPublic);
-            setError(null);
-
-            try {
-                const { error: updateError } = await updateWishlistSettings(userId, newIsPublic);
-
-                if (updateError) throw updateError;
-
-                return true;
-            } catch (err) {
-                console.error('Error updating wishlist settings:', err);
-                setError(err as Error);
-                setIsPublic(previousValue);
-
-                return false;
-            }
+    const updateMutation = useMutation({
+        mutationFn: (newIsPublic: boolean) => updateWishlistSettings(userId!, newIsPublic),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.settings(userId || '') });
         },
-        [userId, isPublic],
-    );
-
-    const togglePublic = useCallback(async () => {
-        return await updatePublicStatus(!isPublic);
-    }, [isPublic, updatePublicStatus]);
-
-    const setPublicStatus = useCallback(
-        async (status: boolean) => {
-            return await updatePublicStatus(status);
-        },
-        [updatePublicStatus],
-    );
-
-    useEffect(() => {
-        if (autoFetch && userId) {
-            void fetchSettings();
+        onError: (error) => {
+            console.error('Error updating wishlist settings:', error);
         }
-    }, [userId, autoFetch, fetchSettings]);
+    });
+
+    const togglePublic = async () => {
+        await updateMutation.mutateAsync(!isPublic);
+        return true;
+    };
+
+    const setPublicStatus = async (status: boolean) => {
+        await updateMutation.mutateAsync(status);
+        return true;
+    };
 
     return {
         isPublic,
         loading,
-        error,
+        error: error as Error | null,
         togglePublic,
         setIsPublic: setPublicStatus,
-        refetch: fetchSettings,
+        refetch: () => queryClient.invalidateQueries({ queryKey: queryKeys.settings(userId || '') }),
     };
 }
 
 export function useWishlistSettingsReadOnly(userId: string | null): { isPublic: boolean; loading: boolean } {
-    const [isPublic, setIsPublic] = useState(false);
-    const [loading, setLoading] = useState(true);
+    const { data: response, isLoading: loading } = useQuery({
+        queryKey: queryKeys.settings(userId || ''),
+        queryFn: () => fetchWishlistSettings(userId!),
+        enabled: !!userId,
+    });
 
-    useEffect(() => {
-        if (!userId) {
-            setLoading(false);
-            return;
-        }
-
-        const fetchSettings = async () => {
-            setLoading(true);
-            try {
-                const { data } = await fetchWishlistSettings(userId);
-                if (data) {
-                    setIsPublic(data.is_public || false);
-                }
-            } catch (err) {
-                console.error('Error fetching wishlist settings:', err);
-                setIsPublic(false);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        void fetchSettings();
-    }, [userId]);
+    const isPublic = response?.data?.is_public || false;
 
     return { isPublic, loading };
 }
-
-

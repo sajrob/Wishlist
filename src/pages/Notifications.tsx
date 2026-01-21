@@ -72,7 +72,7 @@ const Notifications = () => {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={markAllAsRead}
+                                onClick={() => markAllAsRead()}
                                 disabled={markingAllRead}
                                 className="text-xs font-semibold gap-2 hover:bg-primary/5 hover:text-primary transition-colors h-8 px-3 rounded-full"
                             >

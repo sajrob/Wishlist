@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 import { useAuth } from "./AuthContext";
-import { fetchUserItems, fetchUserCategories } from "../utils/supabaseHelpers";
+import { useWishlistData } from "../hooks/useWishlistData";
 import type { Category, WishlistItem } from "../types";
 
 type WishlistContextValue = {
@@ -8,9 +8,11 @@ type WishlistContextValue = {
     categories: Category[];
     loading: boolean;
     error: Error | null;
-    refresh: () => Promise<void>;
-    setAllItems: React.Dispatch<React.SetStateAction<WishlistItem[]>>;
-    setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+    refresh: () => void;
+    // Note: setAllItems and setCategories are now managed by React Query
+    // We provide placeholders or update components to not rely on manual state updates
+    setAllItems: (items: WishlistItem[] | ((prev: WishlistItem[]) => WishlistItem[])) => void;
+    setCategories: (cats: Category[] | ((prev: Category[]) => Category[])) => void;
 };
 
 const WishlistContext = createContext<WishlistContextValue | undefined>(undefined);
@@ -25,57 +27,23 @@ export function useWishlistContext(): WishlistContextValue {
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
     const { user } = useAuth();
-    const [allItems, setAllItems] = useState<WishlistItem[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
+    const { allItems, categories, loading, error, refetch } = useWishlistData(user?.id || null);
 
-    const fetchData = useCallback(async () => {
-        if (!user) {
-            setAllItems([]);
-            setCategories([]);
-            setLoading(false);
-            return;
-        }
-
-        // Only set loading to true if we don't have data, or if we want to show a spinner
-        // For smooth UX, we might want to keep showing stale data while re-fetching
-        if (allItems.length === 0 && categories.length === 0) {
-            setLoading(true);
-        }
-
-        setError(null);
-
-        try {
-            const [itemsResponse, categoriesResponse] = await Promise.all([
-                fetchUserItems(user.id, false),
-                fetchUserCategories(user.id),
-            ]);
-
-            if (itemsResponse.error) throw itemsResponse.error;
-            if (categoriesResponse.error) throw categoriesResponse.error;
-
-            setAllItems(itemsResponse.data || []);
-            setCategories(categoriesResponse.data || []);
-        } catch (err) {
-            console.error("Error fetching wishlist data:", err);
-            setError(err as Error);
-        } finally {
-            setLoading(false);
-        }
-    }, [user]);
-
-    // Initial fetch when user changes
-    useEffect(() => {
-        void fetchData();
-    }, [user]);
+    // Provide setter functions that might be used for optimistic updates or manual overrides
+    // (though React Query's cache is preferred)
+    const setAllItems = () => {
+        console.warn("Manual setAllItems is discouraged with React Query. Use Mutations instead.");
+    };
+    const setCategories = () => {
+        console.warn("Manual setCategories is discouraged with React Query. Use Mutations instead.");
+    };
 
     const value = {
         allItems,
         categories,
         loading,
-        error,
-        refresh: fetchData,
+        error: error as Error | null,
+        refresh: refetch,
         setAllItems,
         setCategories,
     };

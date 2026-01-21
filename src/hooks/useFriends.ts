@@ -1,9 +1,9 @@
 /**
- * Custom hook for managing friend connections
- * Handles fetching friends, followers, following, and managing relationships
+ * Custom hook for managing friend connections using React Query
  */
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../supabaseClient';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchFriends, fetchFollowers, followUser, unfollowUser } from '@/api';
+import { queryKeys } from '@/lib/queryClient';
 import { toast } from 'sonner';
 import { confirmDelete } from '../utils/toastHelpers';
 
@@ -15,90 +15,68 @@ export type FriendSummary = {
     mutual?: boolean;
 };
 
-export type ConnectionTab = 'friends' | 'following' | 'followers';
-
 export function useFriends(userId: string | undefined) {
-    const [following, setFollowing] = useState<FriendSummary[]>([]);
-    const [followers, setFollowers] = useState<FriendSummary[]>([]);
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
 
-    const fetchConnections = useCallback(async () => {
-        if (!userId) return;
+    const { data: followingResponse, isLoading: isLoadingFollowing } = useQuery({
+        queryKey: queryKeys.friends(userId || ''),
+        queryFn: () => fetchFriends(userId!),
+        enabled: !!userId,
+    });
 
-        try {
-            // Fetch following
-            const { data: followingData, error: followingError } = await supabase
-                .from('friends')
-                .select(`
-          friend_id,
-          profiles!friends_friend_id_fkey (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
-                .eq('user_id', userId);
+    const { data: followersResponse, isLoading: isLoadingFollowers } = useQuery({
+        queryKey: queryKeys.followers(userId || ''),
+        queryFn: () => fetchFollowers(userId!),
+        enabled: !!userId,
+    });
 
-            if (followingError) throw followingError;
+    const followingList: FriendSummary[] = (followingResponse?.data || [])
+        .map((f: any) => f.profiles)
+        .filter(Boolean);
 
-            // Fetch followers
-            const { data: followersData, error: followersError } = await supabase
-                .from('friends')
-                .select(`
-          user_id,
-          profiles!friends_user_id_fkey (
-            id,
-            full_name,
-            username,
-            avatar_url
-          )
-        `)
-                .eq('friend_id', userId);
+    const followersList: FriendSummary[] = (followersResponse?.data || [])
+        .map((f: any) => f.profiles)
+        .filter(Boolean);
 
-            if (followersError) throw followersError;
+    const followingIds = new Set(followingList.map(f => f.id));
+    const followerIds = new Set(followersList.map(f => f.id));
 
-            const followingList: FriendSummary[] = (followingData || [])
-                .map((f: any) => f.profiles)
-                .filter(Boolean);
+    const following = followingList.map(f => ({
+        ...f,
+        mutual: followerIds.has(f.id),
+    }));
 
-            const followersList: FriendSummary[] = (followersData || [])
-                .map((f: any) => f.profiles)
-                .filter(Boolean);
+    const followers = followersList.map(f => ({
+        ...f,
+        mutual: followingIds.has(f.id),
+    }));
 
-            // Mark mutual friends
-            const followingIds = new Set(followingList.map(f => f.id));
-            const followerIds = new Set(followersList.map(f => f.id));
-
-            const followingWithMutual = followingList.map(f => ({
-                ...f,
-                mutual: followerIds.has(f.id),
-            }));
-
-            const followersWithMutual = followersList.map(f => ({
-                ...f,
-                mutual: followingIds.has(f.id),
-            }));
-
-            setFollowing(followingWithMutual);
-            setFollowers(followersWithMutual);
-        } catch (error) {
-            console.error('Error fetching connections:', error);
-            toast.error('Could not load connections');
-        } finally {
-            setLoading(false);
+    const followMutation = useMutation({
+        mutationFn: (friendId: string) => followUser(userId!, friendId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
+            toast.success('Started following');
+        },
+        onError: (error) => {
+            console.error('Error following:', error);
+            toast.error('Could not follow user');
         }
-    }, [userId]);
+    });
 
-    useEffect(() => {
-        if (userId) {
-            void fetchConnections();
+    const unfollowMutation = useMutation({
+        mutationFn: (friendId: string) => unfollowUser(userId!, friendId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
+        },
+        onError: (error) => {
+            console.error('Error unfollowing:', error);
+            toast.error('Could not unfollow user');
         }
-    }, [userId, fetchConnections]);
+    });
 
-    const handleUnfollow = useCallback(async (friendId: string, friendName: string, e?: React.MouseEvent) => {
-        if (!userId) return;
-
+    const handleUnfollow = (friendId: string, friendName: string, e?: React.MouseEvent) => {
         e?.preventDefault();
         e?.stopPropagation();
 
@@ -107,72 +85,28 @@ export function useFriends(userId: string | undefined) {
             description: "You won't be able to see their private wishlists anymore.",
             deleteLabel: 'Unfollow',
             onDelete: async () => {
-                try {
-                    const { error } = await supabase
-                        .from('friends')
-                        .delete()
-                        .eq('user_id', userId)
-                        .eq('friend_id', friendId);
-
-                    if (error) throw error;
-
-                    setFollowing(prev => prev.filter(f => f.id !== friendId));
-                    setFollowers(prev =>
-                        prev.map(f =>
-                            f.id === friendId ? { ...f, mutual: false } : f
-                        )
-                    );
-                    toast.success(`Unfollowed ${friendName}`);
-                } catch (error) {
-                    console.error('Error unfollowing:', error);
-                    toast.error('Could not unfollow user');
-                }
+                await unfollowMutation.mutateAsync(friendId);
+                toast.success(`Unfollowed ${friendName}`);
             },
         });
-    }, [userId]);
+    };
 
-    const handleFollowBack = useCallback(async (friendId: string, friendName: string, e?: React.MouseEvent) => {
-        if (!userId) return;
-
+    const handleFollowBack = (friendId: string, friendName: string, e?: React.MouseEvent) => {
         e?.preventDefault();
         e?.stopPropagation();
-
-        try {
-            const { error } = await supabase
-                .from('friends')
-                .insert([{ user_id: userId, friend_id: friendId }]);
-
-            if (error) throw error;
-
-            // Update both lists
-            setFollowers(prev =>
-                prev.map(f =>
-                    f.id === friendId ? { ...f, mutual: true } : f
-                )
-            );
-
-            const followerToAdd = followers.find(f => f.id === friendId);
-            if (followerToAdd) {
-                setFollowing(prev => [...prev, { ...followerToAdd, mutual: true }]);
-            }
-
-            toast.success(`Now following ${friendName}`);
-        } catch (error) {
-            console.error('Error following back:', error);
-            toast.error('Could not follow user');
-        }
-    }, [userId, followers]);
-
-    // Derived values
-    const mutualFriends = following.filter(f => f.mutual);
+        followMutation.mutate(friendId);
+    };
 
     return {
         following,
         followers,
-        mutualFriends,
-        loading,
+        mutualFriends: following.filter(f => f.mutual),
+        loading: isLoadingFollowing || isLoadingFollowers,
         handleUnfollow,
         handleFollowBack,
-        refetch: fetchConnections,
+        refetch: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+            queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
+        },
     };
 }

@@ -1,18 +1,17 @@
 /**
  * Profile page component that allows users to view and update their account information.
- * Displays user statistics and provides a form to edit personal details like name.
  */
 import React, { useState, useEffect } from 'react';
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../supabaseClient';
+import { useProfile } from '../hooks/useProfile';
+import { useUpdateProfile } from '../hooks/useUpdateProfile';
+import { useUserStats } from '../hooks/useUserStats';
+import { Skeleton } from "@/components/ui/skeleton";
 import './Profile.css';
-
-type Stats = { items: number; categories: number };
 
 type ProfileForm = {
     username: string;
@@ -24,8 +23,10 @@ type ProfileForm = {
 
 const Profile = () => {
     const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [stats, setStats] = useState<Stats>({ items: 0, categories: 0 });
+    const { data: profile, isLoading: profileLoading } = useProfile(user?.id || null);
+    const { data: stats, isLoading: statsLoading } = useUserStats(user?.id || undefined);
+    const updateProfileMutation = useUpdateProfile();
+
     const [formData, setFormData] = useState<ProfileForm>({
         username: '',
         first_name: '',
@@ -35,124 +36,50 @@ const Profile = () => {
     });
 
     useEffect(() => {
-        const fetchProfileData = async () => {
-            if (!user) return;
-
+        if (user) {
             const meta = user.user_metadata || {};
-            let firstName = (meta as any).first_name || '';
-            let lastName = (meta as any).last_name || '';
+            let firstName = meta.first_name || '';
+            let lastName = meta.last_name || '';
 
-            if (!firstName && (meta as any).full_name) {
-                const names = (meta as any).full_name.trim().split(' ');
+            if (!firstName && meta.full_name) {
+                const names = meta.full_name.trim().split(' ');
                 firstName = names[0];
                 lastName = names.slice(1).join(' ');
             }
 
-            // Fetch specific profile data from DB
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('username')
-                .eq('id', user.id)
-                .single();
-
             setFormData({
                 first_name: firstName,
                 last_name: lastName,
-                full_name: (meta as any).full_name || '',
+                full_name: meta.full_name || '',
                 email: user.email || '',
-                username: profile?.username || (meta as any).username || '',
+                username: profile?.username || meta.username || '',
             });
-            void fetchStats();
-        };
-
-        fetchProfileData();
-    }, [user]);
-
-    const fetchStats = async () => {
-        if (!user) return;
-
-        try {
-            const { count: itemsCount } = await supabase
-                .from('items')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id);
-
-            const { count: catsCount } = await supabase
-                .from('categories')
-                .select('*', { count: 'exact', head: true })
-                .eq('user_id', user.id);
-
-            setStats({
-                items: itemsCount || 0,
-                categories: catsCount || 0,
-            });
-        } catch (error) {
-            console.error('Error fetching stats:', error);
         }
-    };
+    }, [user, profile]);
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
+        if (!user) return;
 
-        try {
-            // Check username availability if changed
-            if (formData.username) {
-                const { data: existing } = await supabase
-                    .from('profiles')
-                    .select('username')
-                    .eq('username', formData.username)
-                    .neq('id', user?.id)
-                    .maybeSingle();
-
-                if (existing) throw new Error("Username is already taken");
-            }
-
-            const fullName = `${formData.first_name} ${formData.last_name}`.trim();
-            const { error } = await supabase.auth.updateUser({
-                data: {
-                    first_name: formData.first_name,
-                    last_name: formData.last_name,
-                    full_name: fullName,
-                    username: formData.username,
-                },
-            });
-
-            if (error) throw error;
-
-            const { error: profileError } = await supabase.from('profiles').upsert({
-                id: user?.id,
-                email: user?.email,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
-                full_name: fullName,
-                username: formData.username,
-                updated_at: new Date(),
-            });
-
-            if (profileError) {
-                console.error('Error updating public profile:', profileError);
-                if (profileError.message.includes('unique constraint')) {
-                    throw new Error("Username is likely taken");
-                }
-                throw profileError;
-            }
-            setFormData(prev => ({ ...prev, full_name: fullName }));
-            toast.success('Profile updated successfully!');
-        } catch (error: any) {
-            toast.error(error.message);
-        } finally {
-            setLoading(false);
-        }
+        const fullName = `${formData.first_name} ${formData.last_name}`.trim();
+        await updateProfileMutation.mutateAsync({
+            id: user.id,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            full_name: fullName,
+            username: formData.username,
+        });
     };
 
     const getInitials = (name: string) => {
         return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
     };
 
+    const loading = profileLoading || updateProfileMutation.isPending;
+
     return (
-        <div className="profile-container max-w-4xl mx-auto p-6 space-y-8">
-            <div className="flex items-center gap-6 pb-8 border-bottom">
+        <div className="profile-container max-w-4xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
+            <div className="flex items-center gap-6 pb-8 border-b">
                 <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
                     {getInitials(formData.full_name)}
                 </div>
@@ -171,7 +98,11 @@ const Profile = () => {
                                 <CardTitle className="text-sm font-medium text-muted-foreground">Wishlist Items</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 pt-0">
-                                <div className="text-3xl font-bold text-primary">{stats.items}</div>
+                                {statsLoading ? (
+                                    <Skeleton className="h-9 w-12" />
+                                ) : (
+                                    <div className="text-3xl font-bold text-primary">{stats?.items || 0}</div>
+                                )}
                             </CardContent>
                         </Card>
                         <Card>
@@ -179,7 +110,11 @@ const Profile = () => {
                                 <CardTitle className="text-sm font-medium text-muted-foreground">Categories</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 pt-0">
-                                <div className="text-3xl font-bold text-primary">{stats.categories}</div>
+                                {statsLoading ? (
+                                    <Skeleton className="h-9 w-12" />
+                                ) : (
+                                    <div className="text-3xl font-bold text-primary">{stats?.categories || 0}</div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
@@ -237,7 +172,7 @@ const Profile = () => {
                             </CardContent>
                             <CardFooter className="p-6 bg-muted/20 border-t flex justify-end">
                                 <Button type="submit" disabled={loading} className="px-8 font-semibold">
-                                    {loading ? 'Saving Changes...' : 'Save Changes'}
+                                    {updateProfileMutation.isPending ? 'Saving Changes...' : 'Save Changes'}
                                 </Button>
                             </CardFooter>
                         </form>
@@ -249,5 +184,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-

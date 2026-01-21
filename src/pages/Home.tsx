@@ -42,7 +42,7 @@ import { useFilteredItems } from "../hooks/useWishlistData";
 import { useWishlistContext } from "../context/WishlistContext";
 import { useCategories } from "../hooks/useCategories";
 import { useWishlistSettings } from "../hooks/useWishlistSettings";
-import { createItem, updateItem, deleteItem } from "../utils/supabaseHelpers";
+import { useItems } from "../hooks/useItems";
 import type { Category, WishlistItem, ItemFormData } from "../types";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -58,7 +58,7 @@ function Home() {
   const { user } = useAuth();
   const location = useLocation();
 
-  const { allItems, categories, loading, setAllItems, setCategories, refresh: refetch } =
+  const { allItems, categories, loading, refresh: refetch } =
     useWishlistContext();
   const { isPublic, togglePublic } = useWishlistSettings(user?.id || null);
   const {
@@ -67,6 +67,7 @@ function Home() {
     deleteCategory,
     toggleCategoryPrivacy,
   } = useCategories(user?.id || "");
+  const { createItem, updateItem, deleteItem } = useItems(user?.id);
 
   const [activeCategory, setActiveCategory] = useState<string | null>(
     location.state?.categoryId || null
@@ -89,7 +90,7 @@ function Home() {
   const handleAddItem = async (newItem: ItemFormData) => {
     if (!user) return;
 
-    const itemData = {
+    await createItem({
       user_id: user.id,
       category_id: activeCategory,
       name: newItem.name,
@@ -99,16 +100,8 @@ function Home() {
       buy_link: newItem.buy_link,
       is_must_have: newItem.is_must_have || false,
       currency: newItem.currency || 'USD',
-    };
+    });
 
-    const { data, error } = await createItem(itemData);
-
-    if (error) {
-      alert("Error adding item");
-      return;
-    }
-
-    setAllItems((prev) => (data ? [data, ...prev] : prev));
     setIsFormOpen(false);
   };
 
@@ -120,53 +113,32 @@ function Home() {
   const handleUpdateItem = async (formData: ItemFormData) => {
     if (!editingItem) return;
 
-    const updates = {
-      name: formData.name,
-      price: parseFloat(formData.price as string) || 0,
-      description: formData.description,
-      image_url: formData.image_url,
-      buy_link: formData.buy_link,
-      is_must_have: formData.is_must_have || false,
-      currency: formData.currency || 'USD',
-    };
+    await updateItem({
+      itemId: editingItem.id,
+      updates: {
+        name: formData.name,
+        price: parseFloat(formData.price as string) || 0,
+        description: formData.description,
+        image_url: formData.image_url,
+        buy_link: formData.buy_link,
+        is_must_have: formData.is_must_have || false,
+        currency: formData.currency || 'USD',
+      }
+    });
 
-    const { data, error } = await updateItem(editingItem.id, updates);
-
-    if (error) {
-      alert("Error updating item");
-      return;
-    }
-
-    setAllItems((prev) =>
-      prev.map((item) => (item.id === editingItem.id && data ? data : item))
-    );
     setIsFormOpen(false);
     setEditingItem(null);
   };
 
   const handleToggleMustHave = async (itemId: string, isMustHave: boolean) => {
-    const { data, error } = await updateItem(itemId, {
-      is_must_have: isMustHave,
+    await updateItem({
+      itemId,
+      updates: { is_must_have: isMustHave }
     });
-
-    if (error) {
-      toast.error("Failed to update importance");
-      return;
-    }
-
-    if (data) {
-      setAllItems((prev) =>
-        prev.map((item) =>
-          item.id === itemId
-            ? { ...item, is_must_have: data.is_must_have }
-            : item
-        )
-      );
-    }
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    const itemToDelete = allItems.find((i) => i.id === itemId);
+    const itemToDelete = (allItems as WishlistItem[]).find((i) => i.id === itemId);
 
     if (activeCategory) {
       confirmDelete({
@@ -174,16 +146,10 @@ function Home() {
         description: `"${itemToDelete?.name || "this item"}" will be removed from this wishlist but will still be available in "All Items".`,
         deleteLabel: "Remove",
         onDelete: async () => {
-          const { data, error } = await updateItem(itemId, {
-            category_id: null,
+          await updateItem({
+            itemId,
+            updates: { category_id: null }
           });
-          if (error) {
-            toast.error("Error removing item");
-            return;
-          }
-          setAllItems((prev) =>
-            prev.map((item) => (item.id === itemId && data ? data : item))
-          );
           toast.success("Item removed from wishlist");
         },
       });
@@ -193,13 +159,7 @@ function Home() {
         description: `This will completely remove "${itemToDelete?.name || "this item"}" from your account.`,
         deleteLabel: "Delete Permanently",
         onDelete: async () => {
-          const { error } = await deleteItem(itemId);
-          if (error) {
-            toast.error("Error deleting item");
-            return;
-          }
-          setAllItems((prev) => prev.filter((item) => item.id !== itemId));
-          toast.success("Item deleted successfully");
+          await deleteItem(itemId);
         },
       });
     }
@@ -210,19 +170,13 @@ function Home() {
     itemIds?: string[];
     is_public: boolean;
   }) => {
-    const { data, error } = await createCategory(categoryData as any);
-
-    if (error) {
-      alert("Error creating category");
-      return;
-    }
+    const data = await createCategory(categoryData as any);
 
     if (data && !data.is_public && categories.length < 4) {
       setIsTooltipOpen(true);
       setTimeout(() => setIsTooltipOpen(false), 10000);
     }
 
-    await refetch();
     if (data) {
       setActiveCategory(data.id);
     }
@@ -230,14 +184,7 @@ function Home() {
   };
 
   const handleUpdateCategory = async (categoryData: any) => {
-    const { error } = await updateCategory(categoryData.id, categoryData);
-
-    if (error) {
-      alert("Error updating category");
-      return;
-    }
-
-    await refetch();
+    await updateCategory(categoryData.id, categoryData);
     setIsCategoryModalOpen(false);
     setEditingCategory(null);
   };
@@ -249,24 +196,11 @@ function Home() {
       title: "Delete this category?",
       description: `Items in "${catToDelete?.name || "this category"}" will be moved to "All Items".`,
       onDelete: async () => {
-        const { error } = await deleteCategory(categoryId);
-        if (error) {
-          toast.error("Error deleting category");
-          return;
-        }
-        setCategories((prev) => prev.filter((cat) => cat.id !== categoryId));
-        setAllItems((prev) =>
-          prev.map((item) =>
-            item.category_id === categoryId
-              ? { ...item, category_id: null }
-              : item
-          )
-        );
+        await deleteCategory(categoryId);
 
         if (activeCategory === categoryId) {
           setActiveCategory(null);
         }
-        toast.success("Category deleted successfully");
       },
     });
   };
@@ -275,23 +209,10 @@ function Home() {
     categoryId: string,
     currentIsPublic: boolean
   ) => {
-    const { data, error } = await toggleCategoryPrivacy(
+    await toggleCategoryPrivacy(
       categoryId,
       currentIsPublic
     );
-
-    if (error) {
-      alert("Failed to update category privacy");
-      return;
-    }
-
-    if (data) {
-      setCategories((prev) =>
-        prev.map((cat) =>
-          cat.id === categoryId ? { ...cat, is_public: data.is_public } : cat
-        )
-      );
-    }
   };
 
   const handleEditCategory = (category: Category) => {

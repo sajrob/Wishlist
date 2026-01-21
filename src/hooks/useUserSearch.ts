@@ -1,9 +1,10 @@
 /**
- * Custom hook for searching users
- * Handles user search with debounce and follow/unfollow state
+ * Custom hook for searching users using React Query
  */
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../supabaseClient';
+import { useState, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { searchProfiles, followUser, unfollowUser, fetchFriends } from '@/api';
+import { queryKeys } from '@/lib/queryClient';
 import { toast } from 'sonner';
 import { confirmDelete } from '../utils/toastHelpers';
 
@@ -15,112 +16,79 @@ export type ProfileRecord = {
 };
 
 export function useUserSearch(userId: string | undefined) {
+    const queryClient = useQueryClient();
     const [query, setQuery] = useState('');
-    const [users, setUsers] = useState<ProfileRecord[]>([]);
-    const [friends, setFriends] = useState<Set<string>>(new Set());
-    const [searching, setSearching] = useState(false);
     const [hasSearched, setHasSearched] = useState(false);
 
-    // Fetch user's current friends on mount
-    useEffect(() => {
-        if (userId) {
-            void fetchFriends();
-        }
-    }, [userId]);
+    // Fetch user's friends to show follow/unfollow status
+    const { data: friendsResponse } = useQuery({
+        queryKey: queryKeys.friends(userId || ''),
+        queryFn: () => fetchFriends(userId!),
+        enabled: !!userId,
+    });
 
-    const fetchFriends = async () => {
-        if (!userId) return;
-        try {
-            const { data, error } = await supabase
-                .from('friends')
-                .select('friend_id')
-                .eq('user_id', userId);
+    const friendIds = new Set((friendsResponse?.data || []).map((f: any) => f.friend_id));
 
-            if (error) throw error;
-            const friendIds = new Set((data || []).map(f => f.friend_id));
-            setFriends(friendIds);
-        } catch (error) {
-            console.error('Error fetching friends:', error);
+    const { data: searchResponse, isLoading: searching } = useQuery({
+        queryKey: ['user-search', query],
+        queryFn: () => {
+            const cleanQuery = query.trim().replace(/^@/, '');
+            return searchProfiles(cleanQuery, userId!);
+        },
+        enabled: !!userId && query.trim().length > 0,
+    });
+
+    const users = (searchResponse?.data || []) as ProfileRecord[];
+
+    const followMutation = useMutation({
+        mutationFn: (friendId: string) => followUser(userId!, friendId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+            toast.success('Started following');
+        },
+        onError: (error) => {
+            console.error('Error following:', error);
+            toast.error('Could not follow user');
         }
+    });
+
+    const unfollowMutation = useMutation({
+        mutationFn: (friendId: string) => unfollowUser(userId!, friendId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+        },
+        onError: (error) => {
+            console.error('Error unfollowing:', error);
+            toast.error('Could not unfollow user');
+        }
+    });
+
+    const handleFollow = (friendId: string, name: string) => {
+        followMutation.mutate(friendId);
     };
 
-    const searchUsers = useCallback(async (searchQuery: string) => {
-        if (!userId || !searchQuery.trim()) {
-            setUsers([]);
-            return;
-        }
-
-        setSearching(true);
-        try {
-            // Remove @ symbol if present, since usernames in DB don't include it
-            const cleanQuery = searchQuery.trim().replace(/^@/, '');
-
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('id, full_name, username, avatar_url')
-                .neq('id', userId)
-                .or(`full_name.ilike.%${cleanQuery}%,username.ilike.%${cleanQuery}%`)
-                .limit(20);
-
-            if (error) throw error;
-            setUsers((data || []) as ProfileRecord[]);
-            setHasSearched(true);
-        } catch (error) {
-            console.error('Error searching users:', error);
-            toast.error('Search failed.');
-        } finally {
-            setSearching(false);
-        }
-    }, [userId]);
-
-    const handleFollow = useCallback(async (friendId: string, name: string) => {
-        if (!userId) return;
-        try {
-            const { error } = await supabase
-                .from('friends')
-                .insert([{ user_id: userId, friend_id: friendId }]);
-
-            if (error) throw error;
-            setFriends(prev => new Set(prev).add(friendId));
-            toast.success(`Following ${name}`);
-        } catch (error) {
-            toast.error('Could not follow user.');
-        }
-    }, [userId]);
-
-    const handleUnfollow = useCallback(async (friendId: string, name: string) => {
-        if (!userId) return;
+    const handleUnfollow = (friendId: string, name: string) => {
         confirmDelete({
             title: `Unfollow ${name}?`,
             description: "You won't be able to see their private wishlists anymore.",
             deleteLabel: 'Unfollow',
             onDelete: async () => {
-                try {
-                    const { error } = await supabase
-                        .from('friends')
-                        .delete()
-                        .eq('user_id', userId)
-                        .eq('friend_id', friendId);
-
-                    if (error) throw error;
-                    setFriends(prev => {
-                        const next = new Set(prev);
-                        next.delete(friendId);
-                        return next;
-                    });
-                    toast.success(`Unfollowed ${name}`);
-                } catch (error) {
-                    toast.error('Could not unfollow user.');
-                }
+                await unfollowMutation.mutateAsync(friendId);
+                toast.success(`Unfollowed ${name}`);
             },
         });
-    }, [userId]);
+    };
+
+    const searchUsers = useCallback((searchQuery: string) => {
+        setQuery(searchQuery);
+        setHasSearched(true);
+    }, []);
 
     return {
         query,
         setQuery,
         users,
-        friends,
+        friends: friendIds,
         searching,
         hasSearched,
         setHasSearched,
