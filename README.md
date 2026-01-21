@@ -14,9 +14,10 @@ A modern, social wishlist application designed to help you organize your gift id
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite
+- **State Management**: TanStack Query (React Query)
 - **Styling**: Tailwind CSS, Shadcn/UI
 - **Backend**: Supabase (Auth, Database, Storage)
-- **Routing**: React Router
+- **Routing**: React Router v7
 - **Deployment**: Vercel
 
 #### Getting Started

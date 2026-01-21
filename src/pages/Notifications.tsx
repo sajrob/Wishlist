@@ -15,6 +15,25 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bell, UserPlus, Gift, CheckCheck, Trash2, ArrowRight } from "lucide-react";
 import { useNotifications } from "../hooks/useNotifications";
+import { formatDate } from "../utils/dateUtils";
+
+const NOTIFICATION_ICONS = {
+    follow: {
+        icon: UserPlus,
+        bgColor: 'bg-blue-100',
+        textColor: 'text-blue-600'
+    },
+    wishlist_share: {
+        icon: Gift,
+        bgColor: 'bg-pink-100',
+        textColor: 'text-pink-600'
+    },
+    default: {
+        icon: Bell,
+        bgColor: 'bg-gray-100',
+        textColor: 'text-gray-600'
+    }
+} as const;
 
 const Notifications = () => {
     const { user } = useAuth();
@@ -28,32 +47,14 @@ const Notifications = () => {
         deleteNotification,
     } = useNotifications(user?.id);
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInHours = Math.abs(now.getTime() - date.getTime()) / 36e5;
-
-        if (diffInHours < 24 && date.getDate() === now.getDate()) {
-            return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-        }
-
-        return date.toLocaleDateString(undefined, {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
     const getIcon = (type: string) => {
-        switch (type) {
-            case 'follow':
-                return <div className="p-2 bg-blue-100 text-blue-600 rounded-full"><UserPlus className="size-5" /></div>;
-            case 'wishlist_share':
-                return <div className="p-2 bg-pink-100 text-pink-600 rounded-full"><Gift className="size-5" /></div>;
-            default:
-                return <div className="p-2 bg-gray-100 text-gray-600 rounded-full"><Bell className="size-5" /></div>;
-        }
+        const config = NOTIFICATION_ICONS[type as keyof typeof NOTIFICATION_ICONS] || NOTIFICATION_ICONS.default;
+        const Icon = config.icon;
+        return (
+            <div className={`p-2 ${config.bgColor} ${config.textColor} rounded-full`}>
+                <Icon className="size-5" />
+            </div>
+        );
     };
 
     return (
@@ -84,7 +85,7 @@ const Notifications = () => {
                 />
 
                 <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8">
-                    <div className="max-w-2xl mx-auto space-y-3">
+                    <div className="max-w-2xl mx-auto space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {loading ? (
                             Array.from({ length: 5 }).map((_, i) => (
                                 <div key={i} className="flex gap-4 p-4 items-center bg-card border rounded-2xl">

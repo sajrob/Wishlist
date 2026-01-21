@@ -410,7 +410,7 @@ function Home() {
         </header>
 
         <div className={`flex-1 overflow-y-auto ${isModalOpen ? "blur-sm pointer-events-none" : ""}`}>
-          <div className="flex flex-col gap-4 p-4">
+          <div className="flex flex-col gap-4 p-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="cards-grid">
               {loading ? (
                 Array.from({ length: 8 }).map((_, i) => (

@@ -21,7 +21,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useWishlistData, useFilteredItems } from "../hooks/useWishlistData";
 import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
-import { fetchProfile } from "../utils/supabaseHelpers";
+import { useProfile } from "../hooks/useProfile";
+import { useFriends } from "../hooks/useFriends";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../supabaseClient";
 import ShareModal from '../components/ShareModal';
@@ -38,63 +39,21 @@ function SharedWishlist() {
     const { allItems, categories, loading: dataLoading } = useWishlistData(userId || null, { includeClaims: true });
     const { isPublic } = useWishlistSettingsReadOnly(userId || null);
 
+    const { data: profile, isLoading: profileLoading } = useProfile(userId || null);
+    const { follow, isFollowing: checkFollowing, isFollowLoading, loading: friendsLoading } = useFriends(user?.id);
+
+    const isFollowing = userId ? checkFollowing(userId) : false;
+
     const [activeCategory, setActiveCategory] = useState<string | null>(initialCategoryId);
     const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [isFollowing, setIsFollowing] = useState(false);
-    const [isFollowLoading, setIsFollowLoading] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (!userId) return;
-
-        const loadInitialData = async () => {
-            setLoading(true);
-            try {
-                // 1. Fetch profile
-                const { data: profData, error: profileError } = await fetchProfile(userId);
-                if (profileError) throw profileError;
-                setProfile(profData);
-
-                // 2. Check friendship if logged in
-                if (user) {
-                    const { data: friendData } = await supabase
-                        .from('friends')
-                        .select('id')
-                        .eq('user_id', user.id)
-                        .eq('friend_id', userId)
-                        .maybeSingle();
-                    setIsFollowing(!!friendData);
-                }
-            } catch (err: any) {
-                console.error("Error loading shared data:", err);
-                setError("Could not load wishlist. You might not be permissioned to view it.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        void loadInitialData();
-    }, [userId, user]);
 
     const handleFollow = async () => {
         if (!user || !userId) return;
-        setIsFollowLoading(true);
         try {
-            const { error: followError } = await supabase
-                .from('friends')
-                .insert([{ user_id: user.id, friend_id: userId }]);
-
-            if (followError) throw followError;
-
-            setIsFollowing(true);
+            await follow(userId);
             toast.success(`You are now following ${profile?.first_name || 'this user'}!`);
         } catch (err: any) {
-            console.error('Error following user:', err);
-            toast.error('Could not follow user.');
-        } finally {
-            setIsFollowLoading(false);
+            // Error handled by hook toast
         }
     };
 
@@ -132,12 +91,14 @@ function SharedWishlist() {
     // Find active category name for title
     const activeCategoryName = categories.find((c) => c.id === activeCategory)?.name;
 
-    if (error)
+    const loading = profileLoading || dataLoading || friendsLoading;
+
+    if (!loading && !profile)
         return (
             <div className="app-content">
                 <EmptyState
                     title="Oops!"
-                    message={error}
+                    message="Could not load wishlist. It might be private or the user doesn't exist."
                     action={{ text: "Go Back to Find Users", to: "/find-users" }}
                 />
             </div>
@@ -236,7 +197,7 @@ function SharedWishlist() {
                         </div>
                     )}
 
-                    <div className={`flex flex-col gap-4 p-4 transition-all duration-500 ${!isFollowing && !loading ? 'blur-sm grayscale opacity-30 select-none pointer-events-none' : ''}`}>
+                    <div className={`flex flex-col gap-4 p-4 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 duration-500 ${!isFollowing && !loading ? 'blur-sm grayscale opacity-30 select-none pointer-events-none' : ''}`}>
                         <div className="cards-grid">
                             {(loading || dataLoading) ? (
                                 // Show skeleton loading state

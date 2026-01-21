@@ -45,6 +45,8 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/AuthContext";
 import { getUserPossessiveTitle, getInitials } from "@/utils/nameUtils";
+import { useProfile } from "@/hooks/useProfile";
+import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/supabaseClient";
 import type { Category } from "@/types";
 import {
@@ -84,68 +86,10 @@ export function AppSidebar({
   const navigate = useNavigate();
   const location = useLocation();
   const { setOpen, isMobile } = useSidebar();
-  const [unreadCount, setUnreadCount] = React.useState(0);
+  const { data: profile } = useProfile(user?.id || null);
+  const { unreadCount } = useNotifications(user?.id);
 
-  const [username, setUsername] = React.useState<string>("");
-
-  React.useEffect(() => {
-    if (user) {
-      // Set initial username from metadata if available
-      const meta = user.user_metadata || {};
-      if (meta.username) {
-        setUsername(meta.username);
-      }
-
-      // Fetch latest username from profiles to be sure
-      const fetchProfile = async () => {
-        const { data } = await supabase
-          .from("profiles")
-          .select("username")
-          .eq("id", user.id)
-          .single();
-
-        if (data?.username) {
-          setUsername(data.username);
-        }
-      };
-
-      void fetchProfile();
-      void fetchUnreadCount();
-
-      const subscription = supabase
-        .channel("sidebar_notifications_count")
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "notifications",
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            void fetchUnreadCount();
-          }
-        )
-        .subscribe();
-
-      return () => {
-        void subscription.unsubscribe();
-      };
-    }
-  }, [user]);
-
-  const fetchUnreadCount = async () => {
-    if (!user) return;
-    const { count, error } = await supabase
-      .from("notifications")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("is_read", false);
-
-    if (!error) {
-      setUnreadCount(count || 0);
-    }
-  };
+  const username = profile?.username || user?.user_metadata?.username || "";
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -163,8 +107,7 @@ export function AppSidebar({
     const meta = user.user_metadata || {};
     const fullName =
       (meta as any).full_name ||
-      `${(meta as any).first_name || ""} ${(meta as any).last_name || ""
-        }`.trim();
+      `${(meta as any).first_name || ""} ${(meta as any).last_name || ""}`.trim();
     return getInitials(fullName || user.email || "User");
   }, [user]);
 
@@ -173,8 +116,7 @@ export function AppSidebar({
     const meta = user.user_metadata || {};
     return (
       (meta as any).full_name ||
-      `${(meta as any).first_name || ""} ${(meta as any).last_name || ""
-        }`.trim() ||
+      `${(meta as any).first_name || ""} ${(meta as any).last_name || ""}`.trim() ||
       user.email?.split("@")[0] ||
       "User"
     );

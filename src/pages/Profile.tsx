@@ -11,6 +11,7 @@ import { useProfile } from '../hooks/useProfile';
 import { useUpdateProfile } from '../hooks/useUpdateProfile';
 import { useUserStats } from '../hooks/useUserStats';
 import { Skeleton } from "@/components/ui/skeleton";
+import { getInitials } from '../utils/nameUtils';
 import './Profile.css';
 
 type ProfileForm = {
@@ -71,22 +72,31 @@ const Profile = () => {
         });
     };
 
-    const getInitials = (name: string) => {
-        return name ? name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U';
-    };
 
     const loading = profileLoading || updateProfileMutation.isPending;
 
     return (
         <div className="profile-container max-w-4xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
             <div className="flex items-center gap-6 pb-8 border-b">
-                <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
-                    {getInitials(formData.full_name)}
-                </div>
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight">{formData.full_name || 'User'}</h1>
-                    <p className="text-muted-foreground">{formData.email}</p>
-                </div>
+                {profileLoading ? (
+                    <>
+                        <Skeleton className="w-24 h-24 rounded-full" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-8 w-48" />
+                            <Skeleton className="h-4 w-32" />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
+                            {getInitials(formData.full_name)}
+                        </div>
+                        <div className="space-y-1">
+                            <h1 className="text-3xl font-bold tracking-tight">{formData.full_name || 'User'}</h1>
+                            <p className="text-muted-foreground">{formData.email}</p>
+                        </div>
+                    </>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -9,6 +9,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import type { WishlistCardProps, Claim } from '../types';
 import { CURRENCIES } from './CurrencySelect';
 import { ensureAbsoluteUrl } from '../utils/urlUtils';
+import { formatCurrency } from '../utils/numberUtils';
+import { getInitials } from '../utils/nameUtils';
 import { useAuth } from '../context/AuthContext';
 import { toggleClaim } from '../utils/supabaseHelpers';
 import { useState, useEffect } from 'react';
@@ -97,24 +99,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
         }
     };
 
-    // Formatting currency
-    const displayCurrency = currency || 'SLE';
-    let formattedPrice;
-
-    if (displayCurrency === 'SLE') {
-        formattedPrice = `Le ${Number(price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    } else {
-        try {
-            formattedPrice = new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: displayCurrency,
-            }).format(Number(price));
-        } catch (e) {
-            const cur = CURRENCIES.find(c => c.code === displayCurrency);
-            const symbol = cur?.symbol || displayCurrency;
-            formattedPrice = `${symbol}${Number(price).toFixed(2)}`;
-        }
-    }
+    const formattedPrice = formatCurrency(price, currency);
 
     return (
         <div className="wishlist-card">
@@ -167,9 +152,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                                     alt={claim.profiles?.full_name || 'User'}
                                                 />
                                                 <AvatarFallback className="text-[10px]">
-                                                    {claim.profiles?.first_name && claim.profiles?.last_name
-                                                        ? `${claim.profiles.first_name[0]}${claim.profiles.last_name[0]}`.toUpperCase()
-                                                        : claim.profiles?.full_name?.slice(0, 2).toUpperCase() || '?'}
+                                                    {getInitials(claim.profiles?.full_name || '')}
                                                 </AvatarFallback>
                                             </Avatar>
                                         </TooltipTrigger>

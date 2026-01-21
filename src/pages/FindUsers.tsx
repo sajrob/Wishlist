@@ -18,6 +18,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { getInitials } from '../utils/nameUtils';
 import { useUserSearch } from '../hooks/useUserSearch';
+import { FriendCardSkeleton } from '../components/FriendCardSkeleton';
+import EmptyState from '../components/EmptyState';
 
 const FindUsers = () => {
     const { user } = useAuth();
@@ -73,67 +75,81 @@ const FindUsers = () => {
 
                         {/* Results */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {users.map(profile => {
-                                const isFollowing = friends.has(profile.id);
-                                return (
-                                    <Link key={profile.id} to={`/wishlist/${profile.id}`}>
-                                        <Card className="hover:shadow-lg transition-all rounded-[24px] border-muted-foreground/10">
-                                            <CardContent className="p-3">
-                                                <div className="flex items-center gap-4">
-                                                    <Avatar className="size-14 border-2">
-                                                        <AvatarImage src={profile.avatar_url} />
-                                                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
-                                                            {getInitials(profile.full_name)}
-                                                        </AvatarFallback>
-                                                    </Avatar>
+                            {searching ? (
+                                Array.from({ length: 6 }).map((_, i) => (
+                                    <FriendCardSkeleton key={i} />
+                                ))
+                            ) : users.length === 0 && hasSearched ? (
+                                <div className="col-span-full">
+                                    <EmptyState
+                                        title="No users found"
+                                        message={`We couldn't find any users matching "${query}"`}
+                                        icon={Search}
+                                    />
+                                </div>
+                            ) : (
+                                users.map(profile => {
+                                    const isFollowing = friends.has(profile.id);
+                                    return (
+                                        <Link key={profile.id} to={`/wishlist/${profile.id}`}>
+                                            <Card className="hover:shadow-lg transition-all rounded-[24px] border-muted-foreground/10 h-full group">
+                                                <CardContent className="p-3">
+                                                    <div className="flex items-center gap-4">
+                                                        <Avatar className="size-14 border-2 transition-transform group-hover:scale-105">
+                                                            <AvatarImage src={profile.avatar_url} />
+                                                            <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                                                {getInitials(profile.full_name)}
+                                                            </AvatarFallback>
+                                                        </Avatar>
 
-                                                    <div className="flex-1 min-w-0">
-                                                        {/* 1. NAME */}
-                                                        <h3 className="font-bold text-base truncate">
-                                                            {profile.full_name}
-                                                        </h3>
+                                                        <div className="flex-1 min-w-0">
+                                                            {/* 1. NAME */}
+                                                            <h3 className="font-bold text-base truncate group-hover:text-primary transition-colors">
+                                                                {profile.full_name}
+                                                            </h3>
 
-                                                        {/* 2. USERNAME (Positioned exactly as requested) */}
-                                                        <div className="flex items-center">
-                                                            <span className="truncate text-xs text-muted-foreground">
-                                                                @{profile.username || 'user' + getInitials(profile.full_name).toLowerCase()}
-                                                            </span>
+                                                            {/* 2. USERNAME (Positioned exactly as requested) */}
+                                                            <div className="flex items-center">
+                                                                <span className="truncate text-xs text-muted-foreground">
+                                                                    @{profile.username || 'user' + getInitials(profile.full_name).toLowerCase()}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* 3. STATUS */}
+                                                            <p className="text-[10px] mt-1 text-muted-foreground font-medium uppercase tracking-wider opacity-70">
+                                                                {isFollowing ? "Following" : "Discovering"}
+                                                            </p>
                                                         </div>
 
-                                                        {/* 3. STATUS */}
-                                                        <p className="text-[10px] mt-1 text-muted-foreground font-medium uppercase tracking-wider opacity-70">
-                                                            {isFollowing ? "Following" : "Discovering"}
-                                                        </p>
+                                                        <div className="shrink-0">
+                                                            {isFollowing ? (
+                                                                <Button
+                                                                    variant="secondary"
+                                                                    size="sm"
+                                                                    className="h-8 rounded-full text-[10px] font-bold bg-red-500/10 hover:bg-red-500/20 hover:text-red-600 transition-colors"
+                                                                    onClick={(e) => { e.preventDefault(); handleUnfollow(profile.id, profile.full_name); }}
+                                                                >
+                                                                    <UserMinus className="size-3 mr-1 text-red-500" />
+                                                                    <span className="hidden min-[340px]:inline">Unfollow</span>
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    size="sm"
+                                                                    className="h-8 rounded-full text-[10px] font-bold active:scale-95 transition-all"
+                                                                    onClick={(e) => { e.preventDefault(); handleFollow(profile.id, profile.full_name); }}
+                                                                >
+                                                                    <UserPlus className="size-3 mr-1" />
+                                                                    <span className="hidden min-[340px]:inline">Follow</span>
+                                                                </Button>
+                                                            )}
+                                                        </div>
                                                     </div>
-
-                                                    <div className="shrink-0">
-                                                        {isFollowing ? (
-                                                            <Button
-                                                                variant="secondary"
-                                                                size="sm"
-                                                                className="h-8 rounded-full text-[10px] font-bold bg-red-500/10"
-                                                                onClick={(e) => { e.preventDefault(); handleUnfollow(profile.id, profile.full_name); }}
-                                                            >
-                                                                <UserMinus className="size-3 mr-1 text-red-500" />
-                                                                <span className="hidden min-[340px]:inline">Unfollow</span>
-                                                            </Button>
-                                                        ) : (
-                                                            <Button
-                                                                size="sm"
-                                                                className="h-8 rounded-full text-[10px] font-bold"
-                                                                onClick={(e) => { e.preventDefault(); handleFollow(profile.id, profile.full_name); }}
-                                                            >
-                                                                <UserPlus className="size-3 mr-1" />
-                                                                <span className="hidden min-[340px]:inline">Follow</span>
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </Link>
-                                );
-                            })}
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
                 </div>
