@@ -84,7 +84,7 @@ function Faq() {
             {/* Header */}
             <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b bg-white/80 backdrop-blur-md px-6 shadow-sm">
                 <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-                    <h1 className="text-3xl mx-auto font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                    <h1 className="text-lg md:text-3xl lg:text-4xl mx-auto font-bold tracking-tight text-slate-900 flex items-center gap-2">
                         <span className="flex items-center justify-center size-8 rounded-lg bg-indigo-50 text-indigo-600">
                             <HelpCircle className="size-5" />
                         </span>
