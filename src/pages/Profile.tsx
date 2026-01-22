@@ -215,7 +215,7 @@ const Profile = () => {
                                             <div className="text-xl font-black">
                                                 {statsLoading ? "..." : stats?.categories || 0}
                                             </div>
-                                            <div className="text-[9px] uppercase font-bold tracking-widest opacity-70">Groups</div>
+                                            <div className="text-[9px] uppercase font-bold tracking-widest opacity-70">Wishlists</div>
                                         </div>
                                         <div className="bg-white/10 p-3 rounded-xl border border-white/10 flex flex-col items-center text-center">
                                             <Users className="w-4 h-4 mb-1 opacity-80" />
