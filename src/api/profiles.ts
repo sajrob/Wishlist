@@ -63,20 +63,23 @@ export async function updateProfile(profileData: Partial<Profile> & { id: string
     }
 }
 
-export async function fetchUserStats(userId: string): Promise<SupabaseResponse<{ items: number, categories: number }>> {
+export async function fetchUserStats(userId: string): Promise<SupabaseResponse<{ items: number, categories: number, friends: number }>> {
     try {
-        const [itemsCount, catsCount] = await Promise.all([
+        const [itemsCount, catsCount, friendsCount] = await Promise.all([
             supabase.from('items').select('*', { count: 'exact', head: true }).eq('user_id', userId),
-            supabase.from('categories').select('*', { count: 'exact', head: true }).eq('user_id', userId)
+            supabase.from('categories').select('*', { count: 'exact', head: true }).eq('user_id', userId),
+            supabase.from('friends').select('*', { count: 'exact', head: true }).eq('user_id', userId)
         ]);
 
         if (itemsCount.error) throw itemsCount.error;
         if (catsCount.error) throw catsCount.error;
+        if (friendsCount.error) throw friendsCount.error;
 
         return {
             data: {
                 items: itemsCount.count || 0,
-                categories: catsCount.count || 0
+                categories: catsCount.count || 0,
+                friends: friendsCount.count || 0
             },
             error: null
         };
@@ -85,3 +88,4 @@ export async function fetchUserStats(userId: string): Promise<SupabaseResponse<{
         return { data: null, error: error as Error };
     }
 }
+

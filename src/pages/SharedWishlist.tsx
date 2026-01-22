@@ -5,7 +5,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import WishlistCard from "../components/WishlistCard";
-import LoadingSpinner from "../components/LoadingSpinner";
 import EmptyState from "../components/EmptyState";
 import { WishlistCardSkeleton } from "../components/WishlistCardSkeleton";
 import { AppSidebar } from "../components/AppSidebar";
@@ -24,10 +23,9 @@ import { useWishlistSettingsReadOnly } from "../hooks/useWishlistSettings";
 import { useProfile } from "../hooks/useProfile";
 import { useFriends } from "../hooks/useFriends";
 import { useAuth } from "../context/AuthContext";
-import { supabase } from "../supabaseClient";
 import ShareModal from '../components/ShareModal';
 import { getFirstName, getPossessiveName } from "../utils/nameUtils";
-import type { WishlistItem, Profile } from "../types";
+import type { WishlistItem } from "../types";
 import "../App.css";
 
 function SharedWishlist() {
@@ -51,7 +49,7 @@ function SharedWishlist() {
         if (!user || !userId) return;
         try {
             await follow(userId);
-            toast.success(`You are now following ${profile?.first_name || 'this user'}!`);
+            toast.success(`You are now following ${profile?.full_name || 'this user'}!`);
         } catch (err: any) {
             // Error handled by hook toast
         }

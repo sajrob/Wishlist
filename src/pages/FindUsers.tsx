@@ -63,7 +63,7 @@ const FindUsers = () => {
                         <form onSubmit={handleSearchSubmit} className="relative group max-w-xl mx-auto w-full">
                             <Input
                                 placeholder="Search by name or @username..."
-                                className="h-12 pl-12 pr-4 rounded-2xl shadow-sm border-2"
+                                className="h-12 pl-12 pr-4 placeholder:text-xs rounded-2xl shadow-sm border-2"
                                 value={query}
                                 onChange={(e) => { setQuery(e.target.value); setHasSearched(false); }}
                             />
@@ -84,7 +84,7 @@ const FindUsers = () => {
                                     <EmptyState
                                         title="No users found"
                                         message={`We couldn't find any users matching "${query}"`}
-                                        icon={Search}
+                                        icon={<Search className="size-10 text-muted-foreground/40" />}
                                     />
                                 </div>
                             ) : (
@@ -108,7 +108,7 @@ const FindUsers = () => {
                                                                 {profile.full_name}
                                                             </h3>
 
-                                                            {/* 2. USERNAME (Positioned exactly as requested) */}
+                                                            {/* 2. USERNAME */}
                                                             <div className="flex items-center">
                                                                 <span className="truncate text-xs text-muted-foreground">
                                                                     @{profile.username || 'user' + getInitials(profile.full_name).toLowerCase()}
