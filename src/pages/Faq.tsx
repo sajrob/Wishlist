@@ -39,6 +39,11 @@ function Faq() {
             icon: Zap
         },
         {
+            question: "How do I move an item to a different wishlist?",
+            answer: "Go to the wishlist you want to add items to. Click the 'Edit Wishlist' button in the header, (on mobile ...). Select the items you want to add to your wishlist. Click 'Save Changes' to save.",
+            icon: Zap
+        },
+        {
             question: "Can I share my wishlists with friends?",
             answer: "Absolutely. Each wishlist has a 'Share' button that generates a unique link. You can send this link to anyone, even if they don't have an account. If your profile is public, friends can also find you by searching your email. Remember to put your wishlist on public if you want friends to see it.",
             icon: Share2
@@ -54,8 +59,8 @@ function Faq() {
             icon: Tag
         },
         {
-            question: "How do I track items I want to buy?",
-            answer: "When adding an item, you can include details like price, a direct link to the store, and an image. Use the 'Must Have' toggle to highlight your top priorities so friends know exactly what you want most.",
+            question: "How do I add multiple items to my wishlist?",
+            answer: "Go to the wishlist you want to add items to. Click the 'Edit Wishlist' button in the header, (on mobile ...). Select the items you want to add to your wishlist. Click 'Save Changes' to save.",
             icon: Zap
         },
         {
