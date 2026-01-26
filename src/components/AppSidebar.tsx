@@ -17,6 +17,7 @@ import {
   Bug,
   LayoutDashboard,
   HelpCircle,
+  Gift,
 } from "lucide-react";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { useNavigate, useLocation, Link } from "react-router-dom";
@@ -154,10 +155,10 @@ export function AppSidebar({
             <SidebarMenuButton size="lg" asChild tooltip="Wishlist">
               <Link to="/dashboard">
                 <div className="flex aspect-square size-8 group-data-[collapsible=icon]:size-4 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Heart className="size-4" />
+                  <Gift className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate font-semibold">Wishlist</span>
+                  <span className="navbar-logo truncate font-semibold">Mi List</span>
                   <span className="truncate text-xs">Your wishlists</span>
                 </div>
               </Link>
@@ -291,8 +292,8 @@ export function AppSidebar({
             <FeedbackDialog
               trigger={
                 <SidebarMenuButton tooltip="Report a Bug">
-                  <Bug className="text-indigo-600" />
-                  <span className="group-data-[collapsible=icon]:hidden">
+                  <Bug className="text-amber-500" />
+                  <span className="group-data-[collapsible=icon]:hidden text-amber-700">
                     Report a Bug
                   </span>
                 </SidebarMenuButton>

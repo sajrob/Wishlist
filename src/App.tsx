@@ -19,6 +19,7 @@ import Notifications from './pages/Notifications';
 import ContactUs from './pages/ContactUs';
 import SharePage from './pages/SharePage';
 import Faq from './pages/Faq';
+import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
@@ -48,8 +49,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/update-password" element={<UpdatePassword />} />
             <Route path="/faq" element={<Faq />} />
-            <Route path="/contact" element={<ContactUs />} />
             <Route path="/share/:categoryId" element={<SharePage />} />
+            {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
 
             {/* Private Routes - Require Authentication */}
             <Route
@@ -101,8 +102,8 @@ function App() {
               }
             />
 
-            {/* Catch-all redirect */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            {/* 404 Page */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </WishlistProvider>
       </AuthProvider>

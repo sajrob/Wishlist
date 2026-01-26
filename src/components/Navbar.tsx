@@ -142,6 +142,16 @@ const Navbar = () => {
             Contact
           </NavLink> */}
 
+          {/* <NavLink
+            to="/contact"
+            className={({ isActive }) =>
+              isActive ? "navbar-link active" : "navbar-link"
+            }
+            onClick={closeMenu}
+          >
+            Contact
+          </NavLink> */}
+
           <NavLink
             to="/faq"
             className={({ isActive }) =>
@@ -151,6 +161,9 @@ const Navbar = () => {
           >
             FAQ
           </NavLink>
+
+
+
 
         </div>
       </div>
