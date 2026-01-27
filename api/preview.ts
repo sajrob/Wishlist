@@ -3,8 +3,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase Client
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -33,11 +33,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 description = `Check out items in ${category.name}`;
             }
 
-            // Fetch first item image
+            // Fetch first item image - Ensure we get an item WITH an image
             const { data: items } = await supabase
                 .from('items')
                 .select('image_url')
                 .eq('category_id', id)
+                .neq('image_url', null) // Filter out nulls
+                .neq('image_url', '')   // Filter out empty strings
                 .order('created_at', { ascending: true })
                 .limit(1);
 
@@ -64,6 +66,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
     <meta property="og:image" content="${image}" />
+    <meta property="og:image:secure_url" content="${image}" />
+    <meta property="og:image:alt" content="${title}" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -71,6 +75,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     <meta property="twitter:title" content="${title}" />
     <meta property="twitter:description" content="${description}" />
     <meta property="twitter:image" content="${image}" />
+    
+    <!-- Schema.org / WhatsApp -->
+    <meta itemprop="name" content="${title}">
+    <meta itemprop="description" content="${description}">
+    <meta itemprop="image" content="${image}">
     
     <!-- Redirect to actual app -->
     <script>
