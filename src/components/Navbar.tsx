@@ -7,6 +7,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import "./Navbar.css";
+import { Gift } from "lucide-react";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -67,15 +68,34 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  function Logo() {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="flex aspect-square bg-white size-16 ">
+          <img src="/hero-image.png" alt="" />
+        </div>
+        <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+          <span className="navbar-logo truncate font-semibold">Mi List</span>
+          <span className="truncate text-xs">Your wishlists</span>
+        </div>
+      </div>
+    )
+  }
+
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
         <Link
           to={user ? "/dashboard" : "/"}
-          className="navbar-logo"
+          // className="navbar-logo"
           onClick={closeMenu}
         >
-          Me List
+          {/* Me List */}
+
+          {Logo()}
+
+
         </Link>
 
         {/*hamburger menu toggle button designed for mobile responsiveness*/}

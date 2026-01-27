@@ -149,18 +149,16 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
+      <SidebarHeader >
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild tooltip="Wishlist">
               <Link to="/dashboard">
-                <div className="flex aspect-square size-8 group-data-[collapsible=icon]:size-4 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Gift className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+
+                {/*<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="navbar-logo truncate font-semibold">Mi List</span>
                   <span className="truncate text-xs">Your wishlists</span>
-                </div>
+                </div> */}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

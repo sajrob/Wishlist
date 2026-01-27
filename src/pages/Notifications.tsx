@@ -20,18 +20,18 @@ import { formatDate } from "../utils/dateUtils";
 const NOTIFICATION_ICONS = {
     follow: {
         icon: UserPlus,
-        bgColor: 'bg-blue-100',
-        textColor: 'text-blue-600'
+        bgColor: 'bg-primary/10',
+        textColor: 'text-primary'
     },
     wishlist_share: {
         icon: Gift,
-        bgColor: 'bg-pink-100',
-        textColor: 'text-pink-600'
+        bgColor: 'bg-primary/10',
+        textColor: 'text-primary'
     },
     default: {
         icon: Bell,
-        bgColor: 'bg-gray-100',
-        textColor: 'text-gray-600'
+        bgColor: 'bg-muted',
+        textColor: 'text-muted-foreground'
     }
 } as const;
 

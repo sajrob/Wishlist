@@ -136,9 +136,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
             {/* Added fixed h-[85vh] and flex-col to contain the button at the bottom */}
             <DialogContent className="w-[92vw] max-w-md p-0 overflow-hidden rounded-[32px] sm:rounded-xl shadow-2xl border-none h-[85vh] max-h-[640px] flex flex-col">
 
-                <DialogHeader className="p-6 pb-2 bg-gradient-to-b from-blue-50/50 to-transparent shrink-0">
-                    <DialogTitle className="text-xl text-blue-900 flex items-center gap-2">
-                        <Gift className="w-5 h-5 text-blue-600" />
+                <DialogHeader className="p-6 pb-2 bg-gradient-to-b from-primary/5 to-transparent shrink-0">
+                    <DialogTitle className="text-xl text-foreground flex items-center gap-2">
+                        <Gift className="w-5 h-5 text-primary" />
                         Share {displayOwnerName} {categoryName}
                     </DialogTitle>
                     <DialogDescription>
@@ -147,8 +147,8 @@ const ShareModal: React.FC<ShareModalProps> = ({
                 </DialogHeader>
 
                 <Tabs defaultValue="friends" className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                    <div className="px-6 py-2 bg-blue-50/30 border-y shrink-0">
-                        <TabsList className="w-full h-11 bg-blue-50/30 p-1.5 rounded-xl border-none">
+                    <div className="px-6 py-2 bg-muted/30 border-y shrink-0">
+                        <TabsList className="w-full h-11 bg-muted/50 p-1.5 rounded-xl border-none">
                             <TabsTrigger
                                 value="friends"
                                 className="flex-1 py-2 gap-2 text-xs font-semibold transition-all data-[state=active]:bg-primary data-[state=active]:text-white"

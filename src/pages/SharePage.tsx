@@ -143,7 +143,7 @@ const SharePage = () => {
                     </div>
                 </div>
                 <h1 className="text-2xl font-bold mb-2">Private Wishlist</h1>
-                <p className="text-muted-foreground mb-8">This wishlist is private or doesn't exist.</p>
+                <p className="text-muted-foreground mb-8">This wishlist is private, or doesn't exist. <br /> If this link was sent to you, ask the sender to make the wishlist public.</p>
                 <Button asChild className="w-full">
                     <Link to="/">Go Home</Link>
                 </Button>

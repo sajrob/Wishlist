@@ -195,7 +195,7 @@ const Profile = () => {
 
                         {/* Right Column - Sideways Stats/Info */}
                         <div className="space-y-6">
-                            <Card className="border-none shadow-md bg-black/90 text-primary-foreground overflow-hidden h-fit">
+                            <Card className="border-none shadow-md bg-primary text-primary-foreground overflow-hidden h-fit">
                                 <div className="p-6 space-y-6">
                                     <div className="space-y-2">
                                         <h3 className="text-lg text-white font-bold">Quick Stats</h3>
@@ -203,7 +203,7 @@ const Profile = () => {
                                     </div>
 
                                     <div className="grid grid-cols-3 gap-2">
-                                        <div className="bg-white/10 p-3 rounded-xl border border-white/10 flex flex-col items-center text-center">
+                                        <div className="bg-white/10 p-3 rounded-xl border border-white/20 flex flex-col items-center text-center">
                                             <Package className="w-4 h-4 mb-1 opacity-80" />
                                             <div className="text-xl font-black">
                                                 {statsLoading ? "..." : stats?.items || 0}
@@ -217,7 +217,7 @@ const Profile = () => {
                                             </div>
                                             <div className="text-[9px] uppercase font-bold tracking-widest opacity-70">Wishlists</div>
                                         </div>
-                                        <div className="bg-white/10 p-3 rounded-xl border border-white/10 flex flex-col items-center text-center">
+                                        <div className="bg-white/10 p-3 rounded-xl border border-white/20 flex flex-col items-center text-center">
                                             <Users className="w-4 h-4 mb-1 opacity-80" />
                                             <div className="text-xl font-black">
                                                 {statsLoading ? "..." : stats?.friends || 0}
@@ -244,7 +244,7 @@ const Profile = () => {
                                 </CardHeader>
                                 <CardContent className="p-4 space-y-3">
                                     <p className="text-xs text-muted-foreground">Your account is secured with Supabase Auth.</p>
-                                    <Button variant="outline" size="sm" className="w-full bg-slate-500 text-primary-foreground text-xs font-semibold py-4" >
+                                    <Button variant="outline" size="sm" className="w-full bg-primary text-primary-foreground text-xs font-semibold py-4" >
                                         <a href="/forgot-password">Reset Password</a>
                                     </Button>
                                 </CardContent>
