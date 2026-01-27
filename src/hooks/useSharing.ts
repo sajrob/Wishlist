@@ -53,7 +53,8 @@ export const useSharing = () => {
 
     const getShareUrl = (categoryId: string) => {
         const baseUrl = window.location.origin;
-        return `${baseUrl}/share/${categoryId}`;
+        // Use the short link /s/ for better social previews
+        return `${baseUrl}/s/${categoryId}`;
     };
 
     return {

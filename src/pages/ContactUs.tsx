@@ -234,9 +234,9 @@ const ContactUs = () => {
                                             />
                                             <label
                                                 htmlFor={`radio-${subj}`}
-                                                className="relative p-0.5 flex items-center justify-center shrink-0 peer-checked:before:hidden before:block before:absolute before:w-full before:h-full before:bg-white w-5 h-5 cursor-pointer border-2 border-[#4338ca] rounded-full overflow-hidden"
+                                                className="relative p-0.5 flex items-center justify-center shrink-0 peer-checked:before:hidden before:block before:absolute before:w-full before:h-full before:bg-white w-5 h-5 cursor-pointer border-2 border-[#2463eb] rounded-full overflow-hidden"
                                             >
-                                                <span className={`${formData.subject === subj ? 'bg-[#4338ca]' : ''} rounded-full w-full h-full`}></span>
+                                                <span className={`${formData.subject === subj ? 'bg-[#2463eb]' : ''} rounded-full w-full h-full`}></span>
                                             </label>
                                             <p className="text-sm text-slate-600 ml-3">{subj}</p>
                                         </div>

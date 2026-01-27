@@ -16,7 +16,7 @@ const Landing = () => {
             app.
           </h1>
           <p className="landing-description">
-            Create your own wish list, browse your friends' and family's
+            Create your own wish list, browse your friends' and family's &nbsp;
             <span className="colored-strikethrough">wishlists</span> desires.
             Give and receive the perfect gift, every time.
           </p>

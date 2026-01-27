@@ -25,6 +25,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
 import './App.css';
 
+
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();
 
@@ -107,8 +108,10 @@ function App() {
           </Routes>
         </WishlistProvider>
       </AuthProvider>
+
       <Toaster position="top-center" />
     </Router>
+
   );
 }
 

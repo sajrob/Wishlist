@@ -134,7 +134,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             {/* Added fixed h-[85vh] and flex-col to contain the button at the bottom */}
-            <DialogContent className="w-[92vw] max-w-md p-0 overflow-hidden rounded-[32px] sm:rounded-3xl shadow-2xl border-none h-[85vh] max-h-[640px] flex flex-col">
+            <DialogContent className="w-[92vw] max-w-md p-0 overflow-hidden rounded-[32px] sm:rounded-xl shadow-2xl border-none h-[85vh] max-h-[640px] flex flex-col">
 
                 <DialogHeader className="p-6 pb-2 bg-gradient-to-b from-blue-50/50 to-transparent shrink-0">
                     <DialogTitle className="text-xl text-blue-900 flex items-center gap-2">

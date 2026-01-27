@@ -45,11 +45,11 @@
 }
 
 .navbar-link:hover {
-    color: #4338ca;
+    color: #2463eb;
 }
 
 .navbar-link.active {
-    color: #4338ca;
+    color: #2463eb;
     font-weight: 600;
     border-bottom-color: #583623;
 }

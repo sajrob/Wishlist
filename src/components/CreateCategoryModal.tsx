@@ -177,7 +177,7 @@ const CreateCategoryModal = ({
                     </Button>
                 </CardFooter>
             </form>
-        </Card>
+        </Card >
     );
 };
 

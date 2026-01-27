@@ -2,7 +2,7 @@
     text-decoration-line: line-through;
     text-decoration-style: solid;
     text-decoration-thickness: 2px;
-    text-decoration-color: #4338ca;
+    text-decoration-color: #2463eb;
     color: black;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .highlight {
-    color: #4338ca;
+    color: #2463eb;
     position: relative;
 }
 
@@ -74,14 +74,14 @@
 }
 
 .btn-primary {
-    background-color: #4338ca;
+    background-color: #2463eb;
     color: white;
     border: 2px solid #583623;
 }
 
 .btn-primary:hover {
     background-color: #1d4ed8;
-    border-color: #4338ca;
+    border-color: #2463eb;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
 }
