@@ -156,7 +156,7 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                         <Label htmlFor="buy_link" className="text-xs flex items-center gap-1.5">
                             <Link2 className="w-3 h-3" />
                             Product URL (Optional)
-                            <span className="text-[10px] text-muted-foreground font-normal ml-auto flex items-center gap-1">
+                            <span className="text-[10px] text-primary font-normal ml-auto flex items-center gap-1">
                                 <Sparkles className="w-2.5 h-2.5 text-amber-500" />
                                 Auto-fills details
                             </span>

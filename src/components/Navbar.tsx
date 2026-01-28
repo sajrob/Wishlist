@@ -72,7 +72,7 @@ const Navbar = () => {
     return (
       <div className="flex items-center gap-2">
         <div className="flex aspect-square bg-white size-16 ">
-          <img src="/hero-image.png" alt="" />
+          <img src="/wishlist-logo-min.png" alt="" />
         </div>
         <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
           <span className="navbar-logo truncate font-semibold">Mi List</span>
