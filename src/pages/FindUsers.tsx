@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, UserPlus, UserMinus, Loader2 } from "lucide-react";
+import { Search, UserPlus, UserMinus, Loader2, Users, Gift, AtSign } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { getInitials } from '../utils/nameUtils';
@@ -79,7 +79,50 @@ const FindUsers = () => {
                                 Array.from({ length: 6 }).map((_, i) => (
                                     <FriendCardSkeleton key={i} />
                                 ))
-                            ) : users.length === 0 && hasSearched ? (
+                            ) : !hasSearched ? (
+                                <div className="col-span-full flex flex-col items-center justify-center md:py-8 sm:py-0 px-4 text-center space-y-6">
+                                    <div className="relative">
+                                        {/* Glow Effect */}
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 rounded-full blur-xl transform scale-150 opacity-50 animate-pulse" />
+
+                                        <div className="relative w-32 h-32 bg-background rounded-full overflow-hidden border-2 border-dashed border-primary/20 shadow-sm">
+                                            <img
+                                                src="/hero-image.png"
+                                                className="w-full h-full object-cover"
+                                                alt="Hero"
+                                            />
+                                        </div>
+
+                                        {/* Icons */}
+                                        <div className="absolute -right-2 -bottom-1 bg-background p-2 rounded-full border shadow-sm">
+                                            <Search className="size-4 text-yellow-500 fill-yellow-500" />
+                                        </div>
+                                        <div className="absolute -left-2 -top-1 bg-background p-2 rounded-full border shadow-sm">
+                                            <Gift className="size-4 text-pink-500 fill-pink-500" />
+                                        </div>
+                                    </div>
+
+
+                                    <div className="max-w-md space-y-2">
+                                        <h3 className="text-xl font-bold tracking-tight">Find & Follow Friends</h3>
+                                        <p className="text-muted-foreground text-sm leading-relaxed">
+                                            Search for people you know to see their wishlists.
+                                            Follow them to get notified when they add new items or when their birthday is coming up!
+                                        </p>
+                                    </div>
+
+                                    {/* <div className="flex flex-wrap justify-center gap-3">
+                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground border">
+                                            <Search className="size-3" />
+                                            <span>Search by Name</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-lg text-xs font-medium text-muted-foreground border">
+                                            <AtSign className="size-3" />
+                                            <span>Search by Username</span>
+                                        </div>
+                                    </div> */}
+                                </div>
+                            ) : users.length === 0 ? (
                                 <div className="col-span-full">
                                     <EmptyState
                                         title="No users found"

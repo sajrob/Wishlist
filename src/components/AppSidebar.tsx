@@ -291,7 +291,7 @@ export function AppSidebar({
               trigger={
                 <SidebarMenuButton tooltip="Report a Bug">
                   <Bug className="text-amber-500" />
-                  <span className="group-data-[collapsible=icon]:hidden text-amber-700">
+                  <span className="group-data-[collapsible=icon]:hidden text-amber-500">
                     Report a Bug
                   </span>
                 </SidebarMenuButton>
