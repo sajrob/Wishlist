@@ -184,8 +184,12 @@ const Navbar = () => {
             FAQ
           </NavLink>
 
-          {/* dark mode toggle
-          <ModeToggle /> */}
+          {/* ============================================================
+              DARK MODE TOGGLE - Currently Disabled
+              To re-enable: Uncomment the line below AND follow 
+              instructions in App.tsx to enable ThemeProvider
+              ============================================================ */}
+          {/* <ModeToggle /> */}
 
         </div>
       </div>

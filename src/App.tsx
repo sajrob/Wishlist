@@ -23,7 +23,14 @@ import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from './components/theme-provider';
+// ============================================================
+// DARK MODE - Currently Disabled
+// ============================================================
+// To re-enable dark mode, uncomment the following import:
+// import { ThemeProvider } from './components/theme-provider';
+// Then uncomment the ThemeProvider wrapper in the return statement below (lines ~42 and ~115)
+// Also uncomment the ModeToggle in Navbar.tsx (line 188)
+// ============================================================
 import './App.css';
 
 
@@ -39,80 +46,83 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <Router>
-        <AuthProvider>
-          <WishlistProvider>
-            <Navbar />
-            <Routes>
-              {/* Public Routes - Accessible to everyone */}
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/update-password" element={<UpdatePassword />} />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/share/:categoryId" element={<SharePage />} />
-              {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
+    // ============================================================
+    // DARK MODE - To re-enable, uncomment the ThemeProvider tags below
+    // ============================================================
+    // <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <Router>
+      <AuthProvider>
+        <WishlistProvider>
+          <Navbar />
+          <Routes>
+            {/* Public Routes - Accessible to everyone */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/update-password" element={<UpdatePassword />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/share/:categoryId" element={<SharePage />} />
+            {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
 
-              {/* Private Routes - Require Authentication */}
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute>
-                    <Home />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <PrivateRoute>
-                    <Profile />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/find-users"
-                element={
-                  <PrivateRoute>
-                    <FindUsers />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/friends"
-                element={
-                  <PrivateRoute>
-                    <FriendsWishlists />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/wishlist/:userId"
-                element={
-                  <PrivateRoute>
-                    <SharedWishlist />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/notifications"
-                element={
-                  <PrivateRoute>
-                    <Notifications />
-                  </PrivateRoute>
-                }
-              />
+            {/* Private Routes - Require Authentication */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Home />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/find-users"
+              element={
+                <PrivateRoute>
+                  <FindUsers />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/friends"
+              element={
+                <PrivateRoute>
+                  <FriendsWishlists />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/wishlist/:userId"
+              element={
+                <PrivateRoute>
+                  <SharedWishlist />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <PrivateRoute>
+                  <Notifications />
+                </PrivateRoute>
+              }
+            />
 
-              {/* 404 Page */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </WishlistProvider>
-        </AuthProvider>
-        <Toaster position="top-center" />
-      </Router>
-    </ThemeProvider>
+            {/* 404 Page */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </WishlistProvider>
+      </AuthProvider>
+      <Toaster position="top-center" />
+    </Router>
+    // </ThemeProvider>
   );
 }
 
