@@ -124,7 +124,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
             )}
 
             <div className="card-image-container">
-                <img src={image_url || 'https://via.placeholder.com/400x300?text=No+Image'} alt={name} className="card-image" />
+                <img src={image_url || 'https://placehold.co/600x400/grey/black?text=No+Image'} alt={name} className="card-image" />
                 {is_must_have && (
                     <div className="must-have-badge">
                         Must Have
@@ -198,7 +198,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                 />
                                 <label
                                     htmlFor={`must-have-${id}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-600"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
                                 >
                                     Must Have
                                 </label>

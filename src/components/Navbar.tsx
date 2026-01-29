@@ -7,7 +7,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { useAuth } from "../context/AuthContext";
 import "./Navbar.css";
-import { Gift } from "lucide-react";
+import { ModeToggle } from "./mode-toggle";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
@@ -71,9 +71,9 @@ const Navbar = () => {
   function Logo() {
     return (
       <div className="flex items-center gap-2">
-        <div className="flex aspect-square bg-white size-16 ">
+        {/* <div className="flex aspect-square bg-white size-16 ">
           <img src="/wishlist-logo-min.png" alt="" />
-        </div>
+        </div> */}
         <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
           <span className="navbar-logo truncate font-semibold">Mi List</span>
           <span className="truncate text-xs">Your wishlists</span>
@@ -98,14 +98,16 @@ const Navbar = () => {
 
         </Link>
 
-        {/*hamburger menu toggle button designed for mobile responsiveness*/}
-        <div
-          className={`navbar-toggle ${isMenuOpen ? "active" : ""}`}
-          onClick={toggleMenu}
-        >
-          <span className="bar"></span>
-          <span className="bar"></span>
-          <span className="bar"></span>
+        <div className="flex items-center gap-2">
+
+          <div
+            className={`navbar-toggle ${isMenuOpen ? "active" : ""}`}
+            onClick={toggleMenu}
+          >
+            <span className="bar"></span>
+            <span className="bar"></span>
+            <span className="bar"></span>
+          </div>
         </div>
 
         <div className={`navbar-menu ${isMenuOpen ? "active" : ""}`}>
@@ -182,8 +184,8 @@ const Navbar = () => {
             FAQ
           </NavLink>
 
-
-
+          {/* dark mode toggle
+          <ModeToggle /> */}
 
         </div>
       </div>

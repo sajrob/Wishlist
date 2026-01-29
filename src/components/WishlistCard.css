@@ -118,7 +118,7 @@
   justify-content: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: white;
+  background: var(--color-surface);
   cursor: pointer;
   color: var(--color-text-secondary);
   font-size: 0.9rem;
@@ -135,7 +135,7 @@
 .action-icon-btn.delete:hover {
   border-color: var(--color-danger);
   color: var(--color-danger);
-  background-color: #fef2f2;
+  background-color: color-mix(in srgb, var(--color-danger) 10%, transparent);
 }
 
 .must-have-tag,
@@ -143,14 +143,14 @@
   display: inline-flex;
   align-items: center;
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, #4f46e5, #2463eb);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: white;
   border-radius: var(--radius-full);
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -208,9 +208,9 @@
   font-size: 0.7rem !important;
   font-weight: 600 !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-  background-color: #F0EEE9 !important;
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: #000000 !important;
+  background-color: var(--color-surface-hover) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-main) !important;
   transition: all 0.2s ease !important;
   opacity: 1 !important;
 }

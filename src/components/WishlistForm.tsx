@@ -21,7 +21,7 @@ const initialForm: ItemFormData = {
     image_url: '',
     buy_link: '',
     is_must_have: false,
-    currency: 'USD',
+    currency: 'SLE',
 };
 
 const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormProps) => {

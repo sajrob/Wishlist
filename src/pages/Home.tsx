@@ -270,20 +270,20 @@ function Home() {
                 loading={loading}
             />
             <SidebarInset className="flex flex-col bg-background overflow-hidden border-l">
-                <header className="sticky top-0 z-20 flex flex-col md:flex-row h-auto md:h-16 shrink-0 items-center border-b bg-white text-slate-900 px-6 py-2.5 md:py-0 shadow-sm transition-all duration-200">
+                <header className="sticky top-0 z-20 flex flex-col md:flex-row h-auto md:h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 text-foreground px-6 py-2.5 md:py-0 shadow-sm transition-all duration-200">
                     <div className="flex items-center gap-4 w-full">
                         <div className="flex items-center gap-2">
-                            <SidebarTrigger className="-ml-1 h-11 w-11 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors" />
-                            <Separator orientation="vertical" className="h-5 mx-1 bg-slate-600" />
+                            <SidebarTrigger className="-ml-1 h-11 w-11 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors" />
+                            <Separator orientation="vertical" className="h-5 mx-1" />
                         </div>
 
                         <div className="flex flex-1 flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4 min-w-0">
                             {/* Context Section */}
                             <div className="flex items-center gap-3 min-w-0">
                                 <div className="flex flex-col">
-                                    <h1 className="text-lg md:text-xl font-bold tracking-tight text-slate-900 truncate flex items-center gap-2">
+                                    <h1 className="text-lg md:text-xl font-bold tracking-tight text-foreground truncate flex items-center gap-2">
                                         {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                                        <span className="flex items-center justify-center bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full text-[11px] font-bold border border-indigo-100 tabular-nums">
+                                        <span className="flex items-center justify-center bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[11px] font-bold border border-primary/20 tabular-nums">
                                             {wishlistItems.length}
                                         </span>
                                     </h1>
@@ -294,8 +294,8 @@ function Home() {
                             <div className="flex items-center justify-between md:justify-end gap-3 w-full md:w-auto">
                                 <div className="flex items-center gap-3">
                                     {!activeCategory ? (
-                                        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3 h-10 rounded-xl">
-                                            <div className="flex items-center gap-1.5 grayscale opacity-70">
+                                        <div className="flex items-center gap-2.5 bg-muted/50 border border-border px-3 h-10 rounded-xl">
+                                            <div className="flex items-center gap-1.5 grayscale opacity-70 text-foreground">
                                                 {isPublic ? <Globe className="size-3.5" /> : <Lock className="size-3.5" />}
                                                 <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">
                                                     {isPublic ? "Public" : "Private"}
@@ -304,7 +304,7 @@ function Home() {
                                             <Switch
                                                 checked={isPublic}
                                                 onCheckedChange={handleTogglePublic}
-                                                className="scale-90 data-[state=checked]:bg-indigo-700"
+                                                className="scale-90 data-[state=checked]:bg-primary"
                                             />
                                         </div>
                                     ) : (
@@ -318,8 +318,8 @@ function Home() {
                                                         <button
                                                             onClick={() => handleToggleCategoryPrivacy(cat.id, cat.is_public)}
                                                             className={`flex items-center gap-2 px-3 h-11 rounded-xl border transition-all active:scale-95 ${cat.is_public
-                                                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                                                                : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                                                                ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20"
+                                                                : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20"
                                                                 }`}
                                                         >
                                                             {cat.is_public ? <Globe className="size-3.5" /> : <Lock className="size-3.5" />}
@@ -333,7 +333,7 @@ function Home() {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="h-11 px-4 gap-2 rounded-xl border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-all font-bold text-[11px] uppercase tracking-wider"
+                                                                className="h-11 px-4 gap-2 rounded-xl border-border text-muted-foreground hover:text-foreground hover:bg-accent transition-all font-bold text-[11px] uppercase tracking-wider"
                                                                 onClick={() => handleEditCategory(cat)}
                                                             >
                                                                 <Pencil className="size-4" />
@@ -342,7 +342,7 @@ function Home() {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                className="h-11 px-4 gap-2 rounded-xl border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-700 hover:text-white transition-all font-bold text-[11px] uppercase tracking-wider shadow-none"
+                                                                className="h-11 px-4 gap-2 rounded-xl border-primary/20 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all font-bold text-[11px] uppercase tracking-wider shadow-none"
                                                                 onClick={() => setIsShareModalOpen(true)}
                                                             >
                                                                 <Share2 className="size-4" />
@@ -351,7 +351,7 @@ function Home() {
                                                             <Button
                                                                 variant="outline"
                                                                 size="icon"
-                                                                className="h-11 w-11 rounded-xl border-red-100 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-none"
+                                                                className="h-11 w-11 rounded-xl border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-all shadow-none"
                                                                 onClick={() => handleDeleteCategory(cat.id)}
                                                             >
                                                                 <Trash2 className="size-4" />
@@ -362,12 +362,12 @@ function Home() {
                                                         <div className="lg:hidden">
                                                             <DropdownMenu>
                                                                 <DropdownMenuTrigger asChild>
-                                                                    <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-slate-200 bg-slate-50 transition-colors">
-                                                                        <MoreHorizontal className="size-4 text-slate-600" />
+                                                                    <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl border-border bg-muted/50 transition-colors">
+                                                                        <MoreHorizontal className="size-4 text-muted-foreground" />
                                                                     </Button>
                                                                 </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-slate-200">
-                                                                    <DropdownMenuItem onClick={() => handleEditCategory(cat)} className="gap-3 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-700">
+                                                                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl shadow-xl border-border">
+                                                                    <DropdownMenuItem onClick={() => handleEditCategory(cat)} className="gap-3 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-foreground">
                                                                         <Pencil className="size-4" />
                                                                         <span>Edit Wishlist</span>
                                                                     </DropdownMenuItem>
@@ -396,7 +396,7 @@ function Home() {
                                 {wishlistItems.length > 0 && (
                                     <Button
                                         onClick={handleOpenForm}
-                                        className="h-11 px-5 md:px-4 gap-1 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase tracking-[0.05em] shadow-[0_4px_12px_-2px_rgba(67,56,202,0.3)] hover:shadow-[0_8px_16px_-4px_rgba(67,56,202,0.4)] transition-all active:scale-95"
+                                        className="h-11 px-5 md:px-4 gap-1 rounded-xl bg-primary hover:bg-primary/90 text-white font-black text-xs uppercase tracking-[0.05em] shadow-[0_4px_12px_-2px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_16px_-4px_rgba(37,99,235,0.4)] transition-all active:scale-95"
                                     >
                                         <Plus className="size-4 stroke-[3]" />
                                         <span>Add</span>
