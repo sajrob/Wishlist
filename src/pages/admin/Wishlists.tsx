@@ -60,7 +60,7 @@ export default function AdminWishlists() {
     }
 
     const handleDelete = async (id: string, name: string) => {
-        if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.\n\nNote: All items in this wishlist will become "Uncategorized".`)) {
+        if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.\n\nNote: All items in this wishlist will become "Uncategorized" (preserved).`)) {
             const toastId = toast.loading(`Deleting wishlist "${name}"...`);
             try {
                 await deleteWishlist(id);

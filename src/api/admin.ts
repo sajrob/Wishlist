@@ -153,31 +153,22 @@ export const getAdminWishlists = async () => {
 
 export const deleteAdminWishlist = async (id: string) => {
     try {
-        console.log(`Attempting to delete wishlist: ${id}`);
+        console.log(`Attempting to delete wishlist via RPC: ${id}`);
 
-        // 1. Try to uncategorize items
-        // We catch errors here so we can still try to delete the category if this fails
-        // (e.g. if we don't have UPDATE permissions but do have DELETE permissions)
-        const { error: updateError } = await supabase
-            .from("items")
-            .update({ category_id: null })
-            .eq("category_id", id);
+        // Use the secure database function to perform the delete
+        // This is necessary because Admins typically cannot UPDATE other users' items (RLS),
+        // so we use a SECURITY DEFINER function to bypass RLS safely.
+        const { error } = await supabase.rpc('admin_delete_wishlist', {
+            target_category_id: id
+        });
 
-        if (updateError) {
-            console.warn("Warning: Failed to uncategorize items (might be lack of permissions). Proceeding with delete...", updateError);
-        }
-
-        // 2. Delete the category and check if it actually happened
-        const { error, count } = await supabase
-            .from("categories")
-            .delete({ count: 'exact' })
-            .eq("id", id);
-
-        if (error) throw error;
-
-        // If count is 0, it means nothing was deleted (likely RLS or ID not found)
-        if (count === 0) {
-            throw new Error("Deletion failed. No records were deleted (Permission denied or record missing).");
+        if (error) {
+            console.error("RPC Error:", error);
+            // If the function doesn't exist, we provide a helpful error
+            if (error.message?.includes('function') && error.message?.includes('does not exist')) {
+                throw new Error("Missing Database Function. Please run the migration '20260202_admin_delete_rpc.sql' in your Supabase SQL Editor.");
+            }
+            throw error;
         }
 
         return true;
