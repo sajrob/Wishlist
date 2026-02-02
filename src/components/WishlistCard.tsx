@@ -250,7 +250,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
             </div>
 
             <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden gap-0">
+                <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden gap-0 wishlist-detail-dialog">
                     <div className="flex flex-col md:flex-row h-full max-h-[90vh]">
                         <div className="md:w-1/2 bg-muted flex items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-border">
                             <img

@@ -248,8 +248,35 @@
 }
 
 .claimed-text {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  font-weight: 500;
   margin-left: 12px;
+}
+
+/* Premium Close Button for Detail Modal */
+.wishlist-detail-dialog>button[type="button"]:last-child {
+  background-color: white !important;
+  border-radius: 50% !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  opacity: 1 !important;
+  color: #333 !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  transition: all 0.2s ease !important;
+  top: 12px !important;
+  right: 12px !important;
+  z-index: 100 !important;
+}
+
+.wishlist-detail-dialog>button[type="button"]:last-child:hover {
+  transform: scale(1.1);
+  background-color: #f8f8f8 !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.wishlist-detail-dialog>button[type="button"]:last-child svg {
+  width: 20px !important;
+  height: 20px !important;
 }
