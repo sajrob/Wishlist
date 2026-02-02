@@ -261,9 +261,9 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                         </div>
                         <div className="md:w-1/2 p-6 flex flex-col gap-4 overflow-y-auto">
                             <DialogHeader>
-                                <div className="flex items-center justify-between gap-2 mb-1">
+                                <div className="flex items-center justify-start gap-2 mb-1">
                                     {is_must_have && (
-                                        <Badge className="bg-gradient-to-r from-primary to-accent text-white border-none text-[10px] py-0 px-2 uppercase font-bold tracking-wider">
+                                        <Badge className="bg-primary text-white border-none text-[10px] py-1 px-2 uppercase font-bold tracking-wider">
                                             Must Have
                                         </Badge>
                                     )}

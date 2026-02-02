@@ -14,6 +14,8 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AdminEmptyState } from "@/components/admin/AdminEmptyState";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 
 function ItemsSkeleton() {
@@ -44,10 +46,24 @@ function ItemsSkeleton() {
 
 export default function AdminItems() {
     const { data: items, isLoading, deleteItem, isDeleting } = useAdminItems();
+    const { user } = useAuth();
 
     if (isLoading) {
         return <ItemsSkeleton />;
     }
+
+    const handleDelete = async (id: string, name: string) => {
+        if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) {
+            const toastId = toast.loading(`Deleting item "${name}"...`);
+            try {
+                await deleteItem(id);
+                toast.success(`Item "${name}" deleted`, { id: toastId });
+            } catch (err) {
+                console.error("Delete error:", err);
+                toast.error(`Failed to delete "${name}"`, { id: toastId });
+            }
+        }
+    };
 
     if (!items || items.length === 0) {
         return (
@@ -117,7 +133,7 @@ export default function AdminItems() {
                                         variant="ghost"
                                         size="icon"
                                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                        onClick={() => deleteItem(item.id)}
+                                        onClick={() => handleDelete(item.id, item.name)}
                                         disabled={isDeleting}
                                     >
                                         <Trash2 className="h-4 w-4" />
@@ -136,7 +152,7 @@ export default function AdminItems() {
                                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Item Name</th>
                                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap">Price</th>
                                 <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap text-center">Claims</th>
-                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Wishlist / Owner</th>
+                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">List / Owner</th>
                                 <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground whitespace-nowrap">Added</th>
                                 <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
                             </tr>
@@ -167,8 +183,9 @@ export default function AdminItems() {
                                         </div>
                                     </td>
                                     <td className="p-4 align-middle text-center">
-                                        <Badge variant={item.claims_count > 0 ? "default" : "secondary"} className="text-[10px] h-5">
-                                            {item.claims_count} {item.claims_count === 1 ? 'Claim' : 'Claims'}
+                                        <Badge variant={item.claims_count > 0 ? "default" : "secondary"} className="text-[10px] h-5 gap-1">
+                                            <span>{item.claims_count} </span>
+                                            <span>{item.claims_count === 1 ? 'Claim' : 'Claims'}</span>
                                         </Badge>
                                     </td>
                                     <td className="p-4 align-middle">
@@ -191,7 +208,7 @@ export default function AdminItems() {
                                             variant="ghost"
                                             size="icon"
                                             className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                                            onClick={() => deleteItem(item.id)}
+                                            onClick={() => handleDelete(item.id, item.name)}
                                             disabled={isDeleting}
                                         >
                                             <Trash2 className="h-4 w-4" />

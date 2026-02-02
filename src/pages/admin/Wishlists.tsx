@@ -50,12 +50,27 @@ function WishlistsSkeleton() {
     );
 }
 
+import { toast } from "sonner";
+
 export default function AdminWishlists() {
-    const { data: wishlists, isLoading } = useAdminWishlists();
+    const { data: wishlists, isLoading, deleteWishlist, isDeleting } = useAdminWishlists();
 
     if (isLoading) {
         return <WishlistsSkeleton />;
     }
+
+    const handleDelete = async (id: string, name: string) => {
+        if (window.confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.\n\nNote: All items in this wishlist will become "Uncategorized".`)) {
+            const toastId = toast.loading(`Deleting wishlist "${name}"...`);
+            try {
+                await deleteWishlist(id);
+                toast.success(`Wishlist "${name}" deleted`, { id: toastId });
+            } catch (err) {
+                console.error("Delete error:", err);
+                toast.error(`Failed to delete "${name}"`, { id: toastId });
+            }
+        }
+    };
 
     if (!wishlists || wishlists.length === 0) {
         return (
@@ -115,11 +130,17 @@ export default function AdminWishlists() {
                                 </span>
                                 <div className="flex items-center gap-1">
                                     <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" asChild>
-                                        <a href={`/wishlist/${wishlist.id}`} target="_blank" rel="noreferrer">
+                                        <a href={`/wishlist/${wishlist.user_id}?category=${wishlist.id}`} target="_blank" rel="noreferrer">
                                             <ExternalLink className="h-4 w-4" />
                                         </a>
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                        onClick={() => handleDelete(wishlist.id, wishlist.name)}
+                                        disabled={isDeleting}
+                                    >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -174,11 +195,18 @@ export default function AdminWishlists() {
                                     </td>
                                     <td className="p-4 align-middle text-right space-x-1">
                                         <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" title="View Wishlist" asChild>
-                                            <a href={`/wishlist/${wishlist.id}`} target="_blank" rel="noreferrer">
+                                            <a href={`/wishlist/${wishlist.user_id}?category=${wishlist.id}`} target="_blank" rel="noreferrer">
                                                 <ExternalLink className="h-4 w-4" />
                                             </a>
                                         </Button>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" title="Delete Wishlist">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                            title="Delete Wishlist"
+                                            onClick={() => handleDelete(wishlist.id, wishlist.name)}
+                                            disabled={isDeleting}
+                                        >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </td>

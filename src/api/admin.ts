@@ -5,17 +5,31 @@ import { Category } from "@/types";
 // ==================== ACTIVITY LOGS ====================
 
 export const getAdminActivityLog = async () => {
-    const { data, error } = await supabase
-        .from("admin_activity_log")
-        .select(`
-            *,
-            admin:profiles (full_name)
-        `)
-        .order("created_at", { ascending: false })
-        .limit(100);
+    try {
+        const { data: logs, error: logsError } = await supabase
+            .from("admin_activity_log")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(100);
 
-    if (error) throw error;
-    return data as AdminActivityLog[];
+        if (logsError) throw logsError;
+
+        const adminIds = [...new Set(logs.map(l => l.admin_id))];
+        const { data: profiles } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", adminIds);
+
+        const profileMap = Object.fromEntries(profiles?.map(p => [p.id, p]) || []);
+
+        return logs.map(log => ({
+            ...log,
+            admin: profileMap[log.admin_id]
+        })) as AdminActivityLog[];
+    } catch (error) {
+        console.error("Error in getAdminActivityLog:", error);
+        throw error;
+    }
 };
 
 export const logAdminAction = async (action: Omit<AdminActivityLog, 'id' | 'created_at' | 'admin'>) => {
@@ -64,45 +78,38 @@ export const deleteFeedback = async (id: string) => {
 // ==================== USERS ====================
 
 export const getAdminUsers = async () => {
-    // We'll fetch profiles and then manually handle stats if joins fails
-    // Using !user_id to help PostgREST find the relationship
-    const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select(`
-            *,
-            wishlists_count:categories!user_id(count),
-            items_count:items!user_id(count)
-        `)
-        .order("full_name", { ascending: true }); // Order by name instead
+    try {
+        // Fetch data in parallel for efficiency
+        const [profilesRes, categoriesRes, itemsRes] = await Promise.all([
+            supabase.from("profiles").select("*").order("full_name", { ascending: true }),
+            supabase.from("categories").select("user_id"),
+            supabase.from("items").select("user_id")
+        ]);
 
-    if (profilesError) {
-        console.error("Join error in getAdminUsers, falling back to simple fetch:", profilesError);
-        // Fallback: fetch without joins if it fails
-        const { data: rawProfiles, error: rawError } = await supabase
-            .from("profiles")
-            .select("*")
-            .order("full_name", { ascending: true });
+        if (profilesRes.error) throw profilesRes.error;
 
-        if (rawError) throw rawError;
+        const profiles = profilesRes.data || [];
+        const allCategories = categoriesRes.data || [];
+        const allItems = itemsRes.data || [];
 
-        return rawProfiles.map(p => ({
-            ...p,
-            stats: {
-                wishlists_count: 0,
-                items_count: 0,
-                friends_count: 0
-            }
-        })) as AdminUser[];
+        // Map counts in-memory
+        return profiles.map(p => {
+            const userWishlists = allCategories.filter(c => c.user_id === p.id);
+            const userItems = allItems.filter(i => i.user_id === p.id);
+
+            return {
+                ...p,
+                stats: {
+                    wishlists_count: userWishlists.length,
+                    items_count: userItems.length,
+                    friends_count: 0
+                }
+            };
+        }) as AdminUser[];
+    } catch (error) {
+        console.error("Error in getAdminUsers:", error);
+        throw error;
     }
-
-    return profiles.map(p => ({
-        ...p,
-        stats: {
-            wishlists_count: p.wishlists_count?.[0]?.count || 0,
-            items_count: p.items_count?.[0]?.count || 0,
-            friends_count: 0
-        }
-    })) as AdminUser[];
 };
 
 export const toggleAdminStatus = async (userId: string, isAdmin: boolean) => {
@@ -118,77 +125,121 @@ export const toggleAdminStatus = async (userId: string, isAdmin: boolean) => {
 // ==================== WISHLISTS / CATEGORIES ====================
 
 export const getAdminWishlists = async () => {
-    const { data, error } = await supabase
-        .from("categories")
-        .select(`
-            *,
-            user:profiles!user_id (id, full_name, username, avatar_url),
-            items_count:items!category_id (count)
-        `)
-        .order("created_at", { ascending: false });
+    try {
+        const [categoriesRes, profilesRes, itemsRes] = await Promise.all([
+            supabase.from("categories").select("*").order("created_at", { ascending: false }),
+            supabase.from("profiles").select("id, full_name, username, avatar_url"),
+            supabase.from("items").select("category_id")
+        ]);
 
-    if (error) {
-        console.error("Join error in getAdminWishlists, falling back:", error);
-        const { data: raw, error: rawError } = await supabase
-            .from("categories")
-            .select("*")
-            .order("created_at", { ascending: false });
+        if (categoriesRes.error) throw categoriesRes.error;
 
-        if (rawError) throw rawError;
-        return raw.map(item => ({ ...item, items_count: 0 })) as AdminWishlist[];
+        const categories = categoriesRes.data || [];
+        const profiles = profilesRes.data || [];
+        const allItems = itemsRes.data || [];
+
+        const profileMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+
+        return categories.map(cat => ({
+            ...cat,
+            user: profileMap[cat.user_id] || { id: cat.user_id, full_name: 'Unknown' },
+            items_count: allItems.filter(i => i.category_id === cat.id).length
+        })) as AdminWishlist[];
+    } catch (error) {
+        console.error("Error in getAdminWishlists:", error);
+        throw error;
     }
+};
 
-    return data.map(item => ({
-        ...item,
-        items_count: item.items_count?.[0]?.count || 0
-    })) as AdminWishlist[];
+export const deleteAdminWishlist = async (id: string) => {
+    try {
+        console.log(`Attempting to delete wishlist: ${id}`);
+
+        // 1. Try to uncategorize items
+        // We catch errors here so we can still try to delete the category if this fails
+        // (e.g. if we don't have UPDATE permissions but do have DELETE permissions)
+        const { error: updateError } = await supabase
+            .from("items")
+            .update({ category_id: null })
+            .eq("category_id", id);
+
+        if (updateError) {
+            console.warn("Warning: Failed to uncategorize items (might be lack of permissions). Proceeding with delete...", updateError);
+        }
+
+        // 2. Delete the category and check if it actually happened
+        const { error, count } = await supabase
+            .from("categories")
+            .delete({ count: 'exact' })
+            .eq("id", id);
+
+        if (error) throw error;
+
+        // If count is 0, it means nothing was deleted (likely RLS or ID not found)
+        if (count === 0) {
+            throw new Error("Deletion failed. No records were deleted (Permission denied or record missing).");
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error in deleteAdminWishlist:", error);
+        throw error;
+    }
 };
 
 // ==================== ITEMS ====================
 
 export const getAdminItems = async () => {
-    const { data, error } = await supabase
-        .from("items")
-        .select(`
-            *,
-            wishlist:categories!category_id (name),
-            owner:profiles!user_id (full_name),
-            claims_count:claims!item_id (count)
-        `)
-        .order("created_at", { ascending: false });
+    try {
+        const [itemsRes, categoriesRes, profilesRes, claimsRes] = await Promise.all([
+            supabase.from("items").select("*").order("created_at", { ascending: false }),
+            supabase.from("categories").select("id, name"),
+            supabase.from("profiles").select("id, full_name"),
+            supabase.from("claims").select("item_id")
+        ]);
 
-    if (error) {
-        console.error("Join error in getAdminItems, falling back:", error);
-        const { data: raw, error: rawError } = await supabase
-            .from("items")
-            .select("*")
-            .order("created_at", { ascending: false });
+        if (itemsRes.error) throw itemsRes.error;
 
-        if (rawError) throw rawError;
-        return raw.map(item => ({
+        const items = itemsRes.data || [];
+        const categories = categoriesRes.data || [];
+        const profiles = profilesRes.data || [];
+        const claims = claimsRes.data || [];
+
+        const categoryMap = Object.fromEntries(categories.map(c => [c.id, c.name]));
+        const profileMap = Object.fromEntries(profiles.map(p => [p.id, p.full_name]));
+
+        return items.map(item => ({
             ...item,
-            wishlist_name: 'Unknown',
-            owner_name: 'Unknown',
-            claims_count: 0
+            wishlist_name: categoryMap[item.category_id || ""] || 'Uncategorized',
+            owner_name: profileMap[item.user_id] || 'Unknown',
+            claims_count: claims.filter(c => c.item_id === item.id).length
         })) as AdminItem[];
+    } catch (error) {
+        console.error("Error in getAdminItems:", error);
+        throw error;
     }
-
-    return data.map(item => ({
-        ...item,
-        wishlist_name: item.wishlist?.name || 'Unknown',
-        owner_name: item.owner?.full_name || 'Unknown',
-        claims_count: item.claims_count?.[0]?.count || 0
-    })) as AdminItem[];
 };
 
 export const deleteAdminItem = async (id: string) => {
-    const { error } = await supabase
-        .from("items")
-        .delete()
-        .eq("id", id);
+    try {
+        // Delete claims associated with this item first
+        await supabase
+            .from("claims")
+            .delete()
+            .eq("item_id", id);
 
-    if (error) throw error;
-    return true;
+        // Now delete the item
+        const { error } = await supabase
+            .from("items")
+            .delete()
+            .eq("id", id);
+
+        if (error) throw error;
+        return true;
+    } catch (error) {
+        console.error("Error in deleteAdminItem:", error);
+        throw error;
+    }
 };
 
 // ==================== GLOBAL SEARCH ====================
@@ -212,49 +263,36 @@ export const searchAdmin = async (query: string) => {
 // ==================== CLAIMS ====================
 
 export const getAdminClaims = async () => {
-    const { data, error } = await supabase
-        .from("claims")
-        .select(`
-            *,
-            item:items!item_id (name, image_url, user_id),
-            claimer:profiles!claims_user_id_fkey (full_name)
-        `)
-        .order("created_at", { ascending: false });
+    try {
+        const [claimsRes, itemsRes, profilesRes] = await Promise.all([
+            supabase.from("claims").select("*").order("created_at", { ascending: false }),
+            supabase.from("items").select("id, name, image_url, user_id"),
+            supabase.from("profiles").select("id, full_name")
+        ]);
 
-    if (error) {
-        console.error("Join error in getAdminClaims, falling back:", error);
-        const { data: raw, error: rawError } = await supabase
-            .from("claims")
-            .select("*")
-            .order("created_at", { ascending: false });
+        if (claimsRes.error) throw claimsRes.error;
 
-        if (rawError) throw rawError;
-        return raw.map(c => ({
-            ...c,
-            item_name: 'Unknown',
-            claimer_name: 'Unknown',
-            owner_name: 'Unknown'
-        })) as AdminClaim[];
+        const claims = claimsRes.data || [];
+        const items = itemsRes.data || [];
+        const profiles = profilesRes.data || [];
+
+        const itemMap = Object.fromEntries(items.map(i => [i.id, i]));
+        const profileMap = Object.fromEntries(profiles.map(p => [p.id, p.full_name]));
+
+        return claims.map(claim => {
+            const item = itemMap[claim.item_id];
+            return {
+                ...claim,
+                item_name: item?.name || 'Unknown',
+                item_image: item?.image_url,
+                claimer_name: profileMap[claim.user_id] || 'Unknown',
+                owner_name: profileMap[item?.user_id || ""] || 'Unknown'
+            };
+        }) as AdminClaim[];
+    } catch (error) {
+        console.error("Error in getAdminClaims:", error);
+        throw error;
     }
-
-    // We need to fetch owner names separately or via another join if possible
-    const claims = await Promise.all(data.map(async (claim: any) => {
-        const { data: owner } = await supabase
-            .from("profiles")
-            .select("full_name")
-            .eq("id", claim.item?.user_id)
-            .single();
-
-        return {
-            ...claim,
-            item_name: claim.item?.name || 'Unknown',
-            item_image: claim.item?.image_url,
-            claimer_name: claim.claimer?.full_name || 'Unknown',
-            owner_name: owner?.full_name || 'Unknown'
-        };
-    }));
-
-    return claims as AdminClaim[];
 };
 
 export const deleteAdminClaim = async (id: string) => {

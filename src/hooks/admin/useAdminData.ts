@@ -5,6 +5,7 @@ import {
     deleteFeedback,
     getAdminUsers,
     getAdminWishlists,
+    deleteAdminWishlist,
     getAdminItems,
     deleteAdminItem,
     toggleAdminStatus,
@@ -139,10 +140,41 @@ export function useAdminUsers() {
 // ==================== WISHLISTS ====================
 
 export function useAdminWishlists() {
-    return useQuery({
+    const queryClient = useQueryClient();
+    const { user } = useAuth();
+
+    const query = useQuery({
         queryKey: queryKeys.adminWishlists(),
         queryFn: getAdminWishlists,
     });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => deleteAdminWishlist(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: queryKeys.adminWishlists() });
+            queryClient.invalidateQueries({ queryKey: queryKeys.adminActivityLog() });
+            toast.success("Wishlist deleted");
+
+            if (user) {
+                logAdminAction({
+                    admin_id: user.id,
+                    action_type: 'DELETE',
+                    entity_type: 'WISHLIST',
+                    entity_id: id
+                });
+            }
+        },
+        onError: (error) => {
+            console.error("Error deleting wishlist:", error);
+            toast.error("Failed to delete wishlist");
+        }
+    });
+
+    return {
+        ...query,
+        deleteWishlist: deleteMutation.mutateAsync,
+        isDeleting: deleteMutation.isPending,
+    };
 }
 
 // ==================== ITEMS ====================
