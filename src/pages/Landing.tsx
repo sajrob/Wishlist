@@ -24,6 +24,10 @@ const Landing = () => {
             <Link to="/signup" className="btn btn-primary">
               Get Started
             </Link>
+
+            <Link to="/faq" className="btn btn-primary">
+              FAQ
+            </Link>
           </div>
         </div>
 
