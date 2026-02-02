@@ -32,6 +32,13 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Area, AreaChart } from "recharts";
+import {
+    ChartConfig,
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
 
 
 function DashboardSkeleton() {
@@ -54,7 +61,8 @@ function DashboardSkeleton() {
                         </CardHeader>
                         <CardContent>
                             <Skeleton className="h-8 w-16 mb-1" />
-                            <Skeleton className="h-3 w-32" />
+                            <Skeleton className="h-3 w-32 mb-4" />
+                            <Skeleton className="h-16 w-full" />
                         </CardContent>
                     </Card>
                 ))}
@@ -98,6 +106,34 @@ function DashboardSkeleton() {
     );
 }
 
+// Add data generation helper
+const getTrendData = (data: any[] = [], days = 30) => {
+    if (!Array.isArray(data)) return [];
+
+    // Sort by created_at ascending
+    const sorted = [...data].sort((a, b) =>
+        new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    );
+
+    const chartData = [];
+    const today = new Date();
+
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        d.setHours(23, 59, 59, 999);
+
+        // Cumulative count up to this day
+        const value = sorted.filter(item => new Date(item.created_at || 0) <= d).length;
+
+        chartData.push({
+            date: format(d, "MMM dd"),
+            value
+        });
+    }
+    return chartData;
+};
+
 export default function AdminDashboard() {
     const { data: feedback, isLoading: loadingFeedback, error: errorFeedback } = useAdminFeedback();
     const { data: users, isLoading: loadingUsers, error: errorUsers } = useAdminUsers();
@@ -135,38 +171,70 @@ export default function AdminDashboard() {
     const recentUsers = Array.isArray(users) ? users.slice(0, 5) : [];
     const recentActivity = Array.isArray(activityLogs) ? activityLogs.slice(0, 5) : [];
 
+    // Chart Configuration
+    const chartConfig = {
+        users: {
+            label: "Users",
+            color: "hsl(var(--chart-1))",
+        },
+        wishlists: {
+            label: "Wishlists",
+            color: "hsl(var(--chart-2))",
+        },
+        items: {
+            label: "Items",
+            color: "hsl(var(--chart-3))",
+        },
+        claims: {
+            label: "Claims",
+            color: "hsl(var(--chart-4))",
+        },
+    } satisfies ChartConfig;
+
     const metrics = [
         {
+            id: "users",
             title: "Total Users",
             value: users?.length || 0,
             icon: Users,
             color: "text-blue-500",
             bg: "bg-blue-500/10",
-            description: "Registered accounts"
+            chartColor: "hsl(var(--chart-1))",
+            description: "Registered accounts",
+            data: getTrendData(users)
         },
         {
+            id: "wishlists",
             title: "Wishlists",
             value: wishlists?.length || 0,
             icon: List,
             color: "text-indigo-500",
             bg: "bg-indigo-500/10",
-            description: "Collections created"
+            chartColor: "hsl(var(--chart-2))",
+            description: "Collections created",
+            data: getTrendData(wishlists)
         },
         {
+            id: "items",
             title: "Total Items",
             value: items?.length || 0,
             icon: Package,
             color: "text-pink-500",
             bg: "bg-pink-500/10",
-            description: "Wishes cataloged"
+            chartColor: "hsl(var(--chart-3))",
+            description: "Wishes cataloged",
+            data: getTrendData(items)
         },
         {
+            id: "claims",
             title: "Gift Claims",
             value: claims?.length || 0,
             icon: Gift,
             color: "text-emerald-500",
             bg: "bg-emerald-500/10",
-            description: "Active claims"
+            chartColor: "hsl(var(--chart-4))",
+            description: "Active claims",
+            data: getTrendData(claims)
         }
     ];
 
@@ -190,7 +258,7 @@ export default function AdminDashboard() {
             {/* Metrics Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {metrics.map((metric) => (
-                    <Card key={metric.title} className="border-2 shadow-sm transition-all hover:border-primary/20">
+                    <Card key={metric.title} className="border-2 shadow-sm transition-all hover:border-primary/20 overflow-hidden">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                 {metric.title}
@@ -200,10 +268,36 @@ export default function AdminDashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-3xl font-bold">{metric.value}</div>
-                            <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1 italic">
+                            <div className="text-3xl font-bold mb-1">{metric.value}</div>
+                            <p className="text-[10px] text-muted-foreground mb-4 flex items-center gap-1 italic">
                                 {metric.description}
                             </p>
+
+                            <div className="h-[60px] w-full">
+                                <ChartContainer config={chartConfig} className="h-full w-full">
+                                    <AreaChart data={metric.data}>
+                                        <defs>
+                                            <linearGradient id={`fill-${metric.id}`} x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor={metric.chartColor} stopOpacity={0.3} />
+                                                <stop offset="95%" stopColor={metric.chartColor} stopOpacity={0.0} />
+                                            </linearGradient>
+                                        </defs>
+                                        <Area
+                                            dataKey="value"
+                                            type="natural"
+                                            fill={`url(#fill-${metric.id})`}
+                                            fillOpacity={0.4}
+                                            stroke={metric.chartColor}
+                                            strokeWidth={2}
+                                            dot={false}
+                                        />
+                                        <ChartTooltip
+                                            cursor={false}
+                                            content={<ChartTooltipContent hideLabel />}
+                                        />
+                                    </AreaChart>
+                                </ChartContainer>
+                            </div>
                         </CardContent>
                     </Card>
                 ))}

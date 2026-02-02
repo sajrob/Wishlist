@@ -6,7 +6,6 @@ import {
     Users,
     List,
     Package,
-    Tags,
     Gift,
     Menu,
     History,
@@ -45,11 +44,6 @@ const sidebarItems = [
         title: "Claims",
         href: "/admin/claims",
         icon: Gift,
-    },
-    {
-        title: "Categories",
-        href: "/admin/categories",
-        icon: Tags,
     },
     {
         title: "Activity Log",

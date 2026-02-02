@@ -30,7 +30,6 @@ import AdminUsers from './pages/admin/Users';
 import AdminWishlists from './pages/admin/Wishlists';
 import AdminItems from './pages/admin/Items';
 import AdminClaims from './pages/admin/Claims';
-import AdminCategories from './pages/admin/Categories';
 import AdminActivityLog from './pages/admin/ActivityLog';
 import { ProtectedAdminRoute } from './components/admin/ProtectedAdminRoute';
 // ============================================================
@@ -139,7 +138,6 @@ function App() {
                       <Route path="wishlists" element={<AdminWishlists />} />
                       <Route path="items" element={<AdminItems />} />
                       <Route path="claims" element={<AdminClaims />} />
-                      <Route path="categories" element={<AdminCategories />} />
                       <Route path="activity" element={<AdminActivityLog />} />
                     </Route>
                   </Route>
