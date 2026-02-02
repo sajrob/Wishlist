@@ -34,13 +34,14 @@ import AdminCategories from './pages/admin/Categories';
 import AdminActivityLog from './pages/admin/ActivityLog';
 import { ProtectedAdminRoute } from './components/admin/ProtectedAdminRoute';
 // ============================================================
-// DARK MODE - Currently Disabled
+// DARK MODE TOGGLE - Currently Disabled
 // ============================================================
-// To re-enable dark mode, uncomment the following import:
+// To re-enable dark mode:
+// 1. Change defaultTheme to "system" in the ThemeProvider below (line ~64)
+// 2. Uncomment the ModeToggle in Navbar.tsx (line ~205)
+// 3. Uncomment the ModeToggle in AdminLayout.tsx (line ~26)
+// ============================================================
 import { ThemeProvider } from './components/theme-provider';
-// Then uncomment the ThemeProvider wrapper in the return statement below (lines ~42 and ~115)
-// Also uncomment the ModeToggle in Navbar.tsx (line 188)
-// ============================================================
 import './App.css';
 
 
@@ -57,9 +58,11 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 function App() {
   return (
     // ============================================================
-    // DARK MODE - To re-enable, uncomment the ThemeProvider tags below
+    // DARK MODE TOGGLE - Currently Disabled
+    // To re-enable: Change defaultTheme to "system" below
+    // and uncomment ModeToggle in Navbar.tsx and AdminLayout.tsx
     // ============================================================
-    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
         <AuthProvider>
           <WishlistProvider>

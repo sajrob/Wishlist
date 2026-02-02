@@ -22,7 +22,8 @@ export default function AdminLayout() {
                     <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
                         <nav className="flex items-center space-x-2">
                             <AdminSearch />
-                            <ModeToggle />
+                            {/* DARK MODE TOGGLE - Currently Disabled */}
+                            {/* <ModeToggle /> */}
                             <UserNav />
                             <Button variant="ghost" asChild>
                                 <a href="/dashboard">Exit Admin</a>
