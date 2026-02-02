@@ -30,12 +30,30 @@ export interface WishlistItem {
     claims?: Claim[];
 }
 
+export interface ItemInsert {
+    user_id: string;
+    category_id: string | null;
+    name: string;
+    price: number;
+    description: string;
+    image_url: string;
+    buy_link: string;
+    is_must_have: boolean;
+    currency: string;
+}
+
 export interface Category {
     id: string;
     user_id: string;
     name: string;
     is_public: boolean;
     created_at: string;
+}
+
+export interface CategoryInsert {
+    user_id: string;
+    name: string;
+    is_public: boolean;
 }
 
 export interface Profile {
@@ -47,6 +65,7 @@ export interface Profile {
     email: string;
     created_at: string;
     avatar_url?: string;
+    is_admin?: boolean;
     user_metadata?: {
         first_name?: string;
         last_name?: string;

@@ -1,0 +1,330 @@
+{
+    "project_name": "Wishlist Admin Dashboard",
+    "tech_stack": {
+        "frontend": "React + TypeScript",
+        "ui_framework": "shadcn/ui",
+        "styling": "Tailwind CSS",
+        "state_management": "React Query",
+        "routing": "react-router-dom",
+        "backend": "Supabase",
+        "icons": "lucide-react"
+    },
+    "entities": [
+        {
+            "name": "feedback",
+            "priority": "HIGH",
+            "description": "Beta feedback and bug reports",
+            "table_name": "feedback",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uuid",
+                    "is_primary": true
+                },
+                {
+                    "name": "user_id",
+                    "type": "uuid",
+                    "is_foreign_key": true
+                },
+                {
+                    "name": "username",
+                    "type": "string"
+                },
+                {
+                    "name": "type",
+                    "type": "enum",
+                    "options": [
+                        "Bug",
+                        "Feature Request",
+                        "UX Issue"
+                    ]
+                },
+                {
+                    "name": "message",
+                    "type": "string"
+                },
+                {
+                    "name": "page_url",
+                    "type": "string"
+                },
+                {
+                    "name": "status",
+                    "type": "enum",
+                    "options": [
+                        "New",
+                        "In Progress",
+                        "Resolved",
+                        "Archived"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "type": "timestamp"
+                }
+            ],
+            "operations": [
+                "READ",
+                "UPDATE_STATUS",
+                "DELETE",
+                "EXPORT"
+            ],
+            "filters": [
+                "status",
+                "type"
+            ],
+            "search_fields": [
+                "message",
+                "username"
+            ]
+        },
+        {
+            "name": "users",
+            "priority": "HIGH",
+            "description": "User profiles and account management",
+            "table_name": "profiles",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uuid",
+                    "is_primary": true
+                },
+                {
+                    "name": "email",
+                    "type": "string"
+                },
+                {
+                    "name": "full_name",
+                    "type": "string"
+                },
+                {
+                    "name": "avatar_url",
+                    "type": "string"
+                },
+                {
+                    "name": "is_admin",
+                    "type": "boolean",
+                    "default": false
+                },
+                {
+                    "name": "created_at",
+                    "type": "timestamp"
+                }
+            ],
+            "operations": [
+                "READ",
+                "UPDATE (is_admin)",
+                "DELETE",
+                "VIEW_AS_USER"
+            ],
+            "filters": [
+                "is_admin"
+            ],
+            "search_fields": [
+                "email",
+                "full_name",
+                "username"
+            ]
+        },
+        {
+            "name": "wishlists",
+            "priority": "MEDIUM",
+            "description": "User wishlists content",
+            "table_name": "wishlists",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uuid",
+                    "is_primary": true
+                },
+                {
+                    "name": "user_id",
+                    "type": "uuid",
+                    "is_foreign_key": true
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "privacy",
+                    "type": "enum",
+                    "options": [
+                        "public",
+                        "private",
+                        "friends"
+                    ]
+                },
+                {
+                    "name": "created_at",
+                    "type": "timestamp"
+                }
+            ],
+            "operations": [
+                "READ",
+                "DELETE"
+            ],
+            "filters": [
+                "privacy"
+            ],
+            "search_fields": [
+                "title"
+            ]
+        },
+        {
+            "name": "items",
+            "priority": "MEDIUM",
+            "description": "Individual wishlist items",
+            "table_name": "items",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uuid",
+                    "is_primary": true
+                },
+                {
+                    "name": "wishlist_id",
+                    "type": "uuid",
+                    "is_foreign_key": true
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "url",
+                    "type": "string"
+                },
+                {
+                    "name": "price",
+                    "type": "number"
+                },
+                {
+                    "name": "created_at",
+                    "type": "timestamp"
+                }
+            ],
+            "operations": [
+                "READ",
+                "DELETE"
+            ],
+            "search_fields": [
+                "name",
+                "url"
+            ]
+        },
+        {
+            "name": "claims",
+            "priority": "MEDIUM",
+            "description": "Item claims by other users",
+            "table_name": "claims",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uuid",
+                    "is_primary": true
+                },
+                {
+                    "name": "item_id",
+                    "type": "uuid",
+                    "is_foreign_key": true
+                },
+                {
+                    "name": "user_id",
+                    "type": "uuid",
+                    "is_foreign_key": true
+                },
+                {
+                    "name": "created_at",
+                    "type": "timestamp"
+                }
+            ],
+            "operations": [
+                "READ",
+                "DELETE"
+            ],
+            "search_fields": []
+        },
+        {
+            "name": "categories",
+            "priority": "LOW",
+            "description": "Wishlist usage categories",
+            "table_name": "categories",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uuid",
+                    "is_primary": true
+                },
+                {
+                    "name": "name",
+                    "type": "string"
+                },
+                {
+                    "name": "icon",
+                    "type": "string"
+                },
+                {
+                    "name": "created_at",
+                    "type": "timestamp"
+                }
+            ],
+            "operations": [
+                "READ",
+                "CREATE",
+                "UPDATE",
+                "DELETE"
+            ],
+            "search_fields": [
+                "name"
+            ]
+        }
+    ],
+    "pages": [
+        {
+            "route": "/admin",
+            "component": "Dashboard",
+            "title": "Dashboard",
+            "icon": "LayoutDashboard"
+        },
+        {
+            "route": "/admin/feedback",
+            "component": "Feedback",
+            "title": "Feedback",
+            "icon": "MessageSquare"
+        },
+        {
+            "route": "/admin/users",
+            "component": "Users",
+            "title": "Users",
+            "icon": "Users"
+        },
+        {
+            "route": "/admin/wishlists",
+            "component": "Wishlists",
+            "title": "Wishlists",
+            "icon": "List"
+        },
+        {
+            "route": "/admin/items",
+            "component": "Items",
+            "title": "Items",
+            "icon": "Package"
+        },
+        {
+            "route": "/admin/categories",
+            "component": "Categories",
+            "title": "Categories",
+            "icon": "Tags"
+        }
+    ],
+    "access_control": {
+        "admin_flag_column": "is_admin",
+        "user_table": "profiles",
+        "protection_strategy": "ProtectedAdminRoute wrapper checking user.is_admin"
+    },
+    "design_rules": {
+        "glassmorphism_allowed": false,
+        "theme": "Dark/Light mode compatible",
+        "primary_color": "#4338ca"
+    }
+}

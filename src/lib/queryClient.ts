@@ -57,4 +57,13 @@ export const queryKeys = {
 
     // Wishlist settings
     settings: (userId: string) => ['settings', userId] as const,
+
+    // Admin Keys
+    adminFeedback: () => ['admin', 'feedback'] as const,
+    adminUsers: () => ['admin', 'users'] as const,
+    adminWishlists: () => ['admin', 'wishlists'] as const,
+    adminItems: () => ['admin', 'items'] as const,
+    adminClaims: () => ['admin', 'claims'] as const,
+    adminCategories: () => ['admin', 'categories'] as const,
+    adminActivityLog: () => ['admin', 'activity-log'] as const,
 };

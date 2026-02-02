@@ -23,11 +23,21 @@ import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminFeedback from './pages/admin/Feedback';
+import AdminUsers from './pages/admin/Users';
+import AdminWishlists from './pages/admin/Wishlists';
+import AdminItems from './pages/admin/Items';
+import AdminClaims from './pages/admin/Claims';
+import AdminCategories from './pages/admin/Categories';
+import AdminActivityLog from './pages/admin/ActivityLog';
+import { ProtectedAdminRoute } from './components/admin/ProtectedAdminRoute';
 // ============================================================
 // DARK MODE - Currently Disabled
 // ============================================================
 // To re-enable dark mode, uncomment the following import:
-// import { ThemeProvider } from './components/theme-provider';
+import { ThemeProvider } from './components/theme-provider';
 // Then uncomment the ThemeProvider wrapper in the return statement below (lines ~42 and ~115)
 // Also uncomment the ModeToggle in Navbar.tsx (line 188)
 // ============================================================
@@ -49,80 +59,98 @@ function App() {
     // ============================================================
     // DARK MODE - To re-enable, uncomment the ThemeProvider tags below
     // ============================================================
-    // <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-    <Router>
-      <AuthProvider>
-        <WishlistProvider>
-          <Navbar />
-          <Routes>
-            {/* Public Routes - Accessible to everyone */}
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/update-password" element={<UpdatePassword />} />
-            <Route path="/faq" element={<Faq />} />
-            <Route path="/share/:categoryId" element={<SharePage />} />
-            {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <Router>
+        <AuthProvider>
+          <WishlistProvider>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-1 flex flex-col">
+                <Routes>
+                  {/* Public Routes - Accessible to everyone */}
+                  <Route path="/" element={<Landing />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/update-password" element={<UpdatePassword />} />
+                  <Route path="/faq" element={<Faq />} />
+                  <Route path="/share/:categoryId" element={<SharePage />} />
+                  {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
 
-            {/* Private Routes - Require Authentication */}
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Home />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/find-users"
-              element={
-                <PrivateRoute>
-                  <FindUsers />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/friends"
-              element={
-                <PrivateRoute>
-                  <FriendsWishlists />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/wishlist/:userId"
-              element={
-                <PrivateRoute>
-                  <SharedWishlist />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <PrivateRoute>
-                  <Notifications />
-                </PrivateRoute>
-              }
-            />
+                  {/* Private Routes - Require Authentication */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <PrivateRoute>
+                        <Home />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <PrivateRoute>
+                        <Profile />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/find-users"
+                    element={
+                      <PrivateRoute>
+                        <FindUsers />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/friends"
+                    element={
+                      <PrivateRoute>
+                        <FriendsWishlists />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/wishlist/:userId"
+                    element={
+                      <PrivateRoute>
+                        <SharedWishlist />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <PrivateRoute>
+                        <Notifications />
+                      </PrivateRoute>
+                    }
+                  />
 
-            {/* 404 Page */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </WishlistProvider>
-      </AuthProvider>
-      <Toaster position="top-center" />
-    </Router>
-    // </ThemeProvider>
+                  {/* Admin Routes */}
+                  <Route element={<ProtectedAdminRoute />}>
+                    <Route path="/admin" element={<AdminLayout />}>
+                      <Route index element={<AdminDashboard />} />
+                      <Route path="feedback" element={<AdminFeedback />} />
+                      <Route path="users" element={<AdminUsers />} />
+                      <Route path="wishlists" element={<AdminWishlists />} />
+                      <Route path="items" element={<AdminItems />} />
+                      <Route path="claims" element={<AdminClaims />} />
+                      <Route path="categories" element={<AdminCategories />} />
+                      <Route path="activity" element={<AdminActivityLog />} />
+                    </Route>
+                  </Route>
+
+                  {/* 404 Page */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+            </div>
+          </WishlistProvider>
+        </AuthProvider>
+        <Toaster position="top-center" />
+      </Router>
+    </ThemeProvider>
   );
 }
 

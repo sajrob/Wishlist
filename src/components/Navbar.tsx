@@ -122,6 +122,19 @@ const Navbar = () => {
               >
                 My Wishlist
               </NavLink>
+
+              {/* Admin Link - Only visible to admins */}
+              {(user && ((user.user_metadata as any)?.is_admin === true || (user as any)?.is_admin === true)) && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    isActive ? "navbar-link active" : "navbar-link"
+                  }
+                  onClick={closeMenu}
+                >
+                  Admin Panel
+                </NavLink>
+              )}
             </>
           ) : (
             <>
