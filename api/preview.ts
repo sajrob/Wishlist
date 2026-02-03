@@ -16,8 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     let title = 'My Wishlist';
     let description = 'Check out this wishlist on Wishlist App!';
-    let image = 'https://wishlist-app.vercel.app/og-default.png';
-    let url = `https://wishlist-app.vercel.app/share/${id}`;
+    let image = 'http://wishlist-eight-xi.vercel.app/og-default.png';
+    let url = `http://wishlist-eight-xi.vercel.app/share/${id}`;
 
     if (supabase) {
         try {
