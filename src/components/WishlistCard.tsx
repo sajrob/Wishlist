@@ -111,7 +111,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
 
     return (
         <>
-            <div className="wishlist-card" onClick={() => setIsDetailOpen(true)}>
+            <div className="wishlist-card">
                 {readOnly && (
                     <TooltipProvider>
                         <Tooltip>
@@ -123,7 +123,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                         handleToggleClaim();
                                     }}
                                 >
-                                    <Badge variant={isClaimedByUser ? "default" : "outline"} className="cursor-pointer">
+                                    <Badge variant={isClaimedByUser ? "default" : "outline"}>
                                         {isClaimedByUser ? '🎁 Claimed' : '🤝 Claim'}
                                     </Badge>
                                 </div>
@@ -142,17 +142,24 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                             Must Have
                         </div>
                     )}
+                    <span className="text-primary bg-background font-bold rounded-tl-xl px-2 py-0.5 price-badge">{formattedPrice}</span>
                 </div>
+
                 <div className="card-content">
                     <div className="item-header">
                         <h2 className="item-name" title={name}>{name}</h2>
-                        <span className="item-price">{formattedPrice}</span>
                     </div>
 
-                    <p className="item-description">{description || 'No description provided.'}</p>
+                    <div
+                        className="item-description cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => setIsDetailOpen(true)}
+                        title="Click to view full details"
+                    >
+                        {description || 'No description provided.'}
+                    </div>
 
                     {readOnly && claims.length > 0 && (
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
                             <div className="flex -space-x-2">
                                 {claims.slice(0, 5).map((claim) => (
                                     <TooltipProvider key={claim.id}>
@@ -186,7 +193,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                         </div>
                     )}
 
-                    <div className="card-actions" onClick={(e) => e.stopPropagation()}>
+                    <div className="card-actions">
                         {readOnly ? (
                             <div className="shared-actions">
                                 {buy_link && (

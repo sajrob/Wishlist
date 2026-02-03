@@ -8,7 +8,6 @@
   flex-direction: column;
   position: relative;
   height: 100%;
-  cursor: pointer;
 }
 
 .wishlist-card:hover {
@@ -161,6 +160,15 @@
   left: 12px;
   z-index: 10;
   pointer-events: none;
+}
+
+.price-badge {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 1rem;
 }
 
 .buy-button {
