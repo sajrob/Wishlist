@@ -111,7 +111,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
 
     return (
         <>
-            <div className="wishlist-card">
+            <div className="wishlist-card border border-slate-300">
                 {readOnly && (
                     <TooltipProvider>
                         <Tooltip>
@@ -136,13 +136,13 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                 )}
 
                 <div className="card-image-container">
-                    <img src={image_url || 'https://placehold.co/600x400/grey/black?text=No+Image'} alt={name} className="card-image" />
+                    <img src={image_url || 'https://placehold.co/600x400/grey/black?text=No+Image'} alt={name} className="card-image border-b border-slate-400 rounded-t-lg" />
                     {is_must_have && (
                         <div className="must-have-badge">
                             Must Have
                         </div>
                     )}
-                    <span className="text-primary bg-background font-bold rounded-tl-xl px-2 py-0.5 price-badge">{formattedPrice}</span>
+                    <span className="text-primary bg-background font-bold rounded-tl-xl px-2 py-0.5 border-slate-400 border-l border-t price-badge">{formattedPrice}</span>
                 </div>
 
                 <div className="card-content">
@@ -151,7 +151,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                     </div>
 
                     <div
-                        className="item-description cursor-pointer hover:text-primary transition-colors"
+                        className="item-description cursor-pointer truncate hover:text-primary transition-colors"
                         onClick={() => setIsDetailOpen(true)}
                         title="Click to view full details"
                     >

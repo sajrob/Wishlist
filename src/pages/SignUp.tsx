@@ -64,7 +64,7 @@ const SignUp = () => {
 
       if (data?.user && !data.session) {
         setMessage(
-          "Account created! Please check your email to confirm your registration."
+          "Account created! You should get a confirmation email any minute - open it up and confirm your registration."
         );
       } else {
         navigate("/dashboard");
