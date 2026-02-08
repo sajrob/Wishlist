@@ -4,6 +4,7 @@
  */
 import React from 'react';
 import { Separator } from "@/components/ui/separator";
+import Footer from "@/components/Footer";
 import {
     ChevronDown,
     HelpCircle,
@@ -185,6 +186,7 @@ function Faq() {
                     </div>
                 </div>
             </main>
+            <Footer />
         </div>
     );
 }
