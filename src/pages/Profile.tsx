@@ -29,6 +29,8 @@ import {
     Link
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { NotificationSettings } from '@/components/NotificationSettings';
+
 
 type ProfileForm = {
     username: string;
@@ -235,7 +237,7 @@ const Profile = () => {
                                 </div>
                             </Card>
 
-                            <Card className="border-none shadow-md bg-card ring-1 ring-border">
+                            <Card className="border-none shadow-md bg-card ring-1 ring-border text-center">
                                 <CardHeader className="p-4 pb-0">
                                     <CardTitle className="text-sm font-bold flex items-center gap-2 uppercase tracking-tighter">
                                         <ShieldCheck className="w-4 h-4 text-primary" />
@@ -249,6 +251,9 @@ const Profile = () => {
                                     </Button>
                                 </CardContent>
                             </Card>
+
+                            <NotificationSettings />
+
                         </div>
                     </div>
 

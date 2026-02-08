@@ -23,6 +23,8 @@ import NotFound from './pages/NotFound';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
+import { OfflineBanner } from './components/OfflineBanner';
+import { SyncStatus } from './components/SyncStatus';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminFeedback from './pages/admin/Feedback';
@@ -66,6 +68,8 @@ function App() {
         <AuthProvider>
           <WishlistProvider>
             <div className="flex flex-col min-h-screen">
+              <OfflineBanner />
+              <SyncStatus />
               <Navbar />
               <main className="flex-1 flex flex-col">
                 <Routes>

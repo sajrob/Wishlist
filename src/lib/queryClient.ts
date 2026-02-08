@@ -1,8 +1,15 @@
-/**
- * React Query configuration and client setup
- * Provides centralized caching and data fetching configuration
- */
 import { QueryClient } from '@tanstack/react-query';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { get, set, del } from 'idb-keyval';
+
+// Create a custom persister using idb-keyval for IndexedDB storage
+export const persister = createAsyncStoragePersister({
+    storage: {
+        getItem: (key) => get(key),
+        setItem: (key, value) => set(key, value),
+        removeItem: (key) => del(key),
+    },
+});
 
 // Create the QueryClient with optimized defaults
 export const queryClient = new QueryClient({

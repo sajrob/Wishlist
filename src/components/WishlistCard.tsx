@@ -12,7 +12,8 @@ import { ensureAbsoluteUrl } from '../utils/urlUtils';
 import { formatCurrency } from '../utils/numberUtils';
 import { getInitials } from '../utils/nameUtils';
 import { useAuth } from '../context/AuthContext';
-import { toggleClaim } from '../utils/supabaseHelpers';
+import { useItems } from '../hooks/useItems';
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
@@ -28,6 +29,7 @@ import './WishlistCard.css';
 const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: WishlistCardProps) => {
     const { id, name, price, description, image_url, is_must_have, buy_link, currency, claims: initialClaims } = item;
     const { user } = useAuth();
+    const { toggleClaim } = useItems(user?.id);
     const [claims, setClaims] = useState<Claim[]>(initialClaims || []);
     const [isClaiming, setIsClaiming] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -74,8 +76,12 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
         if (!user || isClaiming) return;
         setIsClaiming(true);
         try {
-            const { error } = await toggleClaim(id, user.id, isClaimedByUser);
-            if (error) throw error;
+            await toggleClaim({
+                itemId: id,
+                claimUserId: user.id,
+                isClaimed: isClaimedByUser
+            });
+
             // Local update will be handled by realtime or we can do it manually for speed
             if (isClaimedByUser) {
                 setClaims(prev => prev.filter(c => c.user_id !== user.id));

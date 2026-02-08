@@ -178,7 +178,7 @@ function Faq() {
                                         Found a bug or have an idea?
                                     </h3>
                                     <p className="text-slate-600 leading-relaxed max-w-2xl">
-                                        We're in Beta! If something isn't working or you have an idea to make the community better, please let us know. We appreciate your feedback as we build Me List!
+                                        We're in Beta! If something is not working or you have an idea to make the community better, please let us know. We appreciate your feedback as we build Me List!
                                     </p>
                                 </div>
                             </div>

@@ -7,7 +7,11 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
+            strategies: 'injectManifest',
+            srcDir: 'src',
+            filename: 'sw.ts',
             registerType: 'autoUpdate',
+            injectRegister: 'auto',
             includeAssets: ['favicon.ico', 'icons/icon-192x192.png', 'icons/icon-512x512.png', 'offline.html'],
             manifest: {
                 name: 'Me List',
@@ -41,9 +45,9 @@ export default defineConfig({
                     }
                 ]
             },
-            workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-                navigateFallback: '/offline.html'
+            devOptions: {
+                enabled: true,
+                type: 'module'
             }
         })
     ],
