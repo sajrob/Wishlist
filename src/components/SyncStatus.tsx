@@ -13,6 +13,11 @@ export function SyncStatus() {
     const [isSyncing, setIsSyncing] = useState(false);
     const pendingCount = pendingActions.length;
 
+    const [showSavedMessage, setShowSavedMessage] = useState(false);
+    const prevSyncing = React.useRef(false);
+
+    const [hasAutoSynced, setHasAutoSynced] = useState(false);
+
     useEffect(() => {
         const handleSyncMessage = (event: MessageEvent) => {
             if (event.data?.type === 'PROCESS_SYNC_QUEUE') {
@@ -42,9 +47,92 @@ export function SyncStatus() {
         };
     }, []);
 
-    // Only show when offline, syncing, or have pending actions
-    if (!isOffline && pendingCount === 0 && !isSyncing) {
+    // Auto-sync on mount or when coming online if there are pending actions
+    useEffect(() => {
+        if (!isOffline && pendingCount > 0 && !isSyncing && !hasAutoSynced) {
+            setIsSyncing(true);
+            setHasAutoSynced(true); // Mark as attempted
+
+            processSyncQueue((action, serverData) =>
+                showConflict({
+                    actionId: action.id!,
+                    localData: action.payload,
+                    serverData,
+                    resolved: false
+                })
+            ).then(() => {
+                refreshQueue();
+            }).finally(() => {
+                setIsSyncing(false);
+                // Allow re-sync attempt after a delay if still pending (e.g., if new items added)
+                setTimeout(() => setHasAutoSynced(false), 10000);
+            });
+        }
+    }, [isOffline, pendingCount, isSyncing, hasAutoSynced]);
+
+    // Show "Saved" message temporarily when sync completes
+    useEffect(() => {
+        if (prevSyncing.current && !isSyncing && pendingCount === 0) {
+            setShowSavedMessage(true);
+            const timer = setTimeout(() => setShowSavedMessage(false), 3000);
+            return () => clearTimeout(timer);
+        }
+        prevSyncing.current = isSyncing;
+    }, [isSyncing, pendingCount]);
+
+    // Manage visibility with delay
+    const [isVisible, setIsVisible] = useState(isOffline);
+
+    useEffect(() => {
+        if (isOffline) {
+            setIsVisible(true);
+        } else {
+            // Delay hiding by 5 seconds when coming back online
+            const timer = setTimeout(() => {
+                setIsVisible(false);
+            }, 10000);
+            return () => clearTimeout(timer);
+        }
+    }, [isOffline]);
+
+    // Only show when offline (with delay)
+    const shouldShow = isVisible;
+
+    if (!shouldShow) {
         return null;
+    }
+
+    let mainText = '';
+    let subText = '';
+    let icon = null;
+
+    if (isSyncing) {
+        mainText = 'Syncing...';
+        subText = 'Updating items...';
+        icon = <Loader2 className="size-5 animate-spin" />;
+    } else if (isOffline) {
+        mainText = pendingCount > 0 ? `${pendingCount} Pending` : 'Offline Mode';
+        subText = 'Sync will resume when online';
+        icon = (
+            <div className="relative">
+                <RefreshCcw className="size-5 animate-pulse" />
+                {pendingCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                )}
+            </div>
+        );
+    } else if (pendingCount > 0) {
+        mainText = `${pendingCount} Unsynced`;
+        subText = 'Click to sync now';
+        icon = <RefreshCcw className="size-5 text-amber-500" />;
+    } else {
+        // Fallback for success state
+        mainText = 'List Synced';
+        subText = 'All changes saved';
+        icon = <CheckCircle2 className="size-5 text-green-500" />;
     }
 
     return (
@@ -55,7 +143,9 @@ export function SyncStatus() {
                     ? "bg-primary text-primary-foreground border-primary scale-105"
                     : isOffline
                         ? "bg-amber-500/15 text-amber-600 border-amber-500/30"
-                        : "bg-background/80 text-foreground border-border hover:border-primary/50 cursor-pointer"
+                        : pendingCount > 0
+                            ? "bg-amber-100/80 text-amber-700 border-amber-200 hover:border-amber-300 cursor-pointer"
+                            : "bg-background/80 text-foreground border-border hover:border-primary/50 cursor-pointer"
             )}
                 onClick={async () => {
                     if (!isOffline && pendingCount > 0 && !isSyncing) {
@@ -75,33 +165,15 @@ export function SyncStatus() {
                 title={pendingCount > 0 ? "Click to sync changes" : ""}
             >
                 <div className="relative flex items-center justify-center">
-                    {isSyncing ? (
-                        <Loader2 className="size-5 animate-spin" />
-                    ) : isOffline ? (
-                        <div className="relative">
-                            <RefreshCcw className="size-5 animate-pulse" />
-                            {pendingCount > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                                </span>
-                            )}
-                        </div>
-                    ) : (
-                        <CheckCircle2 className="size-5 text-green-500" />
-                    )}
+                    {icon}
                 </div>
 
                 <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-bold tracking-tight leading-none">
-                        {isSyncing ? 'Syncing...' :
-                            isOffline ? (pendingCount > 0 ? `${pendingCount} Pending` : 'Offline Mode') :
-                                'List Synced'}
+                        {mainText}
                     </span>
                     <p className="text-[11px] font-medium opacity-60 leading-none">
-                        {isSyncing ? 'Updating items...' :
-                            isOffline ? 'Sync will resume when online' :
-                                'All changes saved'}
+                        {subText}
                     </p>
                 </div>
             </div>
