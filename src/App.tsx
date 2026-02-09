@@ -25,6 +25,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { Toaster } from "@/components/ui/sonner";
 import { OfflineBanner } from './components/OfflineBanner';
 import { SyncStatus } from './components/SyncStatus';
+import { NotificationBanner } from './components/NotificationBanner';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminFeedback from './pages/admin/Feedback';
@@ -71,6 +72,7 @@ function App() {
             <WishlistProvider>
               <div className="flex flex-col min-h-screen">
                 <OfflineBanner />
+                <NotificationBanner />
                 <SyncStatus />
                 <Navbar />
                 <main className="flex-1 flex flex-col">
