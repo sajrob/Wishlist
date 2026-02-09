@@ -80,23 +80,12 @@ export function SyncStatus() {
         prevSyncing.current = isSyncing;
     }, [isSyncing, pendingCount]);
 
-    // Manage visibility with delay
-    const [isVisible, setIsVisible] = useState(isOffline);
-
-    useEffect(() => {
-        if (isOffline) {
-            setIsVisible(true);
-        } else {
-            // Delay hiding by 5 seconds when coming back online
-            const timer = setTimeout(() => {
-                setIsVisible(false);
-            }, 10000);
-            return () => clearTimeout(timer);
-        }
-    }, [isOffline]);
-
-    // Only show when offline (with delay)
-    const shouldShow = isVisible;
+    // Only show when:
+    // 1. Offline (primary purpose)
+    // 2. Syncing (user needs to know)
+    // 3. Just finished syncing (show success message)
+    // 4. Pending items exist but auto-sync hasn't triggered yet (prevents flicker)
+    const shouldShow = isOffline || isSyncing || showSavedMessage || (pendingCount > 0 && !hasAutoSynced);
 
     if (!shouldShow) {
         return null;
