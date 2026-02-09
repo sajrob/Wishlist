@@ -19,11 +19,20 @@ export function usePushNotifications() {
             }
 
             try {
-                const registration = await navigator.serviceWorker.ready;
+                // Add timeout to prevent infinite loading if SW is not ready (e.g. hard refresh or dev mode)
+                const registration = await Promise.race([
+                    navigator.serviceWorker.ready,
+                    new Promise<ServiceWorkerRegistration>((_, reject) =>
+                        setTimeout(() => reject(new Error('Service Worker ready timeout')), 2000)
+                    )
+                ]);
+
                 const subscription = await registration.pushManager.getSubscription();
                 setIsSubscribed(!!subscription);
             } catch (err) {
                 console.error('Error checking push subscription:', err);
+                // If we time out or fail, we just assume not subscribed and let user try to enable
+                setIsSubscribed(false);
             } finally {
                 setLoading(false);
             }
