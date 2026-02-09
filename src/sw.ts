@@ -7,6 +7,7 @@ import { createHandlerBoundToURL } from 'workbox-precaching';
 
 declare let self: ServiceWorkerGlobalScope;
 
+console.log('Service Worker version: 2026.02.08.v3');
 cleanupOutdatedCaches();
 
 precacheAndRoute(self.__WB_MANIFEST);

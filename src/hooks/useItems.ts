@@ -17,13 +17,35 @@ export function useItems(userId: string | undefined) {
         {
             actionType: 'CREATE_ITEM',
             table: 'items',
-            onSuccess: (response: any) => {
-                if (response?.error) throw response.error;
+            onMutate: async (newItem: ItemInsert) => {
+                const queryKey = queryKeys.items(userId || '');
+                const previousItems = queryClient.getQueryData<WishlistItem[]>(queryKey);
+
+                if (previousItems) {
+                    const optimisticItem: WishlistItem = {
+                        ...newItem,
+                        id: 'temp-' + Date.now(),
+                        created_at: new Date().toISOString(),
+                        updated_at: new Date().toISOString(),
+                        claims: [],
+                    } as any;
+
+                    queryClient.setQueryData<WishlistItem[]>(queryKey, old =>
+                        [optimisticItem, ...(old || [])]
+                    );
+                }
+
+                return { previousItems };
+            },
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: queryKeys.items(userId || '') });
                 toast.success('Item added successfully');
             },
-            onError: (error) => {
-                console.error('Error creating item:', error);
+            onError: (error, variables, context: any) => {
+                if (context?.previousItems) {
+                    queryClient.setQueryData(queryKeys.items(userId || ''), context.previousItems);
+                }
+                console.error('[useItems] createItem Error:', error);
                 toast.error('Failed to add item');
             }
         }
@@ -35,11 +57,25 @@ export function useItems(userId: string | undefined) {
         {
             actionType: 'UPDATE_ITEM',
             table: 'items',
-            onSuccess: (response: any) => {
-                if (response?.error) throw response.error;
+            onMutate: async ({ itemId, updates }) => {
+                const queryKey = queryKeys.items(userId || '');
+                const previousItems = queryClient.getQueryData<WishlistItem[]>(queryKey);
+
+                if (previousItems) {
+                    queryClient.setQueryData<WishlistItem[]>(queryKey, old =>
+                        old?.map(item => item.id === itemId ? { ...item, ...updates } : item)
+                    );
+                }
+
+                return { previousItems };
+            },
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: queryKeys.items(userId || '') });
             },
-            onError: (error) => {
+            onError: (error, variables, context: any) => {
+                if (context?.previousItems) {
+                    queryClient.setQueryData(queryKeys.items(userId || ''), context.previousItems);
+                }
                 console.error('Error updating item:', error);
                 toast.error('Failed to update item');
             }
@@ -51,13 +87,27 @@ export function useItems(userId: string | undefined) {
         {
             actionType: 'DELETE_ITEM',
             table: 'items',
-            onSuccess: (response: any) => {
-                if (response?.error) throw response.error;
+            onMutate: async (itemId) => {
+                const queryKey = queryKeys.items(userId || '');
+                const previousItems = queryClient.getQueryData<WishlistItem[]>(queryKey);
+
+                if (previousItems) {
+                    queryClient.setQueryData<WishlistItem[]>(queryKey, old =>
+                        old?.filter(item => item.id !== itemId)
+                    );
+                }
+
+                return { previousItems };
+            },
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: queryKeys.items(userId || '') });
                 toast.success('Item deleted');
             },
-            onError: (error) => {
-                console.error('Error deleting item:', error);
+            onError: (error, variables, context: any) => {
+                if (context?.previousItems) {
+                    queryClient.setQueryData(queryKeys.items(userId || ''), context.previousItems);
+                }
+                console.error('[useItems] deleteItem Error:', error);
                 toast.error('Failed to delete item');
             }
         }
@@ -67,15 +117,42 @@ export function useItems(userId: string | undefined) {
         ({ itemId, claimUserId, isClaimed }: { itemId: string, claimUserId: string, isClaimed: boolean }) =>
             apiToggleClaim(itemId, claimUserId, isClaimed),
         {
-            actionType: 'CLAIM_ITEM',
+            actionType: ({ isClaimed }) => isClaimed ? 'UNCLAIM_ITEM' : 'CLAIM_ITEM',
             table: 'claims',
 
-            onSuccess: (response: any) => {
-                if (response?.error) throw response.error;
+            onMutate: async ({ itemId, claimUserId, isClaimed }) => {
+                const queryKey = queryKeys.items(userId || '');
+                const previousItems = queryClient.getQueryData<WishlistItem[]>(queryKey);
+
+                if (previousItems) {
+                    queryClient.setQueryData<WishlistItem[]>(queryKey, old =>
+                        old?.map(item => {
+                            if (item.id === itemId) {
+                                const newClaims = isClaimed
+                                    ? (item.claims || []).filter(c => c.user_id !== claimUserId)
+                                    : [...(item.claims || []), {
+                                        id: 'temp-' + Date.now(),
+                                        item_id: itemId,
+                                        user_id: claimUserId,
+                                        created_at: new Date().toISOString()
+                                    } as any];
+                                return { ...item, claims: newClaims };
+                            }
+                            return item;
+                        })
+                    );
+                }
+
+                return { previousItems };
+            },
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: queryKeys.items(userId || '') });
                 queryClient.invalidateQueries({ queryKey: queryKeys.itemsWithClaims(userId || '') });
             },
-            onError: (error) => {
+            onError: (error, variables, context: any) => {
+                if (context?.previousItems) {
+                    queryClient.setQueryData(queryKeys.items(userId || ''), context.previousItems);
+                }
                 console.error('Error toggling claim:', error);
                 toast.error('Failed to update claim');
             }

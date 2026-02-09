@@ -4,6 +4,8 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+console.log('App version: 2026.02.08.v3');
+
 import { Analytics } from '@vercel/analytics/react';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';

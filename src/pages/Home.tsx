@@ -16,6 +16,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import ShareModal from '../components/ShareModal';
 import { AppSidebar } from "../components/AppSidebar";
 import { WishlistCardSkeleton } from "../components/WishlistCardSkeleton";
+import { InstallPwaPrompt } from "../components/InstallPwaPrompt";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -90,7 +91,10 @@ function Home() {
     const handleAddItem = async (newItem: ItemFormData) => {
         if (!user) return;
 
-        await createItem({
+        // Close immediately for a snappy feel (optimistic)
+        setIsFormOpen(false);
+
+        createItem({
             user_id: user.id,
             category_id: activeCategory,
             name: newItem.name,
@@ -101,8 +105,6 @@ function Home() {
             is_must_have: newItem.is_must_have || false,
             currency: newItem.currency || 'USD',
         });
-
-        setIsFormOpen(false);
     };
 
     const handleEditItem = (item: WishlistItem) => {
@@ -113,7 +115,10 @@ function Home() {
     const handleUpdateItem = async (formData: ItemFormData) => {
         if (!editingItem) return;
 
-        await updateItem({
+        // Close immediately for a snappy feel (optimistic)
+        handleCloseForm();
+
+        updateItem({
             itemId: editingItem.id,
             updates: {
                 name: formData.name,
@@ -125,9 +130,6 @@ function Home() {
                 currency: formData.currency || 'USD',
             }
         });
-
-        setIsFormOpen(false);
-        setEditingItem(null);
     };
 
     const handleToggleMustHave = async (itemId: string, isMustHave: boolean) => {
@@ -504,6 +506,7 @@ function Home() {
                     />
                 )}
                 <WelcomeModal />
+                <InstallPwaPrompt />
             </SidebarProvider>
         </div>
     );

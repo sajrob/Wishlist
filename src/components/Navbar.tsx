@@ -120,7 +120,7 @@ const Navbar = () => {
                 }
                 onClick={closeMenu}
               >
-                My Wishlist
+                My Wishlists
               </NavLink>
 
               {/* Admin Link - Only visible to admins */}

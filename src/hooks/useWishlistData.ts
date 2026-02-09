@@ -14,20 +14,26 @@ export function useWishlistData(userId: string | null, options: Options = {}) {
     const { includeClaims = false } = options;
     const queryClient = useQueryClient();
 
-    const { data: itemsResponse, isLoading: itemsLoading, error: itemsError } = useQuery({
+    const { data: allItems = [], isLoading: itemsLoading, error: itemsError } = useQuery({
         queryKey: includeClaims ? queryKeys.itemsWithClaims(userId || '') : queryKeys.items(userId || ''),
-        queryFn: () => fetchUserItems(userId!, includeClaims),
+        queryFn: async () => {
+            const res = await fetchUserItems(userId!, includeClaims);
+            if (res.error) throw res.error;
+            return res.data || [];
+        },
         enabled: !!userId,
     });
 
-    const { data: categoriesResponse, isLoading: categoriesLoading, error: categoriesError } = useQuery({
+    const { data: categories = [], isLoading: categoriesLoading, error: categoriesError } = useQuery({
         queryKey: queryKeys.categories(userId || ''),
-        queryFn: () => fetchUserCategories(userId!),
+        queryFn: async () => {
+            const res = await fetchUserCategories(userId!);
+            if (res.error) throw res.error;
+            return res.data || [];
+        },
         enabled: !!userId,
     });
 
-    const allItems = itemsResponse?.data || [];
-    const categories = categoriesResponse?.data || [];
     const loading = itemsLoading || categoriesLoading;
     const error = itemsError || categoriesError;
 

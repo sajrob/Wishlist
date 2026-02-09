@@ -2,6 +2,7 @@
  * Custom hook for managing category operations (CRUD) using React Query
  */
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from './useOptimisticMutation';
 import {
     createCategory as apiCreateCategory,
     updateCategory as apiUpdateCategory,
@@ -16,8 +17,8 @@ import { toast } from 'sonner';
 export function useCategories(userId: string) {
     const queryClient = useQueryClient();
 
-    const createMutation = useMutation({
-        mutationFn: async (categoryData: CategoryFormData) => {
+    const createMutation = useOptimisticMutation(
+        async (categoryData: CategoryFormData) => {
             const { data: newCategory, error: catError } = await apiCreateCategory({
                 user_id: userId,
                 name: categoryData.name,
@@ -33,19 +34,46 @@ export function useCategories(userId: string) {
 
             return newCategory;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.items(userId) });
-            toast.success('Category created successfully');
-        },
-        onError: (error) => {
-            console.error('Error creating category:', error);
-            toast.error('Failed to create category');
-        }
-    });
+        {
+            actionType: 'CREATE_CATEGORY',
+            table: 'categories',
+            onMutate: async (newCategory: CategoryFormData) => {
+                const queryKey = queryKeys.categories(userId);
+                const previousCategories = queryClient.getQueryData<any[]>(queryKey);
 
-    const updateMutation = useMutation({
-        mutationFn: async ({ categoryId, categoryData }: { categoryId: string, categoryData: CategoryFormData }) => {
+                if (previousCategories) {
+                    const optimisticCategory = {
+                        id: 'temp-' + Date.now(),
+                        name: newCategory.name,
+                        is_public: newCategory.is_public || false,
+                        user_id: userId,
+                        created_at: new Date().toISOString(),
+                    };
+
+                    queryClient.setQueryData<any[]>(queryKey, old =>
+                        [optimisticCategory, ...(old || [])]
+                    );
+                }
+
+                return { previousCategories };
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) });
+                queryClient.invalidateQueries({ queryKey: queryKeys.items(userId) });
+                toast.success('Category created successfully');
+            },
+            onError: (error, variables, context: any) => {
+                if (context?.previousCategories) {
+                    queryClient.setQueryData(queryKeys.categories(userId), context.previousCategories);
+                }
+                console.error('Error creating category:', error);
+                toast.error('Failed to create category');
+            }
+        }
+    );
+
+    const updateMutation = useOptimisticMutation(
+        async ({ categoryId, categoryData }: { categoryId: string, categoryData: CategoryFormData }) => {
             const { error: catError } = await apiUpdateCategory(categoryId, {
                 name: categoryData.name,
                 is_public: categoryData.is_public,
@@ -63,19 +91,38 @@ export function useCategories(userId: string) {
 
             return true;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.items(userId) });
-            toast.success('Category updated successfully');
-        },
-        onError: (error) => {
-            console.error('Error updating category:', error);
-            toast.error('Failed to update category');
-        }
-    });
+        {
+            actionType: 'UPDATE_CATEGORY',
+            table: 'categories',
+            onMutate: async ({ categoryId, categoryData }) => {
+                const queryKey = queryKeys.categories(userId);
+                const previousCategories = queryClient.getQueryData<any[]>(queryKey);
 
-    const deleteMutation = useMutation({
-        mutationFn: async (categoryId: string) => {
+                if (previousCategories) {
+                    queryClient.setQueryData<any[]>(queryKey, old =>
+                        old?.map(cat => cat.id === categoryId ? { ...cat, ...categoryData } : cat)
+                    );
+                }
+
+                return { previousCategories };
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) });
+                queryClient.invalidateQueries({ queryKey: queryKeys.items(userId) });
+                toast.success('Category updated successfully');
+            },
+            onError: (error, variables, context: any) => {
+                if (context?.previousCategories) {
+                    queryClient.setQueryData(queryKeys.categories(userId), context.previousCategories);
+                }
+                console.error('Error updating category:', error);
+                toast.error('Failed to update category');
+            }
+        }
+    );
+
+    const deleteMutation = useOptimisticMutation(
+        async (categoryId: string) => {
             const { error: itemsError } = await uncategorizeItems(categoryId);
             if (itemsError) throw itemsError;
 
@@ -84,16 +131,35 @@ export function useCategories(userId: string) {
 
             return true;
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) });
-            queryClient.invalidateQueries({ queryKey: queryKeys.items(userId) });
-            toast.success('Category deleted successfully');
-        },
-        onError: (error) => {
-            console.error('Error deleting category:', error);
-            toast.error('Failed to delete category');
+        {
+            actionType: 'DELETE_CATEGORY',
+            table: 'categories',
+            onMutate: async (categoryId) => {
+                const queryKey = queryKeys.categories(userId);
+                const previousCategories = queryClient.getQueryData<any[]>(queryKey);
+
+                if (previousCategories) {
+                    queryClient.setQueryData<any[]>(queryKey, old =>
+                        old?.filter(cat => cat.id !== categoryId)
+                    );
+                }
+
+                return { previousCategories };
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: queryKeys.categories(userId) });
+                queryClient.invalidateQueries({ queryKey: queryKeys.items(userId) });
+                toast.success('Category deleted successfully');
+            },
+            onError: (error, variables, context: any) => {
+                if (context?.previousCategories) {
+                    queryClient.setQueryData(queryKeys.categories(userId), context.previousCategories);
+                }
+                console.error('Error deleting category:', error);
+                toast.error('Failed to delete category');
+            }
         }
-    });
+    );
 
     const togglePrivacyMutation = useMutation({
         mutationFn: async ({ categoryId, currentIsPublic }: { categoryId: string, currentIsPublic: boolean }) => {

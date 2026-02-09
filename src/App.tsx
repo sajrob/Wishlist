@@ -43,6 +43,7 @@ import { ProtectedAdminRoute } from './components/admin/ProtectedAdminRoute';
 // 3. Uncomment the ModeToggle in AdminLayout.tsx (line ~26)
 // ============================================================
 import { ThemeProvider } from './components/theme-provider';
+import { ConflictProvider } from './context/ConflictContext';
 import './App.css';
 
 
@@ -66,92 +67,94 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <Router>
         <AuthProvider>
-          <WishlistProvider>
-            <div className="flex flex-col min-h-screen">
-              <OfflineBanner />
-              <SyncStatus />
-              <Navbar />
-              <main className="flex-1 flex flex-col">
-                <Routes>
-                  {/* Public Routes - Accessible to everyone */}
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/update-password" element={<UpdatePassword />} />
-                  <Route path="/faq" element={<Faq />} />
-                  <Route path="/share/:categoryId" element={<SharePage />} />
-                  {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
+          <ConflictProvider>
+            <WishlistProvider>
+              <div className="flex flex-col min-h-screen">
+                <OfflineBanner />
+                <SyncStatus />
+                <Navbar />
+                <main className="flex-1 flex flex-col">
+                  <Routes>
+                    {/* Public Routes - Accessible to everyone */}
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<SignUp />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/update-password" element={<UpdatePassword />} />
+                    <Route path="/faq" element={<Faq />} />
+                    <Route path="/share/:categoryId" element={<SharePage />} />
+                    {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
 
-                  {/* Private Routes - Require Authentication */}
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <PrivateRoute>
-                        <Home />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/profile"
-                    element={
-                      <PrivateRoute>
-                        <Profile />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/find-users"
-                    element={
-                      <PrivateRoute>
-                        <FindUsers />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/friends"
-                    element={
-                      <PrivateRoute>
-                        <FriendsWishlists />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/wishlist/:userId"
-                    element={
-                      <PrivateRoute>
-                        <SharedWishlist />
-                      </PrivateRoute>
-                    }
-                  />
-                  <Route
-                    path="/notifications"
-                    element={
-                      <PrivateRoute>
-                        <Notifications />
-                      </PrivateRoute>
-                    }
-                  />
+                    {/* Private Routes - Require Authentication */}
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <PrivateRoute>
+                          <Home />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/profile"
+                      element={
+                        <PrivateRoute>
+                          <Profile />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/find-users"
+                      element={
+                        <PrivateRoute>
+                          <FindUsers />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/friends"
+                      element={
+                        <PrivateRoute>
+                          <FriendsWishlists />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/wishlist/:userId"
+                      element={
+                        <PrivateRoute>
+                          <SharedWishlist />
+                        </PrivateRoute>
+                      }
+                    />
+                    <Route
+                      path="/notifications"
+                      element={
+                        <PrivateRoute>
+                          <Notifications />
+                        </PrivateRoute>
+                      }
+                    />
 
-                  {/* Admin Routes */}
-                  <Route element={<ProtectedAdminRoute />}>
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<AdminDashboard />} />
-                      <Route path="feedback" element={<AdminFeedback />} />
-                      <Route path="users" element={<AdminUsers />} />
-                      <Route path="wishlists" element={<AdminWishlists />} />
-                      <Route path="items" element={<AdminItems />} />
-                      <Route path="claims" element={<AdminClaims />} />
-                      <Route path="activity" element={<AdminActivityLog />} />
+                    {/* Admin Routes */}
+                    <Route element={<ProtectedAdminRoute />}>
+                      <Route path="/admin" element={<AdminLayout />}>
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="feedback" element={<AdminFeedback />} />
+                        <Route path="users" element={<AdminUsers />} />
+                        <Route path="wishlists" element={<AdminWishlists />} />
+                        <Route path="items" element={<AdminItems />} />
+                        <Route path="claims" element={<AdminClaims />} />
+                        <Route path="activity" element={<AdminActivityLog />} />
+                      </Route>
                     </Route>
-                  </Route>
 
-                  {/* 404 Page */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </WishlistProvider>
+                    {/* 404 Page */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
+              </div>
+            </WishlistProvider>
+          </ConflictProvider>
         </AuthProvider>
         <Toaster position="top-center" />
       </Router>

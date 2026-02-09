@@ -7,9 +7,14 @@ A modern, social wishlist application designed to help you organize your gift id
 - **Personalized Wishlists**: Create and manage items across different categories.
 - **Privacy Controls**: Set wishlists or specific categories as public or private.
 - **Social Connectivity**: Follow friends, see their public wishlists, and manage your followers.
+- **Progressive Web App (PWA)**: Installable on home screen for a native-like experience.
+- **Offline Support**: View and manage your wishlists even without an internet connection.
+- **Background Sync**: Automatic synchronization of changes made while offline once connection is restored.
+- **Push Notifications**: Real-time alerts for item claims and social interactions.
 - **Real-time Sync**: Powered by Supabase for instant updates across devices.
 - **Modern UI**: A sleek, responsive interface built with Tailwind CSS and Radix UI components.
 - **Auth & Profiles**: Secure email/password login and customizable user profiles.
+
 
 ## 🛠️ Tech Stack
 

@@ -13,6 +13,8 @@ import { formatCurrency } from '../utils/numberUtils';
 import { getInitials } from '../utils/nameUtils';
 import { useAuth } from '../context/AuthContext';
 import { useItems } from '../hooks/useItems';
+import { useSyncQueue } from '../hooks/useSyncQueue';
+import { Loader2, CloudOff } from 'lucide-react';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
@@ -30,9 +32,13 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
     const { id, name, price, description, image_url, is_must_have, buy_link, currency, claims: initialClaims } = item;
     const { user } = useAuth();
     const { toggleClaim } = useItems(user?.id);
+    const { hasPendingClaims, isPending } = useSyncQueue();
     const [claims, setClaims] = useState<Claim[]>(initialClaims || []);
     const [isClaiming, setIsClaiming] = useState(false);
     const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+    const itemIsPending = isPending('UPDATE_ITEM', id) || isPending('DELETE_ITEM', id);
+    const claimIsPending = hasPendingClaims(id);
 
     useEffect(() => {
         setClaims(initialClaims || []);
@@ -146,6 +152,12 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                     {is_must_have && (
                         <div className="must-have-badge">
                             Must Have
+                        </div>
+                    )}
+                    {(itemIsPending || claimIsPending) && (
+                        <div className="absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-lg animate-pulse z-10">
+                            <CloudOff className="size-3" />
+                            Pending Sync
                         </div>
                     )}
                     <span className="text-primary bg-background font-bold rounded-tl-xl px-2 py-0.5 border-slate-400 border-l border-t price-badge">{formattedPrice}</span>

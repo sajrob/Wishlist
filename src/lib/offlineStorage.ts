@@ -2,15 +2,20 @@ import { openDB, IDBPDatabase } from 'idb';
 import { WishlistItem, Category, Profile } from '../types';
 
 const DB_NAME = 'me-list-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export interface MeListDB extends IDBPDatabase {
     // Define custom methods if needed
 }
 
-export const initDB = async () => {
-    return openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
+let dbPromise: Promise<IDBPDatabase> | null = null;
+
+export const initDB = () => {
+    if (dbPromise) return dbPromise;
+
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+        upgrade(db, oldVersion, newVersion) {
+            console.log(`Upgrading IndexedDB from ${oldVersion} to ${newVersion}`);
             if (!db.objectStoreNames.contains('items')) {
                 db.createObjectStore('items', { keyPath: 'id' });
             }
@@ -20,12 +25,13 @@ export const initDB = async () => {
             if (!db.objectStoreNames.contains('profiles')) {
                 db.createObjectStore('profiles', { keyPath: 'id' });
             }
-            // Store for pending actions when offline
             if (!db.objectStoreNames.contains('sync-queue')) {
                 db.createObjectStore('sync-queue', { keyPath: 'id', autoIncrement: true });
             }
         },
     });
+
+    return dbPromise;
 };
 
 export const offlineStorage = {

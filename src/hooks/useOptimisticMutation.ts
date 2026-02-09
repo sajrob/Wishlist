@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 
 interface OptimisticOptions<TData, TError, TVariables, TContext>
     extends UseMutationOptions<TData, TError, TVariables, TContext> {
-    actionType: OfflineAction['type'];
-    table: string;
+    actionType: OfflineAction['type'] | ((variables: TVariables) => OfflineAction['type']);
+    table: string | ((variables: TVariables) => string);
 }
 
 export function useOptimisticMutation<TData, TError, TVariables, TContext>(
@@ -14,38 +14,97 @@ export function useOptimisticMutation<TData, TError, TVariables, TContext>(
 ) {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        ...options,
-        mutationFn: async (variables) => {
-            if (!navigator.onLine) {
-                // Queue the action
+    const {
+        onSuccess: userOnSuccess,
+        onError: userOnError,
+        onSettled: userOnSettled,
+        onMutate: userOnMutate,
+        actionType: _actionType,
+        table: _table,
+        ...mutationOptions
+    } = options;
+
+    return useMutation<TData, TError, TVariables, TContext>({
+        ...mutationOptions as any,
+        networkMode: 'always',
+        mutationFn: async (variables: TVariables) => {
+            const isOffline = !navigator.onLine;
+            console.log(`[OptimisticMutation] Executing. Offline: ${isOffline}`);
+
+            if (isOffline) {
+                const actionType = typeof options.actionType === 'function' ? (options.actionType as any)(variables) : options.actionType;
+                const table = typeof options.table === 'function' ? (options.table as any)(variables) : options.table;
+
+                console.log(`[OptimisticMutation] Queuing ${actionType} while offline`);
                 await syncQueue.add({
-                    type: options.actionType,
-                    table: options.table,
+                    type: actionType,
+                    table: table,
                     payload: variables,
                 });
 
-                toast.info('You are offline. Action queued for sync.');
-                // Return a mock result or throw to trigger optimistic update if needed
-                return null as unknown as TData;
+                toast.info('Action queued for sync (Offline)');
+                return { data: null, offline: true } as unknown as TData;
             }
-            return mutationFn(variables);
+
+            try {
+                const result = await mutationFn(variables);
+                if (result && (result as any).error) {
+                    console.warn('[OptimisticMutation] API returned error:', (result as any).error);
+                    throw (result as any).error;
+                }
+                return result;
+            } catch (error: any) {
+                const msg = (error?.message || '').toLowerCase();
+                const name = (error?.name || '');
+                const isNetworkError =
+                    !navigator.onLine ||
+                    name === 'TypeError' ||
+                    name === 'NetworkError' ||
+                    msg.includes('fetch') ||
+                    msg.includes('network') ||
+                    msg.includes('load failed') ||
+                    msg.includes('dns');
+
+                console.warn(`[OptimisticMutation] Mutation failed. Name: ${name}, IsNetwork: ${isNetworkError}`, error);
+
+                if (isNetworkError) {
+                    const actionType = typeof options.actionType === 'function' ? (options.actionType as any)(variables) : options.actionType;
+                    const table = typeof options.table === 'function' ? (options.table as any)(variables) : options.table;
+
+                    await syncQueue.add({ type: actionType, table: table, payload: variables });
+                    toast.info('Action queued (Connection issue)');
+                    return { data: null, offline: true } as unknown as TData;
+                }
+                throw error;
+            }
         },
         onMutate: async (variables) => {
-            // Cancel refetches to avoid overwriting optimistic update
+            console.log('[OptimisticMutation] onMutate');
             await queryClient.cancelQueries();
-
-            // Perform manual optimistic updates here if needed by user
-            if (options.onMutate) {
-                return options.onMutate(variables);
+            if (userOnMutate) {
+                return (userOnMutate as any)(variables);
+            }
+            return undefined as any;
+        },
+        onSuccess: (data, variables, context) => {
+            console.log('[OptimisticMutation] onSuccess');
+            if (userOnSuccess) {
+                (userOnSuccess as any)(data, variables, context);
+            }
+        },
+        onError: (error, variables, context) => {
+            console.error('[OptimisticMutation] onError:', error);
+            if (userOnError) {
+                (userOnError as any)(error, variables, context);
             }
         },
         onSettled: (data, error, variables, context) => {
-            if (navigator.onLine) {
+            console.log('[OptimisticMutation] onSettled. Error:', !!error);
+            if (navigator.onLine && !error) {
                 queryClient.invalidateQueries();
             }
-            if (options.onSettled) {
-                options.onSettled(data, error, variables, context);
+            if (userOnSettled) {
+                (userOnSettled as any)(data, error, variables, context);
             }
         }
     });

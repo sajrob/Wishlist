@@ -2,6 +2,7 @@
  * Custom hook for managing friend connections using React Query
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useOptimisticMutation } from './useOptimisticMutation';
 import { fetchFriends, fetchFollowers, followUser, unfollowUser } from '@/api';
 import { queryKeys } from '@/lib/queryClient';
 import { toast } from 'sonner';
@@ -18,23 +19,31 @@ export type FriendSummary = {
 export function useFriends(userId: string | undefined) {
     const queryClient = useQueryClient();
 
-    const { data: followingResponse, isLoading: isLoadingFollowing } = useQuery({
+    const { data: followingRaw = [], isLoading: isLoadingFollowing } = useQuery({
         queryKey: queryKeys.friends(userId || ''),
-        queryFn: () => fetchFriends(userId!),
+        queryFn: async () => {
+            const res = await fetchFriends(userId!);
+            if (res.error) throw res.error;
+            return res.data || [];
+        },
         enabled: !!userId,
     });
 
-    const { data: followersResponse, isLoading: isLoadingFollowers } = useQuery({
+    const { data: followersRaw = [], isLoading: isLoadingFollowers } = useQuery({
         queryKey: queryKeys.followers(userId || ''),
-        queryFn: () => fetchFollowers(userId!),
+        queryFn: async () => {
+            const res = await fetchFollowers(userId!);
+            if (res.error) throw res.error;
+            return res.data || [];
+        },
         enabled: !!userId,
     });
 
-    const followingList: FriendSummary[] = (followingResponse?.data || [])
+    const followingList: FriendSummary[] = followingRaw
         .map((f: any) => f.profiles)
         .filter(Boolean);
 
-    const followersList: FriendSummary[] = (followersResponse?.data || [])
+    const followersList: FriendSummary[] = followersRaw
         .map((f: any) => f.profiles)
         .filter(Boolean);
 
@@ -51,30 +60,38 @@ export function useFriends(userId: string | undefined) {
         mutual: followingIds.has(f.id),
     }));
 
-    const followMutation = useMutation({
-        mutationFn: (friendId: string) => followUser(userId!, friendId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
-            queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
-            toast.success('Started following');
-        },
-        onError: (error) => {
-            console.error('Error following:', error);
-            toast.error('Could not follow user');
+    const followMutation = useOptimisticMutation(
+        ({ userId, friendId }: { userId: string, friendId: string }) => followUser(userId, friendId),
+        {
+            actionType: 'FOLLOW_USER',
+            table: 'friends',
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+                queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
+                toast.success('Started following');
+            },
+            onError: (error) => {
+                console.error('Error following:', error);
+                toast.error('Could not follow user');
+            }
         }
-    });
+    );
 
-    const unfollowMutation = useMutation({
-        mutationFn: (friendId: string) => unfollowUser(userId!, friendId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
-            queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
-        },
-        onError: (error) => {
-            console.error('Error unfollowing:', error);
-            toast.error('Could not unfollow user');
+    const unfollowMutation = useOptimisticMutation(
+        ({ userId, friendId }: { userId: string, friendId: string }) => unfollowUser(userId, friendId),
+        {
+            actionType: 'UNFOLLOW_USER',
+            table: 'friends',
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: queryKeys.friends(userId || '') });
+                queryClient.invalidateQueries({ queryKey: queryKeys.followers(userId || '') });
+            },
+            onError: (error) => {
+                console.error('Error unfollowing:', error);
+                toast.error('Could not unfollow user');
+            }
         }
-    });
+    );
 
     const handleUnfollow = (friendId: string, friendName: string, e?: React.MouseEvent) => {
         e?.preventDefault();
@@ -85,7 +102,7 @@ export function useFriends(userId: string | undefined) {
             description: "You won't be able to see their private wishlists anymore.",
             deleteLabel: 'Unfollow',
             onDelete: async () => {
-                await unfollowMutation.mutateAsync(friendId);
+                await unfollowMutation.mutateAsync({ userId: userId!, friendId });
                 toast.success(`Unfollowed ${friendName}`);
             },
         });
@@ -94,7 +111,7 @@ export function useFriends(userId: string | undefined) {
     const handleFollowBack = (friendId: string, friendName: string, e?: React.MouseEvent) => {
         e?.preventDefault();
         e?.stopPropagation();
-        followMutation.mutate(friendId);
+        followMutation.mutate({ userId: userId!, friendId });
     };
 
     return {
@@ -102,8 +119,8 @@ export function useFriends(userId: string | undefined) {
         followers,
         mutualFriends: following.filter(f => f.mutual),
         isFollowing: (friendId: string) => followingIds.has(friendId),
-        follow: followMutation.mutateAsync,
-        unfollow: unfollowMutation.mutateAsync,
+        follow: (friendId: string) => followMutation.mutateAsync({ userId: userId!, friendId }),
+        unfollow: (friendId: string) => unfollowMutation.mutateAsync({ userId: userId!, friendId }),
         isFollowLoading: followMutation.isPending,
         isUnfollowLoading: unfollowMutation.isPending,
         loading: isLoadingFollowing || isLoadingFollowers,
