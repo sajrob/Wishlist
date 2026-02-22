@@ -19,18 +19,24 @@ export function usePushNotifications() {
             }
 
             try {
-                // Add timeout to prevent infinite loading if SW is not ready (e.g. hard refresh or dev mode)
-                const registration = await Promise.race([
-                    navigator.serviceWorker.ready,
-                    new Promise<ServiceWorkerRegistration>((_, reject) =>
-                        setTimeout(() => reject(new Error('Service Worker ready timeout')), 2000)
-                    )
-                ]);
+                // Check if we already have a registration first
+                let registration = await navigator.serviceWorker.getRegistration();
+
+                if (!registration) {
+                    console.log('[usePushNotifications] No registration found yet, waiting for ready state...');
+                    // Longer timeout for the initial background check
+                    registration = await Promise.race([
+                        navigator.serviceWorker.ready,
+                        new Promise<ServiceWorkerRegistration>((_, reject) =>
+                            setTimeout(() => reject(new Error('SW ready timeout')), 5000)
+                        )
+                    ]);
+                }
 
                 const subscription = await registration.pushManager.getSubscription();
                 setIsSubscribed(!!subscription);
             } catch (err) {
-                console.error('Error checking push subscription:', err);
+                console.warn('[usePushNotifications] Non-critical error checking subscription:', err);
                 // If we time out or fail, we just assume not subscribed and let user try to enable
                 setIsSubscribed(false);
             } finally {
@@ -63,12 +69,13 @@ export function usePushNotifications() {
             }
         }
 
-        const sub = await subscribeToPushNotifications(user.id);
-        if (sub) {
+        try {
+            const sub = await subscribeToPushNotifications(user.id);
             setIsSubscribed(true);
             toast.success('Successfully subscribed to notifications!');
-        } else {
-            toast.error('Failed to subscribe to notifications');
+        } catch (error: any) {
+            console.error('Subscription error:', error);
+            toast.error(error.message || 'Failed to subscribe to notifications');
         }
         setLoading(false);
     };
@@ -92,6 +99,7 @@ export function usePushNotifications() {
         loading,
         subscribe,
         unsubscribe,
-        requestPermission
+        requestPermission,
+        isSecureContext: window.isSecureContext
     };
 }

@@ -55,10 +55,13 @@ export function useFilteredItems(allItems: WishlistItem[], activeCategoryId: str
         : allItems.filter(item => item.category_id === activeCategoryId);
 
     return [...filtered].sort((a, b) => {
+        if (a.is_received && !b.is_received) return 1;
+        if (!a.is_received && b.is_received) return -1;
         if (a.is_must_have && !b.is_must_have) return -1;
         if (!a.is_must_have && b.is_must_have) return 1;
         return 0;
     });
+
 }
 
 export function useCategoryItems(allItems: WishlistItem[], categoryId: string) {
@@ -71,10 +74,13 @@ export function useCategoryItems(allItems: WishlistItem[], categoryId: string) {
 export function useUncategorizedItems(allItems: WishlistItem[]) {
     const filtered = allItems.filter(item => item.category_id === null);
     return [...filtered].sort((a, b) => {
+        if (a.is_received && !b.is_received) return 1;
+        if (!a.is_received && b.is_received) return -1;
         if (a.is_must_have && !b.is_must_have) return -1;
         if (!a.is_must_have && b.is_must_have) return 1;
         return 0;
     });
+
 }
 
 export function useCategoryStats(allItems: WishlistItem[], categories: Category[]): CategoryStats {

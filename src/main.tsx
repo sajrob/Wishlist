@@ -14,9 +14,26 @@ import './index.css';
 import App from './App';
 
 import { processSyncQueue } from './lib/syncQueue';
+import { registerSW } from 'virtual:pwa-register';
 
 // Listen for sync messages from the Service Worker
 if ('serviceWorker' in navigator) {
+  // Register Service Worker using vite-plugin-pwa
+  const updateSW = registerSW({
+    onNeedRefresh() {
+      console.log('New content available, please refresh.');
+    },
+    onOfflineReady() {
+      console.log('App ready to work offline.');
+    },
+    onRegistered(registration) {
+      console.log('Service Worker registered:', registration);
+    },
+    onRegisterError(error) {
+      console.error('Service Worker registration error:', error);
+    }
+  });
+
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (event.data?.type === 'PROCESS_SYNC_QUEUE') {
       processSyncQueue();

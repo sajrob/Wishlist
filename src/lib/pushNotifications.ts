@@ -4,41 +4,57 @@ const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 export async function subscribeToPushNotifications(userId: string) {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-        console.warn('Push notifications are not supported by this browser.');
-        return null;
+        throw new Error('Push notifications are not supported by this browser.');
     }
 
-    try {
-        const registration = await navigator.serviceWorker.ready;
-
-        // Check for existing subscription
-        let subscription = await registration.pushManager.getSubscription();
-
-        if (!subscription) {
-            // Subscribe if no existing subscription
-            subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-            });
-        }
-
-        // Save subscription to Supabase
-        const { error } = await supabase
-            .from('push_subscriptions')
-            .upsert({
-                user_id: userId,
-                endpoint: subscription.endpoint,
-                p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')!))),
-                auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')!)))
-            }, { onConflict: 'user_id, endpoint' });
-
-        if (error) throw error;
-
-        return subscription;
-    } catch (err) {
-        console.error('Error subscribing to push notifications:', err);
-        return null;
+    if (!VAPID_PUBLIC_KEY) {
+        throw new Error('VAPID public key is missing. Please check your environment variables.');
     }
+
+    console.log('[Push] Attempting to find service worker...');
+
+    // Check if we already have a registration first
+    let registration = await navigator.serviceWorker.getRegistration();
+
+    if (!registration) {
+        console.log('[Push] No active registration found, waiting for ready...');
+        registration = await Promise.race([
+            navigator.serviceWorker.ready,
+            new Promise<ServiceWorkerRegistration>((_, reject) =>
+                setTimeout(() => reject(new Error('Service Worker ready timeout (10s)')), 10000)
+            )
+        ]);
+    }
+
+    console.log('[Push] Service worker found:', registration.scope);
+
+    // Check for existing subscription
+    let subscription = await registration.pushManager.getSubscription();
+
+    if (!subscription) {
+        // Subscribe if no existing subscription
+        subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+    }
+
+    // Save subscription to Supabase
+    const { error } = await supabase
+        .from('push_subscriptions')
+        .upsert({
+            user_id: userId,
+            endpoint: subscription.endpoint,
+            p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')!))),
+            auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')!)))
+        }, { onConflict: 'user_id, endpoint' });
+
+    if (error) {
+        console.error('Supabase upsert error:', error);
+        throw new Error(`Failed to save subscription: ${error.message}`);
+    }
+
+    return subscription;
 }
 
 export async function unsubscribeFromPushNotifications(userId: string) {

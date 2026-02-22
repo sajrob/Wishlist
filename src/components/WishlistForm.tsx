@@ -21,7 +21,8 @@ const initialForm: ItemFormData = {
     image_url: '',
     buy_link: '',
     is_must_have: false,
-    currency: 'SLE',
+    is_received: false,
+    currency: 'USD',
 };
 
 const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormProps) => {
@@ -92,6 +93,7 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                 image_url: editingItem.image_url || '',
                 buy_link: editingItem.buy_link || '',
                 is_must_have: editingItem.is_must_have || false,
+                is_received: editingItem.is_received || false,
                 currency: editingItem.currency || 'USD',
             });
         } else {
@@ -120,6 +122,13 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
         setFormData(prev => ({
             ...prev,
             is_must_have: checked,
+        }));
+    };
+
+    const handleReceivedChange = (checked: boolean) => {
+        setFormData(prev => ({
+            ...prev,
+            is_received: checked,
         }));
     };
 
@@ -204,9 +213,9 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                         </div>
                     </div>
 
-                    {/* Row 1: Item Name (2/3) and Must Have (1/3) */}
-                    <div className="grid grid-cols-3 gap-3 items-end">
-                        <div className="col-span-2 space-y-1">
+                    {/* Row 1: Item Name and Options */}
+                    <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                        <div className="flex-1 w-full space-y-1">
                             <Label htmlFor="name" className="text-xs">Item Name</Label>
                             <Input
                                 id="name"
@@ -218,8 +227,8 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                                 required
                             />
                         </div>
-                        <div className="col-span-1">
-                            <div className="flex items-center justify-between px-2 border rounded-lg bg-muted/5 h-8">
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            <div className="flex flex-1 sm:w-[100px] items-center justify-between px-2 border rounded-lg bg-muted/5 h-8">
                                 <Label htmlFor="is_must_have" className="text-[11px] font-medium cursor-pointer truncate mr-1">Must Have</Label>
                                 <Switch
                                     id="is_must_have"
@@ -228,6 +237,17 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                                     onCheckedChange={handleSwitchChange}
                                 />
                             </div>
+                            {editingItem && (
+                                <div className="flex flex-1 sm:w-[100px] items-center justify-between px-2 border rounded-lg bg-muted/5 h-8">
+                                    <Label htmlFor="is_received" className="text-[11px] font-medium cursor-pointer truncate mr-1">Received</Label>
+                                    <Switch
+                                        id="is_received"
+                                        className="scale-65 origin-right data-[state=checked]:bg-emerald-500"
+                                        checked={formData.is_received}
+                                        onCheckedChange={handleReceivedChange}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 

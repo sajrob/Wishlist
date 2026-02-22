@@ -127,6 +127,7 @@ function Home() {
                 image_url: formData.image_url,
                 buy_link: formData.buy_link,
                 is_must_have: formData.is_must_have || false,
+                is_received: formData.is_received || false,
                 currency: formData.currency || 'USD',
             }
         });
@@ -136,6 +137,13 @@ function Home() {
         await updateItem({
             itemId,
             updates: { is_must_have: isMustHave }
+        });
+    };
+
+    const handleToggleReceived = async (itemId: string, isReceived: boolean) => {
+        await updateItem({
+            itemId,
+            updates: { is_received: isReceived }
         });
     };
 
@@ -466,6 +474,7 @@ function Home() {
                                             onEdit={() => handleEditItem(item)}
                                             onDelete={() => handleDeleteItem(item.id)}
                                             onToggleMustHave={handleToggleMustHave}
+                                            onToggleReceived={handleToggleReceived}
                                         />
                                     ))
                                 )}

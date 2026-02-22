@@ -4,10 +4,14 @@ import { registerRoute, NavigationRoute } from 'workbox-routing';
 import { NetworkFirst, CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { createHandlerBoundToURL } from 'workbox-precaching';
+import { clientsClaim } from 'workbox-core';
 
 declare let self: ServiceWorkerGlobalScope;
 
-console.log('Service Worker version: 2026.02.08.v3');
+console.log('Service Worker version: 2026.02.08.v4');
+
+self.skipWaiting();
+clientsClaim();
 cleanupOutdatedCaches();
 
 precacheAndRoute(self.__WB_MANIFEST);

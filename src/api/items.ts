@@ -10,6 +10,7 @@ export async function fetchUserItems(
             .from('items')
             .select(includeClaims ? '*, claims(*, profiles(*))' : '*')
             .eq('user_id', userId)
+            .order('is_received', { ascending: true })
             .order('is_must_have', { ascending: false })
             .order('created_at', { ascending: false });
 

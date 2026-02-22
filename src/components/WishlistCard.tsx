@@ -28,8 +28,8 @@ import {
 } from "@/components/ui/dialog";
 import './WishlistCard.css';
 
-const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: WishlistCardProps) => {
-    const { id, name, price, description, image_url, is_must_have, buy_link, currency, claims: initialClaims } = item;
+const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceived, readOnly }: WishlistCardProps) => {
+    const { id, name, price, description, image_url, is_must_have, is_received, buy_link, currency, claims: initialClaims } = item;
     const { user } = useAuth();
     const { toggleClaim } = useItems(user?.id);
     const { hasPendingClaims, isPending } = useSyncQueue();
@@ -123,8 +123,8 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
 
     return (
         <>
-            <div className="wishlist-card border border-slate-300">
-                {readOnly && (
+            <div className={`wishlist-card border border-slate-300 ${!!is_received ? 'is-received' : ''}`}>
+                {readOnly && !is_received && (
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -149,7 +149,14 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
 
                 <div className="card-image-container">
                     <img src={image_url || 'https://placehold.co/600x400/grey/black?text=No+Image'} alt={name} className="card-image border-b border-slate-400 rounded-t-lg" />
-                    {is_must_have && (
+                    {!!is_received && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
+                            <Badge className="bg-emerald-500 text-white border-none py-1.5 px-4 text-sm font-bold uppercase tracking-widest shadow-xl">
+                                Received
+                            </Badge>
+                        </div>
+                    )}
+                    {is_must_have && !is_received && (
                         <div className="must-have-badge">
                             Must Have
                         </div>
@@ -166,6 +173,11 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                 <div className="card-content">
                     <div className="item-header">
                         <h2 className="item-name" title={name}>{name}</h2>
+                        {!!is_received && readOnly && (
+                            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200 text-[10px] h-5 px-1.5 shrink-0">
+                                Received
+                            </Badge>
+                        )}
                     </div>
 
                     <div
@@ -241,6 +253,21 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                     </label>
                                 </div>
 
+                                <div className="flex items-center space-x-2">
+                                    <Switch
+                                        id={`received-${id}`}
+                                        checked={is_received}
+                                        onCheckedChange={(checked) => onToggleReceived?.(id, checked)}
+                                        className="data-[state=checked]:bg-emerald-500"
+                                    />
+                                    <label
+                                        htmlFor={`received-${id}`}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
+                                    >
+                                        Received
+                                    </label>
+                                </div>
+
                                 <div className="flex gap-1">
                                     {onEdit && (
                                         <button
@@ -287,9 +314,14 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                         <div className="md:w-1/2 p-6 flex flex-col gap-4 overflow-y-auto">
                             <DialogHeader>
                                 <div className="flex items-center justify-start gap-2 mb-1">
-                                    {is_must_have && (
+                                    {is_must_have && !is_received && (
                                         <Badge className="bg-primary text-white border-none text-[10px] py-1 px-2 uppercase font-bold tracking-wider">
                                             Must Have
+                                        </Badge>
+                                    )}
+                                    {!!is_received && (
+                                        <Badge className="bg-emerald-500 text-white border-none text-[10px] py-1 px-2 uppercase font-bold tracking-wider">
+                                            Received
                                         </Badge>
                                     )}
                                     <span className="text-xl font-bold text-primary">{formattedPrice}</span>
@@ -318,16 +350,18 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, readOnly }: Wi
                                                 View Online / Buy
                                             </a>
                                         )}
-                                        <button
-                                            onClick={handleToggleClaim}
-                                            disabled={isClaiming}
-                                            className={`w-full px-4 py-3 rounded-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2 ${isClaimedByUser
-                                                ? 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                                                }`}
-                                        >
-                                            {isClaimedByUser ? '🎁 Unclaim Item' : '🤝 Claim this Item'}
-                                        </button>
+                                        {!is_received && (
+                                            <button
+                                                onClick={handleToggleClaim}
+                                                disabled={isClaiming}
+                                                className={`w-full px-4 py-3 rounded-md font-semibold transition-all shadow-sm flex items-center justify-center gap-2 ${isClaimedByUser
+                                                    ? 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                                                    }`}
+                                            >
+                                                {isClaimedByUser ? '🎁 Unclaim Item' : '🤝 Claim this Item'}
+                                            </button>
+                                        )}
                                         {claims.length > 0 && (
                                             <p className="text-xs text-center text-muted-foreground">
                                                 {claims.length} {claims.length === 1 ? 'person has' : 'people have'} claimed this

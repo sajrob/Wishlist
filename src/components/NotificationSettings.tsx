@@ -8,7 +8,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function NotificationSettings() {
-    const { isSubscribed, loading, subscribe, unsubscribe, permission } = usePushNotifications();
+    const { isSubscribed, loading, subscribe, unsubscribe, permission, isSecureContext } = usePushNotifications();
 
     if (loading) {
         return (
@@ -21,16 +21,28 @@ export function NotificationSettings() {
         );
     }
 
-    const handleToggle = () => {
-        if (isSubscribed) {
-            unsubscribe();
-        } else {
-            subscribe();
+    const handleToggle = async () => {
+        try {
+            if (isSubscribed) {
+                await unsubscribe();
+            } else {
+                await subscribe();
+            }
+        } catch (err) {
+            console.error('Toggle error:', err);
         }
     };
 
     return (
         <Card className="border-none shadow-md bg-card ring-1 ring-border overflow-hidden transition-all duration-300 hover:shadow-lg">
+            {!isSecureContext && (
+                <div className="bg-amber-500/10 border-b border-amber-500/20 p-2 text-center">
+                    <p className="text-[10px] font-bold text-amber-600 flex items-center justify-center gap-1 uppercase tracking-tighter">
+                        <Info className="w-3 h-3" />
+                        Insecure Context: HTTPS required for mobile push
+                    </p>
+                </div>
+            )}
             <CardHeader className="bg-muted/50 border-b pb-4">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg text-primary">
@@ -61,6 +73,7 @@ export function NotificationSettings() {
                         checked={isSubscribed}
                         onCheckedChange={handleToggle}
                         className="data-[state=checked]:bg-primary"
+                        disabled={!isSecureContext && window.location.hostname !== 'localhost'}
                     />
                 </div>
 
@@ -105,7 +118,7 @@ export function NotificationSettings() {
                 <div className="bg-primary/5 rounded-xl p-4 flex items-start gap-3 border border-primary/10">
                     <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                     <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Notifications help you stay connected with your community and ensure you never miss a thoughtful guest from your friends.
+                        Push notifications allow you to get alerts on your device lock screen even when the app is closed.
                     </p>
                 </div>
             </CardContent>

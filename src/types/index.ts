@@ -26,6 +26,7 @@ export interface WishlistItem {
     buy_link: string;
     currency?: string;
     is_must_have: boolean;
+    is_received: boolean;
     created_at: string;
     claims?: Claim[];
 }
@@ -146,6 +147,7 @@ export interface ItemFormData {
     buy_link: string;
     currency?: string;
     is_must_have?: boolean;
+    is_received?: boolean;
 }
 
 export interface CategoryFormData {
@@ -162,6 +164,7 @@ export interface WishlistCardProps {
     onEdit?: (item: WishlistItem) => void;
     onDelete?: (itemId: string) => void;
     onToggleMustHave?: (itemId: string, isMustHave: boolean) => void;
+    onToggleReceived?: (itemId: string, isReceived: boolean) => void;
     readOnly?: boolean;
 }
 

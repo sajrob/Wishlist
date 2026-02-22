@@ -292,3 +292,16 @@
   width: 20px !important;
   height: 20px !important;
 }
+
+.wishlist-card.is-received {
+  opacity: 0.75;
+}
+
+.wishlist-card.is-received .card-image {
+  filter: grayscale(1);
+}
+
+.wishlist-card.is-received .item-name,
+.wishlist-card.is-received .price-badge {
+  color: var(--color-text-secondary);
+}
