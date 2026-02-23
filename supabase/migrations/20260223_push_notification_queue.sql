@@ -61,7 +61,7 @@ BEGIN
     -- Determine push title and URL based on type
     IF NEW.type = 'claim' THEN
         push_title := 'Item Claimed! 🎁';
-        notification_url := '/items/' || COALESCE(NEW.item_id::TEXT, '');
+        notification_url := '/dashboard';
     ELSIF NEW.type = 'follow' THEN
         push_title := 'New Follower! 👋';
         notification_url := '/profile/' || NEW.actor_id::TEXT;

@@ -92,13 +92,20 @@ serve(async (req) => {
           },
         };
 
+        let finalUrl = url || "/";
+        if (finalUrl === "/") {
+          if (title.includes("Claim")) finalUrl = "/dashboard";
+          else if (title.includes("Follow")) finalUrl = "/profile";
+          else if (title.includes("Share")) finalUrl = "/shared-wishlists";
+        }
+
         const payload = JSON.stringify({
           notification: {
             title,
             body,
             icon: icon || "/icons/icon-192x192.png",
             data: {
-              url: url || "/",
+              url: finalUrl,
               type: type || "default",
               ...data,
             },

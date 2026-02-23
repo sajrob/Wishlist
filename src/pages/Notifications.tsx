@@ -73,7 +73,7 @@ const Notifications = () => {
     <SidebarProvider className="min-h-0 h-[calc(100vh-64px)]">
       <AppSidebar
         activeCategory={null}
-        onCategoryChange={() => {}}
+        onCategoryChange={() => { }}
         categories={[]}
       />
       <SidebarInset className="flex flex-col bg-background overflow-hidden font-sans">
@@ -131,21 +131,19 @@ const Notifications = () => {
                 } else if (notification.type === "wishlist_share") {
                   notificationPath = `/shared-wishlists`;
                 } else if (
-                  notification.type === "claim" &&
-                  notification.item_id
+                  notification.type === "claim"
                 ) {
-                  notificationPath = `/wishlist/${notification.item_id}`;
+                  notificationPath = `/dashboard`;
                 }
 
                 return (
                   <Link
                     key={notification.id}
                     to={notificationPath}
-                    className={`group relative flex items-center gap-4 p-4 rounded-2xl border transition-all hover:shadow-md hover:border-primary/20 ${
-                      !notification.is_read
+                    className={`group relative flex items-center gap-4 p-4 rounded-2xl border transition-all hover:shadow-md hover:border-primary/20 ${!notification.is_read
                         ? "bg-blue-50/40 border-blue-100/50 shadow-sm"
                         : "bg-card border-border hover:bg-muted/30"
-                    }`}
+                      }`}
                     onClick={() => {
                       if (!notification.is_read) {
                         void markAsRead(notification.id);
