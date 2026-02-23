@@ -63,8 +63,8 @@ export function NotificationBanner() {
   if (!isVisible) return null;
 
   return (
-    <div className="bg-primary/10 border-b border-primary/20 p-3 sm:p-4 animate-in slide-in-from-top duration-300">
-      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+    <div className="w-full bg-amber-50 border-b border-primary/20 p-3 sm:p-4 animate-in slide-in-from-top duration-300 relative z-50">
+      <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center gap-3 text-center sm:text-left">
           <div className="p-2 bg-primary/20 rounded-full text-primary hidden sm:block">
             <Bell className="w-5 h-5" />
