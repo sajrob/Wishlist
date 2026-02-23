@@ -2,39 +2,46 @@
  * Main App component that defines the application's routing structure and global providers.
  * Manages public and private routes, authentication context, and global UI components like the Navbar and Toaster.
  */
-import React, { ReactNode } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Landing from './pages/Landing';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import ForgotPassword from './pages/ForgotPassword';
-import UpdatePassword from './pages/UpdatePassword';
-import Profile from './pages/Profile';
-import FindUsers from './pages/FindUsers';
-import FriendsWishlists from './pages/FriendsWishlists';
-import SharedWishlist from './pages/SharedWishlist';
-import Notifications from './pages/Notifications';
-import ContactUs from './pages/ContactUs';
-import SharePage from './pages/SharePage';
-import Faq from './pages/Faq';
-import NotFound from './pages/NotFound';
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { WishlistProvider } from './context/WishlistContext';
+import React, { ReactNode, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Landing from "./pages/Landing";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import UpdatePassword from "./pages/UpdatePassword";
+import Profile from "./pages/Profile";
+import FindUsers from "./pages/FindUsers";
+import FriendsWishlists from "./pages/FriendsWishlists";
+import SharedWishlist from "./pages/SharedWishlist";
+import Notifications from "./pages/Notifications";
+import ContactUs from "./pages/ContactUs";
+import SharePage from "./pages/SharePage";
+import Faq from "./pages/Faq";
+import NotFound from "./pages/NotFound";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { WishlistProvider } from "./context/WishlistContext";
 import { Toaster } from "@/components/ui/sonner";
-import { OfflineBanner } from './components/OfflineBanner';
-import { SyncStatus } from './components/SyncStatus';
-import { NotificationBanner } from './components/NotificationBanner';
-import AdminLayout from './pages/admin/AdminLayout';
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminFeedback from './pages/admin/Feedback';
-import AdminUsers from './pages/admin/Users';
-import AdminWishlists from './pages/admin/Wishlists';
-import AdminItems from './pages/admin/Items';
-import AdminClaims from './pages/admin/Claims';
-import AdminActivityLog from './pages/admin/ActivityLog';
-import { ProtectedAdminRoute } from './components/admin/ProtectedAdminRoute';
+import { OfflineBanner } from "./components/OfflineBanner";
+import { SyncStatus } from "./components/SyncStatus";
+import { NotificationBanner } from "./components/NotificationBanner";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/Dashboard";
+import AdminFeedback from "./pages/admin/Feedback";
+import AdminUsers from "./pages/admin/Users";
+import AdminWishlists from "./pages/admin/Wishlists";
+import AdminItems from "./pages/admin/Items";
+import AdminClaims from "./pages/admin/Claims";
+import AdminActivityLog from "./pages/admin/ActivityLog";
+import { ProtectedAdminRoute } from "./components/admin/ProtectedAdminRoute";
+import { useNotifications } from "./hooks/useNotifications";
 // ============================================================
 // DARK MODE TOGGLE - Currently Disabled
 // ============================================================
@@ -43,10 +50,9 @@ import { ProtectedAdminRoute } from './components/admin/ProtectedAdminRoute';
 // 2. Uncomment the ModeToggle in Navbar.tsx (line ~205)
 // 3. Uncomment the ModeToggle in AdminLayout.tsx (line ~26)
 // ============================================================
-import { ThemeProvider } from './components/theme-provider';
-import { ConflictProvider } from './context/ConflictContext';
-import './App.css';
-
+import { ThemeProvider } from "./components/theme-provider";
+import { ConflictProvider } from "./context/ConflictContext";
+import "./App.css";
 
 const PrivateRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();
@@ -57,6 +63,42 @@ const PrivateRoute = ({ children }: { children: ReactNode }) => {
 
   return user ? <>{children}</> : <Navigate to="/login" replace />;
 };
+
+// Component to handle service worker messages for notification clicks
+function NotificationClickHandler() {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { markAsRead } = useNotifications(user?.id);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === "NOTIFICATION_CLICKED") {
+        const { notification_id, url } = event.data;
+
+        // Mark notification as read
+        if (notification_id && markAsRead) {
+          markAsRead(notification_id);
+        }
+
+        // Navigate to the context-aware URL
+        if (url && url !== "/") {
+          navigate(url);
+        }
+      }
+    };
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", handleMessage);
+    }
+
+    return () => {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener("message", handleMessage);
+      }
+    };
+  }, [navigate, markAsRead]);
+  return null;
+}
 
 function App() {
   return (
@@ -74,6 +116,7 @@ function App() {
                 <OfflineBanner />
                 <NotificationBanner />
                 <SyncStatus />
+                <NotificationClickHandler />
                 <Navbar />
                 <main className="flex-1 flex flex-col">
                   <Routes>
@@ -81,8 +124,14 @@ function App() {
                     <Route path="/" element={<Landing />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<SignUp />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/update-password" element={<UpdatePassword />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/update-password"
+                      element={<UpdatePassword />}
+                    />
                     <Route path="/faq" element={<Faq />} />
                     <Route path="/share/:categoryId" element={<SharePage />} />
                     {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}

@@ -3,131 +3,133 @@
  * Converted from JSDoc to TypeScript for stronger type safety.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from "react";
 
 // ==================== DATABASE MODELS ====================
 
 export interface Claim {
-    id: string;
-    item_id: string;
-    user_id: string;
-    created_at: string;
-    profiles?: Profile; // Joined data
+  id: string;
+  item_id: string;
+  user_id: string;
+  created_at: string;
+  profiles?: Profile; // Joined data
 }
 
 export interface WishlistItem {
-    id: string;
-    user_id: string;
-    category_id: string | null;
-    name: string;
-    price: number;
-    description: string;
-    image_url: string;
-    buy_link: string;
-    currency?: string;
-    is_must_have: boolean;
-    is_received: boolean;
-    created_at: string;
-    claims?: Claim[];
+  id: string;
+  user_id: string;
+  category_id: string | null;
+  name: string;
+  price: number;
+  description: string;
+  image_url: string;
+  buy_link: string;
+  currency?: string;
+  is_must_have: boolean;
+  is_received: boolean;
+  created_at: string;
+  claims?: Claim[];
 }
 
 export interface ItemInsert {
-    user_id: string;
-    category_id: string | null;
-    name: string;
-    price: number;
-    description: string;
-    image_url: string;
-    buy_link: string;
-    is_must_have: boolean;
-    currency: string;
+  user_id: string;
+  category_id: string | null;
+  name: string;
+  price: number;
+  description: string;
+  image_url: string;
+  buy_link: string;
+  is_must_have: boolean;
+  currency: string;
 }
 
 export interface Category {
-    id: string;
-    user_id: string;
-    name: string;
-    is_public: boolean;
-    created_at: string;
+  id: string;
+  user_id: string;
+  name: string;
+  is_public: boolean;
+  created_at: string;
 }
 
 export interface CategoryInsert {
-    user_id: string;
-    name: string;
-    is_public: boolean;
+  user_id: string;
+  name: string;
+  is_public: boolean;
 }
 
 export interface Profile {
-    id: string;
+  id: string;
+  username?: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string;
+  avatar_url?: string;
+  is_admin?: boolean;
+  user_metadata?: {
+    first_name?: string;
+    last_name?: string;
+    full_name?: string;
     username?: string;
-    full_name: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    created_at: string;
-    avatar_url?: string;
-    is_admin?: boolean;
-    user_metadata?: {
-        first_name?: string;
-        last_name?: string;
-        full_name?: string;
-        username?: string;
-    };
+  };
 }
 
 export interface WishlistSettings {
-    id: string;
-    is_public: boolean;
+  id: string;
+  is_public: boolean;
 }
 
 export interface Friend {
-    id: string;
-    user_id: string;
-    friend_id: string;
-    created_at: string;
+  id: string;
+  user_id: string;
+  friend_id: string;
+  created_at: string;
 }
 
 export interface Notification {
+  id: string;
+  user_id: string;
+  actor_id: string; // The person who triggered the notification
+  type: "follow" | "claim" | "wishlist_share" | string;
+  message: string;
+  category_id?: string;
+  item_id?: string; // For claim notifications - link to specific item
+  is_read: boolean;
+  created_at: string;
+  actor?: {
     id: string;
-    user_id: string;
-    actor_id: string; // The person who triggered the notification
-    type: 'follow' | 'wishlist_share' | string;
-    message: string;
-    category_id?: string;
-    is_read: boolean;
-    created_at: string;
-    actor?: {
-        id: string;
-        full_name: string;
-        username?: string;
-    };
+    full_name: string;
+    username?: string;
+    avatar_url?: string;
+  };
 }
 
 export interface SharedLink {
-    id: string;
-    created_at: string;
-    category_id: string;
-    shared_by: string;
-    target_user_id?: string;
+  id: string;
+  created_at: string;
+  category_id: string;
+  shared_by: string;
+  target_user_id?: string;
 }
 
 export interface AuthUser {
-    id: string;
-    email: string;
-    user_metadata: {
-        first_name?: string;
-        last_name?: string;
-        full_name?: string;
-        [key: string]: unknown;
-    };
-    created_at: string;
+  id: string;
+  email: string;
+  user_metadata: {
+    first_name?: string;
+    last_name?: string;
+    full_name?: string;
+    [key: string]: unknown;
+  };
+  created_at: string;
 }
 
 // ==================== API RESPONSES ====================
 
 export type SupabaseResponse<T> = {
-    data: T | null;
-    error: Error | null;
+  data: T | null;
+  error: Error | null;
 };
 
 export type ItemResponse = SupabaseResponse<WishlistItem>;
@@ -140,94 +142,92 @@ export type ProfilesResponse = SupabaseResponse<Profile[]>;
 // ==================== FORM DATA ====================
 
 export interface ItemFormData {
-    name: string;
-    price: number | string;
-    description: string;
-    image_url: string;
-    buy_link: string;
-    currency?: string;
-    is_must_have?: boolean;
-    is_received?: boolean;
+  name: string;
+  price: number | string;
+  description: string;
+  image_url: string;
+  buy_link: string;
+  currency?: string;
+  is_must_have?: boolean;
+  is_received?: boolean;
 }
 
 export interface CategoryFormData {
-    id?: string;
-    name: string;
-    is_public: boolean;
-    itemIds?: string[];
+  id?: string;
+  name: string;
+  is_public: boolean;
+  itemIds?: string[];
 }
 
 // ==================== COMPONENT PROPS ====================
 
 export interface WishlistCardProps {
-    item: WishlistItem;
-    onEdit?: (item: WishlistItem) => void;
-    onDelete?: (itemId: string) => void;
-    onToggleMustHave?: (itemId: string, isMustHave: boolean) => void;
-    onToggleReceived?: (itemId: string, isReceived: boolean) => void;
-    readOnly?: boolean;
+  item: WishlistItem;
+  onEdit?: (item: WishlistItem) => void;
+  onDelete?: (itemId: string) => void;
+  onToggleMustHave?: (itemId: string, isMustHave: boolean) => void;
+  onToggleReceived?: (itemId: string, isReceived: boolean) => void;
+  readOnly?: boolean;
 }
 
 export interface WishlistFormProps {
-    onSubmit: (formData: ItemFormData) => Promise<void> | void;
-    onClose: () => void;
-    editingItem?: WishlistItem;
+  onSubmit: (formData: ItemFormData) => Promise<void> | void;
+  onClose: () => void;
+  editingItem?: WishlistItem;
 }
 
 export interface CreateCategoryModalProps {
-    items: WishlistItem[];
-    onClose: () => void;
-    onCreateCategory: (form: CategoryFormData) => Promise<void> | void;
-    onUpdateCategory: (form: CategoryFormData) => Promise<void> | void;
-    editingCategory?: (Category & { itemIds?: string[] });
+  items: WishlistItem[];
+  onClose: () => void;
+  onCreateCategory: (form: CategoryFormData) => Promise<void> | void;
+  onUpdateCategory: (form: CategoryFormData) => Promise<void> | void;
+  editingCategory?: Category & { itemIds?: string[] };
 }
 
 // ==================== HOOK RETURN TYPES ====================
 
 export interface UseWishlistDataReturn {
-    allItems: WishlistItem[];
-    categories: Category[];
-    loading: boolean;
-    error: Error | null;
-    refetch: () => Promise<void>;
-    setAllItems: Dispatch<SetStateAction<WishlistItem[]>>;
-    setCategories: Dispatch<SetStateAction<Category[]>>;
+  allItems: WishlistItem[];
+  categories: Category[];
+  loading: boolean;
+  error: Error | null;
+  refetch: () => Promise<void>;
+  setAllItems: Dispatch<SetStateAction<WishlistItem[]>>;
+  setCategories: Dispatch<SetStateAction<Category[]>>;
 }
 
 export interface UseWishlistSettingsReturn {
-    isPublic: boolean;
-    loading: boolean;
-    error: Error | null;
-    togglePublic: () => Promise<boolean>;
-    setIsPublic: (isPublic: boolean) => Promise<boolean>;
-    refetch: () => Promise<void>;
+  isPublic: boolean;
+  loading: boolean;
+  error: Error | null;
+  togglePublic: () => Promise<boolean>;
+  setIsPublic: (isPublic: boolean) => Promise<boolean>;
+  refetch: () => Promise<void>;
 }
 
 export interface UseCategoriesReturn {
-    createCategory: (
-        data: CategoryFormData,
-    ) => Promise<SupabaseResponse<Category | null>>;
-    updateCategory: (
-        categoryId: string,
-        updates: CategoryFormData,
-    ) => Promise<SupabaseResponse<boolean>>;
-    deleteCategory: (categoryId: string) => Promise<SupabaseResponse<boolean>>;
-    toggleCategoryPrivacy: (
-        categoryId: string,
-        isPublic: boolean,
-    ) => Promise<SupabaseResponse<{ is_public: boolean }>>;
+  createCategory: (
+    data: CategoryFormData,
+  ) => Promise<SupabaseResponse<Category | null>>;
+  updateCategory: (
+    categoryId: string,
+    updates: CategoryFormData,
+  ) => Promise<SupabaseResponse<boolean>>;
+  deleteCategory: (categoryId: string) => Promise<SupabaseResponse<boolean>>;
+  toggleCategoryPrivacy: (
+    categoryId: string,
+    isPublic: boolean,
+  ) => Promise<SupabaseResponse<{ is_public: boolean }>>;
 }
 
 // ==================== UTILITY TYPES ====================
 
 export interface FriendWishlistSummary {
-    id: string;
-    name: string;
-    firstName: string;
-    publicCategories?: number;
-    totalItems?: number;
+  id: string;
+  name: string;
+  firstName: string;
+  publicCategories?: number;
+  totalItems?: number;
 }
 
 export type CategoryStats = Record<string, number>;
-
-
