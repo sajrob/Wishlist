@@ -213,72 +213,73 @@ const WishlistForm = ({ onSubmit, onClose, editingItem = null }: WishlistFormPro
                         </div>
                     </div>
 
-                    {/* Row 1: Item Name and Options */}
+                    {/* Row 1: Item Name (Full Width) */}
+                    <div className="space-y-1">
+                        <Label htmlFor="name" className="text-xs">Item Name</Label>
+                        <Input
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="Item name"
+                            className="h-8 text-sm"
+                            required
+                        />
+                    </div>
+
+                    {/* Row 2: Price and Toggles Grouped together */}
                     <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-                        <div className="flex-1 w-full space-y-1">
-                            <Label htmlFor="name" className="text-xs">Item Name</Label>
-                            <Input
-                                id="name"
-                                name="name"
-                                value={formData.name}
-                                onChange={handleChange}
-                                placeholder="Item name"
-                                className="h-8 text-sm"
-                                required
-                            />
+                        <div className="flex-[2] w-full space-y-1">
+                            <Label htmlFor="price" className="text-xs">Price</Label>
+                            <div className="flex -space-x-px w-full">
+                                <div className="w-[90px] shrink-0">
+                                    <CurrencySelect
+                                        value={formData.currency}
+                                        onValueChange={handleCurrencyChange}
+                                        variant="small"
+                                    />
+                                </div>
+                                <div className="relative flex-1">
+                                    <Input
+                                        id="price"
+                                        name="price"
+                                        type="number"
+                                        value={formData.price}
+                                        onChange={handleChange}
+                                        placeholder="0.00"
+                                        className="h-8 pr-7 text-sm rounded-l-none focus:z-10"
+                                        required
+                                    />
+                                    {selectedCurrency && (
+                                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none text-sm opacity-50">
+                                            {selectedCurrency.symbol}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <div className="flex flex-1 sm:w-[100px] items-center justify-between px-2 border rounded-lg bg-muted/5 h-8">
-                                <Label htmlFor="is_must_have" className="text-[11px] font-medium cursor-pointer truncate mr-1">Must Have</Label>
+
+                        <div className="flex flex-1 gap-2 w-full sm:w-auto shrink-0 mb-0.5">
+                            <div className="flex flex-1 sm:w-auto items-center justify-between px-2.5 border rounded-lg bg-muted/5 h-8">
+                                <Label htmlFor="is_must_have" className="text-[11px] font-medium whitespace-nowrap cursor-pointer mr-2">Must Have</Label>
                                 <Switch
                                     id="is_must_have"
-                                    className="scale-65 origin-right"
+                                    className="scale-75 origin-right"
                                     checked={formData.is_must_have}
                                     onCheckedChange={handleSwitchChange}
                                 />
                             </div>
                             {editingItem && (
-                                <div className="flex flex-1 sm:w-[100px] items-center justify-between px-2 border rounded-lg bg-muted/5 h-8">
-                                    <Label htmlFor="is_received" className="text-[11px] font-medium cursor-pointer truncate mr-1">Received</Label>
+                                <div className="flex flex-1 sm:w-auto items-center justify-between px-2.5 border rounded-lg bg-muted/5 h-8">
+                                    <Label htmlFor="is_received" className="text-[11px] font-medium whitespace-nowrap cursor-pointer mr-2">Received</Label>
                                     <Switch
                                         id="is_received"
-                                        className="scale-65 origin-right data-[state=checked]:bg-emerald-500"
+                                        className="scale-75 origin-right data-[state=checked]:bg-emerald-500"
                                         checked={formData.is_received}
                                         onCheckedChange={handleReceivedChange}
                                     />
                                 </div>
                             )}
-                        </div>
-                    </div>
-
-                    {/* Row 2: Price (Full Width) */}
-                    <div className="space-y-1">
-                        <Label htmlFor="price" className="text-xs">Price</Label>
-                        <div className="flex -space-x-px w-full">
-                            <div className="w-[110px] shrink-0">
-                                <CurrencySelect
-                                    value={formData.currency}
-                                    onValueChange={handleCurrencyChange}
-                                    variant="small"
-                                />
-                            </div>
-                            <div className="relative flex-1">
-                                <Input
-                                    id="price"
-                                    name="price"
-                                    type="number"
-                                    value={formData.price}
-                                    onChange={handleChange}
-                                    placeholder="0.00"
-                                    className="h-8 pr-7 text-sm rounded-l-none focus:z-10"
-                                    required
-                                />
-                                {selectedCurrency && (
-                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none text-sm opacity-50">
-                                        {selectedCurrency.symbol}
-                                    </span>
-                                )}
-                            </div>
                         </div>
                     </div>
 

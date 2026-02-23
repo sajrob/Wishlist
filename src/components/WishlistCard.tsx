@@ -238,62 +238,81 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                                 )}
                             </div>
                         ) : (
-                            <div className="owner-actions">
-                                <div className="flex items-center space-x-2">
-                                    <Switch
-                                        id={`must-have-${id}`}
-                                        checked={is_must_have}
-                                        onCheckedChange={(checked) => onToggleMustHave?.(id, checked)}
-                                    />
-                                    <label
-                                        htmlFor={`must-have-${id}`}
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
-                                    >
-                                        Must Have
-                                    </label>
+                            <div className="owner-actions-container space-y-2">
+                                <div className="owner-actions-row flex items-center justify-between gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id={`must-have-${id}`}
+                                            checked={is_must_have}
+                                            onCheckedChange={(checked) => onToggleMustHave?.(id, checked)}
+                                            className="scale-90"
+                                        />
+                                        <label
+                                            htmlFor={`must-have-${id}`}
+                                            className="text-[10px] font-bold uppercase tracking-tight text-muted-foreground"
+                                        >
+                                            Must Have
+                                        </label>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        {onEdit && (
+                                            <button
+                                                className="action-icon-btn h-8 w-8"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onEdit(item);
+                                                }}
+                                                title="Edit Item"
+                                            >
+                                                <Pencil className="size-3.5" />
+                                            </button>
+                                        )}
+                                        {onDelete && (
+                                            <button
+                                                className="action-icon-btn delete h-8 w-8"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onDelete(item.id);
+                                                }}
+                                                title="Delete Item"
+                                            >
+                                                <Trash2 className="size-3.5" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <div className="flex items-center space-x-2">
-                                    <Switch
-                                        id={`received-${id}`}
-                                        checked={is_received}
-                                        onCheckedChange={(checked) => onToggleReceived?.(id, checked)}
-                                        className="data-[state=checked]:bg-emerald-500"
-                                    />
-                                    <label
-                                        htmlFor={`received-${id}`}
-                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
-                                    >
-                                        Received
-                                    </label>
-                                </div>
-
-                                <div className="flex gap-1">
-                                    {onEdit && (
-                                        <button
-                                            className="action-icon-btn"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onEdit(item);
-                                            }}
-                                            title="Edit Item"
+                                <div className="owner-actions-row flex items-center justify-between pt-0 border-t border-slate-100/50">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch
+                                            id={`received-${id}`}
+                                            checked={is_received}
+                                            onCheckedChange={(checked) => onToggleReceived?.(id, checked)}
+                                            className="scale-90 data-[state=checked]:bg-emerald-500"
+                                        />
+                                        <label
+                                            htmlFor={`received-${id}`}
+                                            className="text-[11px] font-bold uppercase tracking-tight text-muted-foreground"
                                         >
-                                            <Pencil className="size-4" />
+                                            Received
+                                        </label>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {buy_link && (
+                                            <a
+                                                href={ensureAbsoluteUrl(buy_link)}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-[10px] font-bold text-primary hover:underline flex items-center gap-1 bg-primary/5 px-2 py-1 rounded"
+                                            >
+                                                <ExternalLink className="size-3" />
+                                                View Link
+                                            </a>
+                                        )}
+                                    </div>
 
-                                        </button>
-                                    )}
-                                    {onDelete && (
-                                        <button
-                                            className="action-icon-btn delete"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onDelete(item.id);
-                                            }}
-                                            title="Delete Item"
-                                        >
-                                            <Trash2 className="size-4" />
-                                        </button>
-                                    )}
+
                                 </div>
                             </div>
                         )}

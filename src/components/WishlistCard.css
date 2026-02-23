@@ -105,7 +105,14 @@
   gap: var(--spacing-md);
 }
 
-.owner-actions {
+.owner-actions-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-sm);
+}
+
+.owner-actions-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
