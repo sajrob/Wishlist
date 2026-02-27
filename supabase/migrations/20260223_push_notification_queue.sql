@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.push_notification_queue (
     last_error TEXT,
     http_status_code INT,
     status TEXT DEFAULT 'pending', -- pending, sent, failed, skipped
+    url TEXT DEFAULT '/',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     sent_at TIMESTAMPTZ
@@ -32,14 +33,15 @@ CREATE OR REPLACE FUNCTION public.queue_push_notification(
     p_notification_id UUID,
     p_title TEXT,
     p_body TEXT,
-    p_type TEXT
+    p_type TEXT,
+    p_url TEXT DEFAULT '/'
 )
 RETURNS void AS $$
 BEGIN
     INSERT INTO public.push_notification_queue (
-        user_id, notification_id, title, body, notification_type
+        user_id, notification_id, title, body, notification_type, url
     ) VALUES (
-        p_user_id, p_notification_id, p_title, p_body, p_type
+        p_user_id, p_notification_id, p_title, p_body, p_type, p_url
     );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -74,32 +76,14 @@ BEGIN
     END IF;
 
     -- Queue the push notification attempt (for observability and retry)
+    -- We NO LONGER make the HTTP call here to prevent synchronous blocking and cold starts
     PERFORM public.queue_push_notification(
         NEW.user_id,
         NEW.id,
         push_title,
         actor_name || ' ' || NEW.message,
-        NEW.type
-    );
-
-    -- Call Edge Function (non-blocking with PERFORM)
-    PERFORM net.http_post(
-        url := 'https://kcqbdjhoekditfgrktvo.supabase.co/functions/v1/send-push-notification',
-        headers := '{"Content-Type": "application/json", "Authorization": "Bearer ' || current_setting('request.jwt.claim.sub', true) || '"}'::jsonb,
-        body := jsonb_build_object(
-            'user_id', NEW.user_id::TEXT,
-            'type', NEW.type,
-            'title', push_title,
-            'body', actor_name || ' ' || NEW.message,
-            'url', notification_url,
-            'data', jsonb_build_object(
-                'notification_id', NEW.id::TEXT,
-                'type', NEW.type,
-                'actor_id', NEW.actor_id::TEXT,
-                'item_id', COALESCE(NEW.item_id::TEXT, '')
-            )
-        ),
-        timeout_milliseconds := 5000
+        NEW.type,
+        notification_url
     );
 
     RETURN NEW;
@@ -114,6 +98,40 @@ EXCEPTION WHEN OTHERS THEN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to process the push queue asynchronously
+CREATE OR REPLACE FUNCTION public.process_push_queue()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Call Edge Function (non-blocking with PERFORM)
+    PERFORM net.http_post(
+        url := 'https://kcqbdjhoekditfgrktvo.supabase.co/functions/v1/send-push-notification',
+        headers := '{"Content-Type": "application/json"}'::jsonb,
+        body := jsonb_build_object(
+            'user_id', NEW.user_id::TEXT,
+            'type', NEW.notification_type,
+            'title', NEW.title,
+            'body', NEW.body,
+            'url', NEW.url, -- Need to add 'url' column to queue
+            'data', jsonb_build_object(
+                'notification_id', NEW.notification_id::TEXT,
+                'queue_id', NEW.id::TEXT,
+                'type', NEW.notification_type
+            )
+        ),
+        timeout_milliseconds := 5000
+    );
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_push_queue_inserted ON public.push_notification_queue;
+CREATE TRIGGER on_push_queue_inserted
+    AFTER INSERT ON public.push_notification_queue
+    FOR EACH ROW
+    WHEN (NEW.status = 'pending')
+    EXECUTE FUNCTION public.process_push_queue();
 
 -- Enable RLS on queue table
 ALTER TABLE public.push_notification_queue ENABLE ROW LEVEL SECURITY;

@@ -93,11 +93,12 @@ serve(async (req) => {
         };
 
         let finalUrl = url || "/";
-        if (finalUrl === "/") {
-          if (title.includes("Claim")) finalUrl = "/dashboard";
-          else if (title.includes("Follow")) finalUrl = "/profile";
-          else if (title.includes("Share")) finalUrl = "/shared-wishlists";
-        }
+
+        // Force overriding all DB trigger URL paths to prevent 404s
+        // Because App.tsx does not have /items/:id or /profile/:id
+        if (type === "claim") finalUrl = "/dashboard";
+        else if (type === "follow") finalUrl = "/friends";
+        else if (type === "wishlist_share") finalUrl = "/friends";
 
         const payload = JSON.stringify({
           notification: {

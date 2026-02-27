@@ -15,6 +15,7 @@ import App from "./App";
 
 import { processSyncQueue } from "./lib/syncQueue";
 import { registerSW } from "virtual:pwa-register";
+import { toast } from "sonner";
 
 // Listen for sync messages from the Service Worker
 if ("serviceWorker" in navigator) {
@@ -24,6 +25,14 @@ if ("serviceWorker" in navigator) {
   const updateSW = registerSW({
     onNeedRefresh() {
       console.log("[SW] New content available, please refresh.");
+      toast("A new version is available", {
+        description: "Click below to refresh the page.",
+        action: {
+          label: "Refresh",
+          onClick: () => updateSW(true),
+        },
+        duration: Infinity,
+      });
     },
     onOfflineReady() {
       console.log("[SW] App ready to work offline.");
