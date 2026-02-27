@@ -284,7 +284,7 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="pb-8 mb-4 md:mb-0 md:pb-2 border-none">
         <SidebarMenu>
           <SidebarMenuItem>
             <FeedbackDialog
@@ -378,6 +378,6 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
-    </Sidebar>
+    </Sidebar >
   );
 }
