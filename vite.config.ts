@@ -13,7 +13,6 @@ export default defineConfig({
       registerType: "prompt",
       injectRegister: "inline",
       includeAssets: [
-        "favicon.ico",
         "icons/icon-192x192.png",
         "icons/icon-512x512.png",
       ],
