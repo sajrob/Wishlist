@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import { useItems } from '../hooks/useItems';
 import { useSyncQueue } from '../hooks/useSyncQueue';
 import { Loader2, CloudOff } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
@@ -59,9 +60,6 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                     filter: `item_id=eq.${id}`,
                 },
                 async () => {
-                    // When something changes, we should ideally refetch claims with profiles
-                    // For now, let's just trigger a re-fetch if we had a more global state
-                    // But since it's per card, maybe we just fetch item claims
                     const { data } = await supabase
                         .from('claims')
                         .select('*, profiles(*)')
@@ -88,12 +86,12 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                 isClaimed: isClaimedByUser
             });
 
-            // Local update will be handled by realtime or we can do it manually for speed
             if (isClaimedByUser) {
                 setClaims(prev => prev.filter(c => c.user_id !== user.id));
+                toast('Claim removed', {
+                    description: 'Your claim on this item has been removed.',
+                });
             } else {
-                // We don't have the full profile here easily without another fetch,
-                // but realtime will pick it up. For instant feedback:
                 const newClaim: Claim = {
                     id: 'temp',
                     item_id: id,
@@ -111,6 +109,9 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                     }
                 };
                 setClaims(prev => [...prev, newClaim]);
+                toast.success('Item Claimed! 🎁', {
+                    description: "You've pledged to buy this. The owner has been notified.",
+                });
             }
         } catch (err) {
             console.error('Failed to toggle claim:', err);
@@ -311,8 +312,6 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                                             </a>
                                         )}
                                     </div>
-
-
                                 </div>
                             </div>
                         )}

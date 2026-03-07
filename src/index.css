@@ -150,3 +150,19 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* ==================== SONNER TOAST OVERRIDES ====================
+   Force dark, readable text on all toasts regardless of variant or theme.
+   Sonner applies its own inline styles on description elements which
+   override Tailwind classes — these attribute selectors match Sonner's
+   internal DOM structure and win via specificity without !important.
+   Any new toast calls get this automatically with zero extra work.
+   ================================================================ */
+[data-sonner-toast] [data-title] {
+    color: #111827 !important; /* gray-900 — always near-black */
+    font-weight: 600;
+}
+
+[data-sonner-toast] [data-description] {
+    color: #374151 !important; /* gray-700 — dark but softer than title */
+}
