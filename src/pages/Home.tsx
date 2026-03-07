@@ -294,7 +294,7 @@ function Home() {
                                     <div className="flex flex-col">
                                         <h1 className="text-lg md:text-xl font-bold tracking-tight text-foreground truncate flex items-center gap-2">
                                             {activeCategory ? `${activeCategoryName} Wishlist` : "All Items"}
-                                            <span className="flex items-center justify-center bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[11px] font-bold border border-primary/20 tabular-nums">
+                                            <span className="flex items-center justify-center bg-primary/5 text-primary h-6 w-6 rounded-full text-[11px] font-bold border border-primary/20 tabular-nums shrink-0">
                                                 {wishlistItems.length}
                                             </span>
                                         </h1>
