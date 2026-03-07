@@ -110,7 +110,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                 };
                 setClaims(prev => [...prev, newClaim]);
                 toast.success('Item Claimed! 🎁', {
-                    description: "You've pledged to buy this. The owner has been notified.",
+                    description: "You've pledged to buy this. Only friends can see who claimed it — the owner won't know!",
                 });
             }
         } catch (err) {
