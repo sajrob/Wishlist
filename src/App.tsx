@@ -22,7 +22,6 @@ import FindUsers from "./pages/FindUsers";
 import FriendsWishlists from "./pages/FriendsWishlists";
 import SharedWishlist from "./pages/SharedWishlist";
 import Notifications from "./pages/Notifications";
-import ContactUs from "./pages/ContactUs";
 import SharePage from "./pages/SharePage";
 import Faq from "./pages/Faq";
 import NotFound from "./pages/NotFound";
@@ -134,7 +133,6 @@ function App() {
                     />
                     <Route path="/faq" element={<Faq />} />
                     <Route path="/share/:categoryId" element={<SharePage />} />
-                    {/*incomplete <Route path="/contact" element={<ContactUs />} /> */}
 
                     {/* Private Routes - Require Authentication */}
                     <Route
