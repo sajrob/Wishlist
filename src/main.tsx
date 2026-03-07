@@ -2,6 +2,7 @@
  * Entry point for the React application.
  * Renders the root App component and initializes global styles and analytics.
  */
+/// <reference types="vite-plugin-pwa/client" />
 import React from "react";
 import ReactDOM from "react-dom/client";
 console.log("App version: 2026.02.08.v3");

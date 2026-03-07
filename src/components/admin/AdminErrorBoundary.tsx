@@ -51,7 +51,7 @@ export class AdminErrorBoundary extends Component<Props, State> {
                             Try Again
                         </Button>
                     </div>
-                    {process.env.NODE_ENV === 'development' && (
+                    {import.meta.env.MODE === 'development' && (
                         <pre className="mt-8 p-4 bg-black/5 rounded text-left text-[10px] overflow-auto max-w-full text-destructive">
                             {this.state.error?.message}
                             {this.state.error?.stack}

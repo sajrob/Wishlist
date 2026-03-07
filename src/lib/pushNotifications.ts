@@ -92,7 +92,7 @@ export async function diagnosePush() {
       try {
         const ready = await Promise.race([
           navigator.serviceWorker.ready,
-          new Promise((_, reject) =>
+          new Promise<ServiceWorkerRegistration>((_, reject) =>
             setTimeout(() => reject(new Error("timeout")), 3000),
           ),
         ]);
