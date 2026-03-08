@@ -89,16 +89,16 @@ const SignUp = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-6 bg-transparent">
       <Card className="w-full max-w-[500px] shadow-xl border-t-4 border-t-primary">
-        <CardHeader className="space-y-1 text-center">
+        <CardHeader className="space-y-1 text-center bg-muted/20 pb-6 border-b">
           <CardTitle className="text-3xl font-bold tracking-tight">Create Account</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground/80">
             Join now to start managing your own wishlist
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
           {message && (
-            <Alert className="bg-emerald-50 border-emerald-200 text-emerald-800">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-500">
+              <CheckCircle2 className="h-4 w-4" />
               <AlertTitle>Success</AlertTitle>
               <AlertDescription>{message}</AlertDescription>
             </Alert>
@@ -213,7 +213,7 @@ const SignUp = () => {
             Google
           </Button>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4 border-t p-6 bg-muted/20">
+        <CardFooter className="flex flex-col space-y-4 border-t p-6 bg-muted/10">
           <p className="text-sm text-center text-muted-foreground w-full">
             Already have an account?{" "}
             <Link to="/login" className="font-semibold text-primary hover:underline">

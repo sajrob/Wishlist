@@ -54,9 +54,9 @@ const Login = () => {
   return (
     <div className="min-h-[80vh] flex items-center justify-center p-6 bg-transparent">
       <Card className="w-full max-w-[450px] shadow-xl border-t-4 border-t-primary">
-        <CardHeader className="space-y-1 text-center">
+        <CardHeader className="space-y-1 text-center bg-muted/20 pb-6 border-b">
           <CardTitle className="text-3xl font-bold tracking-tight">Welcome Back</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground/80">
             Enter your email to sign in to your wishlist account
           </CardDescription>
         </CardHeader>
@@ -140,7 +140,7 @@ const Login = () => {
             Google
           </Button>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2 border-t p-6 bg-muted/20">
+        <CardFooter className="flex flex-col space-y-2 border-t p-6 bg-muted/10">
           <p className="text-sm text-center text-muted-foreground">
             Don't have an account?{" "}
             <Link to="/signup" className="font-semibold text-primary hover:underline">

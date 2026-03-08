@@ -94,10 +94,10 @@ const FindUsers = () => {
                                         </div>
 
                                         {/* Icons */}
-                                        <div className="absolute -right-2 -bottom-1 bg-background p-2 rounded-full border shadow-sm">
+                                        <div className="absolute -right-2 -bottom-1 bg-background p-2 rounded-full border border-primary shadow-sm">
                                             <Search className="size-4 text-yellow-500 fill-yellow-500" />
                                         </div>
-                                        <div className="absolute -left-2 -top-1 bg-background p-2 rounded-full border shadow-sm">
+                                        <div className="absolute -left-2 -top-1 bg-background p-2 rounded-full border border-primary shadow-sm">
                                             <Gift className="size-4 text-pink-500 fill-pink-500" />
                                         </div>
                                     </div>
