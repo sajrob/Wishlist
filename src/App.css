@@ -9,15 +9,15 @@
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
 
-  --color-background: #f8fafc;
-  --color-surface: #ffffff;
+  --color-background: hsl(var(--background));
+  --color-surface: hsl(var(--card));
   --color-surface-hover: #f1f5f9;
 
-  --color-text-main: #0f172a;
+  --color-text-main: hsl(var(--foreground));
   --color-text-secondary: #475569;
   --color-text-muted: #94a3b8;
 
-  --color-border: #e2e8f0;
+  --color-border: hsl(var(--border) / 0.5);
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -46,15 +46,15 @@
 }
 
 .dark {
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
+  --color-background: hsl(var(--background));
+  --color-surface: hsl(var(--card));
   --color-surface-hover: #334155;
 
-  --color-text-main: #f8fafc;
+  --color-text-main: hsl(var(--foreground));
   --color-text-secondary: #cbd5e1;
   --color-text-muted: #94a3b8;
 
-  --color-border: #334155;
+  --color-border: hsl(var(--border) / 0.5);
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
