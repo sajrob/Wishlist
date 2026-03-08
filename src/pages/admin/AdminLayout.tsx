@@ -23,7 +23,7 @@ export default function AdminLayout() {
                         <nav className="flex items-center space-x-2">
                             <AdminSearch />
                             {/* DARK MODE TOGGLE - Currently Disabled */}
-                            {/* <ModeToggle /> */}
+                            <ModeToggle />
                             <UserNav />
                             <Button variant="ghost" asChild>
                                 <a href="/dashboard">Exit Admin</a>

@@ -8,6 +8,13 @@
   top: 0;
   z-index: 40;
   border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .navbar {
+  background-color: hsl(var(--background));
+  border-bottom-color: hsl(var(--border) / 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .navbar-container {
@@ -35,23 +42,38 @@
 }
 
 .navbar-link {
-  color: var(--color-text-main);
+  color: var(--color-text-secondary);
   text-decoration: none;
   font-weight: 500;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  padding: 0.5rem 0;
-  border-bottom: 2px solid transparent;
+  font-size: 0.95rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+}
+
+.dark .navbar-link {
+  color: hsl(var(--muted-foreground));
 }
 
 .navbar-link:hover {
-  color: #2463eb;
+  color: var(--color-primary);
+  background-color: var(--color-surface-hover);
+}
+
+.dark .navbar-link:hover {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--muted) / 0.5);
 }
 
 .navbar-link.active {
-  color: #2463eb;
+  color: var(--color-primary);
   font-weight: 600;
-  border-bottom-color: #583623;
+  background-color: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.dark .navbar-link.active {
+  color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.15);
 }
 
 .navbar-btn {
@@ -66,12 +88,19 @@
 }
 
 .navbar-btn.signup {
-  background-color: #2563eb;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
 }
 
 .navbar-btn.signup:hover {
-  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.dark .navbar-btn.signup {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 .navbar-btn.logout {
@@ -130,14 +159,21 @@
     top: 0;
     flex-direction: column;
     background-color: var(--color-surface);
-    width: 100%;
+    width: 280px;
+    /* Thinner mobile menu like a drawer */
     height: 100vh;
-    text-align: center;
-    transition: 0.3s ease-in-out;
-    box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
-    padding-top: 8rem;
-    gap: 2rem;
+    text-align: left;
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.1);
+    padding: 6rem 1.5rem 2rem;
+    gap: 0.5rem;
     z-index: 90;
+  }
+
+  .dark .navbar-menu {
+    background-color: hsl(var(--background));
+    border-right: 1px solid hsl(var(--border) / 0.5);
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.4);
   }
 
   .navbar-menu.active {

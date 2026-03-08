@@ -106,7 +106,7 @@ function App() {
     // To re-enable: Change defaultTheme to "system" below
     // and uncomment ModeToggle in Navbar.tsx and AdminLayout.tsx
     // ============================================================
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Router>
         <AuthProvider>
           <ConflictProvider>

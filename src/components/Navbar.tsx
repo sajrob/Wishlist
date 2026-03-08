@@ -202,7 +202,7 @@ const Navbar = () => {
               To re-enable: Uncomment the line below AND follow 
               instructions in App.tsx to enable ThemeProvider
               ============================================================ */}
-          {/* <ModeToggle /> */}
+          <ModeToggle />
 
         </div>
       </div>

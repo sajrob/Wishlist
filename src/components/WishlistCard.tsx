@@ -124,7 +124,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
 
     return (
         <>
-            <div className={`wishlist-card border border-slate-300 ${!!is_received ? 'is-received' : ''}`}>
+            <div className={`wishlist-card border ${!!is_received ? 'is-received' : ''}`}>
                 {readOnly && !is_received && (
                     <TooltipProvider>
                         <Tooltip>
@@ -149,7 +149,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                 )}
 
                 <div className="card-image-container">
-                    <img src={image_url || 'https://placehold.co/600x400/grey/black?text=No+Image'} alt={name} className="card-image border-b border-slate-400 rounded-t-lg" />
+                    <img src={image_url || 'https://placehold.co/600x400/grey/black?text=No+Image'} alt={name} className="card-image border-b rounded-t-lg" />
                     {!!is_received && (
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10">
                             <Badge className="bg-emerald-500 text-white border-none py-1.5 px-4 text-sm font-bold uppercase tracking-widest shadow-xl">
@@ -168,14 +168,14 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                             Pending Sync
                         </div>
                     )}
-                    <span className="text-primary bg-background font-bold rounded-tl-xl px-2 py-0.5 border-slate-400 border-l border-t price-badge">{formattedPrice}</span>
+                    <span className="text-primary bg-card font-bold rounded-tl-xl px-2 py-0.5 border-l border-t price-badge">{formattedPrice}</span>
                 </div>
 
                 <div className="card-content">
                     <div className="item-header">
                         <h2 className="item-name" title={name}>{name}</h2>
                         {!!is_received && readOnly && (
-                            <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200 text-[10px] h-5 px-1.5 shrink-0">
+                            <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 border-emerald-500/20 text-[10px] h-5 px-1.5 shrink-0">
                                 Received
                             </Badge>
                         )}
@@ -284,7 +284,7 @@ const WishlistCard = ({ item, onEdit, onDelete, onToggleMustHave, onToggleReceiv
                                     </div>
                                 </div>
 
-                                <div className="owner-actions-row flex items-center justify-between pt-0 border-t border-slate-100/50">
+                                <div className="owner-actions-row flex items-center justify-between pt-0 border-t">
                                     <div className="flex items-center space-x-2">
                                         <Switch
                                             id={`received-${id}`}
