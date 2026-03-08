@@ -114,7 +114,7 @@ const Profile = () => {
               {/* Left Column - Form */}
               <div className="lg:col-span-2 space-y-6">
                 <Card className="border-none shadow-md overflow-hidden bg-card ring-1 ring-border">
-                  <CardHeader className="bg-muted/50 border-b">
+                  <CardHeader className="bg-muted/20 border-b">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-primary/10 rounded-lg text-primary">
                         <User className="w-5 h-5" />
@@ -233,7 +233,7 @@ const Profile = () => {
                         </p>
                       </div>
                     </CardContent>
-                    <CardFooter className="p-6 bg-muted/30 border-t flex justify-between items-center">
+                    <CardFooter className="p-6 bg-muted/10 border-t flex justify-between items-center">
                       <p className="text-xs text-muted-foreground max-w-[200px]">
                         Last updated:{" "}
                         {profile?.created_at
@@ -258,19 +258,19 @@ const Profile = () => {
               <div className="space-y-6">
                 <NotificationSettings />
 
-                <Card className="border-none shadow-md bg-primary text-primary-foreground overflow-hidden h-fit">
+                <Card className="border-none shadow-md bg-primary dark:bg-primary/20 text-primary-foreground dark:text-primary overflow-hidden h-fit border dark:border-primary/20">
                   <div className="p-6 space-y-6">
                     <div className="space-y-2">
-                      <h3 className="text-lg text-white font-bold">
+                      <h3 className="text-lg font-bold text-white dark:text-primary">
                         Quick Stats
                       </h3>
-                      <p className="text-primary-foreground/70 text-sm">
+                      <p className="text-primary-foreground/70 dark:text-primary/70 text-sm">
                         Your activity at a glance.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-white/10 p-3 rounded-xl border border-white/20 flex flex-col items-center text-center">
+                      <div className="bg-white/10 dark:bg-primary/10 p-3 rounded-xl border border-white/20 dark:border-primary/20 flex flex-col items-center text-center">
                         <Package className="w-4 h-4 mb-1 opacity-80" />
                         <div className="text-xl font-black">
                           {statsLoading ? "..." : stats?.items || 0}
@@ -279,7 +279,7 @@ const Profile = () => {
                           Items
                         </div>
                       </div>
-                      <div className="bg-white/10 p-3 rounded-xl border border-white/20 flex flex-col items-center text-center">
+                      <div className="bg-white/10 dark:bg-primary/10 p-3 rounded-xl border border-white/20 dark:border-primary/20 flex flex-col items-center text-center">
                         <LayoutGrid className="w-4 h-4 mb-1 opacity-80" />
                         <div className="text-xl font-black">
                           {statsLoading ? "..." : stats?.categories || 0}
@@ -288,7 +288,7 @@ const Profile = () => {
                           Wishlists
                         </div>
                       </div>
-                      <div className="bg-white/10 p-3 rounded-xl border border-white/20 flex flex-col items-center text-center">
+                      <div className="bg-white/10 dark:bg-primary/10 p-3 rounded-xl border border-white/20 dark:border-primary/20 flex flex-col items-center text-center">
                         <Users className="w-4 h-4 mb-1 opacity-80" />
                         <div className="text-xl font-black">
                           {statsLoading ? "..." : stats?.friends || 0}
@@ -299,7 +299,7 @@ const Profile = () => {
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-white/10">
+                    <div className="pt-4 border-t border-white/10 dark:border-primary/10">
                       <div className="flex items-center gap-2 text-sm font-medium">
                         <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                         Account Active
@@ -320,9 +320,8 @@ const Profile = () => {
                       Your account is secured with Supabase Auth.
                     </p>
                     <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-primary text-primary-foreground text-xs font-semibold py-4"
+                      asChild
+                      className="w-full text-xs font-semibold py-4 shadow-lg shadow-primary/20"
                     >
                       <a href="/forgot-password">Reset Password</a>
                     </Button>

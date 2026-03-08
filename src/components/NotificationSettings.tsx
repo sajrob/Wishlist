@@ -59,7 +59,7 @@ export function NotificationSettings() {
           </p>
         </div>
       )}
-      <CardHeader className="bg-muted/50 border-b pb-4">
+      <CardHeader className="bg-muted/20 border-b pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <Bell className="w-5 h-5" />
@@ -174,7 +174,7 @@ export function NotificationSettings() {
           </div>
         )}
 
-        <div className="bg-primary/5 rounded-xl p-4 flex items-start gap-3 border border-primary/10">
+        <div className="bg-primary/10 rounded-xl p-4 flex items-start gap-3 border border-primary/20 transition-colors">
           <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             Push notifications allow you to get alerts on your device lock
